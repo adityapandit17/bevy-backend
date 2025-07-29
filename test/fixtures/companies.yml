@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  code: MyString
+  industry: MyString
+  employee_count: MyString
+  address: MyText
+  timezone: MyString
+  currency: MyString
+
+two:
+  name: MyString
+  code: MyString
+  industry: MyString
+  employee_count: MyString
+  address: MyText
+  timezone: MyString
+  currency: MyString

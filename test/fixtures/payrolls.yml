@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  employee: one
+  month: MyString
+  gross_salary: 9.99
+  net_salary: 9.99
+  status: MyString
+
+two:
+  employee: two
+  month: MyString
+  gross_salary: 9.99
+  net_salary: 9.99
+  status: MyString

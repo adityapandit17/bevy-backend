@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  onboarding_employee: one
+  title: MyString
+  description: MyText
+  category: MyString
+  priority: MyString
+  due_date: 2025-07-30
+  assigned_to: MyString
+  is_completed: false
+  documents: MyText
+
+two:
+  onboarding_employee: two
+  title: MyString
+  description: MyText
+  category: MyString
+  priority: MyString
+  due_date: 2025-07-30
+  assigned_to: MyString
+  is_completed: false
+  documents: MyText

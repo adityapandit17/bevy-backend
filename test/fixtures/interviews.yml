@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  candidate: one
+  interview_type: MyString
+  scheduled_date: 2025-07-30
+  scheduled_time: 2025-07-30 01:51:09
+  interviewer: MyString
+  status: MyString
+  notes: MyText
+  feedback: MyText
+  rating: 1
+
+two:
+  candidate: two
+  interview_type: MyString
+  scheduled_date: 2025-07-30
+  scheduled_time: 2025-07-30 01:51:09
+  interviewer: MyString
+  status: MyString
+  notes: MyText
+  feedback: MyText
+  rating: 1
