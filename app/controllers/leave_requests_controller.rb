@@ -1,8 +1,13 @@
 class LeaveRequestsController < ApplicationController
+  before_action :set_leave_request, only: [:show, :update, :destroy]
+
   def index
+    @leave_requests = LeaveRequest.all
+    render json: @leave_requests
   end
 
   def show
+    render json: @leave_request
   end
 
   def create
@@ -23,5 +28,19 @@ class LeaveRequestsController < ApplicationController
   end
 
   def destroy
+    @leave_request.destroy
+    head :no_content
+  end
+
+  private
+
+  def set_leave_request
+    @leave_request = LeaveRequest.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    head :not_found
+  end
+
+  def leave_request_params
+    params.require(:leave_request).permit(:employee_id, :leave_type, :start_date, :end_date, :reason, :status)
   end
 end

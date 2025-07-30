@@ -1,8 +1,13 @@
 class PayrollsController < ApplicationController
+  before_action :set_payroll, only: [:show, :update, :destroy]
+
   def index
+    @payrolls = Payroll.all
+    render json: @payrolls
   end
 
   def show
+    render json: @payroll
   end
 
   def create
@@ -23,5 +28,19 @@ class PayrollsController < ApplicationController
   end
 
   def destroy
+    @payroll.destroy
+    head :no_content
+  end
+
+  private
+
+  def set_payroll
+    @payroll = Payroll.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    head :not_found
+  end
+
+  def payroll_params
+    params.require(:payroll).permit(:employee_id, :month, :gross_salary, :net_salary, :status)
   end
 end

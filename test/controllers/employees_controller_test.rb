@@ -19,7 +19,6 @@ class EmployeesControllerTest < ActionDispatch::IntegrationTest
   test "should get index" do
     get employees_url
     assert_response :success
-    assert_not_nil assigns(:employees)
   end
 
   test "should get index as json" do

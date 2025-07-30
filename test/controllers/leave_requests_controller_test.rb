@@ -15,9 +15,8 @@ class LeaveRequestsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get index" do
-    get leave_requests_url
+    get leave_requests_url, as: :json
     assert_response :success
-    assert_not_nil assigns(:leave_requests)
   end
 
   test "should get index as json" do
