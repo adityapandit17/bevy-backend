@@ -119,7 +119,8 @@ class EmployeeBenefit < ApplicationRecord
 
   def duration_summary
     if end_date.present?
-      "#{formatted_start_date} to #{formatted_end_date}"
+      days = (end_date - start_date).to_i
+      "#{formatted_start_date} to #{formatted_end_date} (#{days} days)"
     else
       "Started #{formatted_start_date} (Ongoing)"
     end
