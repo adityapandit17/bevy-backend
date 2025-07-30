@@ -162,7 +162,7 @@ candidates = [
     department: "Engineering",
     experience: "3 years",
     location: "Mumbai",
-    status: "interview_scheduled",
+    status: "interview",
     applied_date: Date.current - 5.days,
     last_contact: Date.current - 1.day,
     resume: "sarah_wilson_resume.pdf",
@@ -182,7 +182,7 @@ candidates = [
     department: "Product",
     experience: "5 years",
     location: "Bangalore",
-    status: "application_review",
+    status: "screening",
     applied_date: Date.current - 3.days,
     last_contact: Date.current - 2.days,
     resume: "david_brown_resume.pdf",
@@ -202,7 +202,7 @@ candidates = [
     department: "Design",
     experience: "4 years",
     location: "Delhi",
-    status: "offer_sent",
+    status: "offered",
     applied_date: Date.current - 10.days,
     last_contact: Date.current,
     resume: "lisa_chen_resume.pdf",
@@ -859,7 +859,7 @@ puts "Creating offboarding employees..."
 # Create offboarding employees
 offboarding_employees = [
   {
-    employee: employees[0], # Sarah Johnson
+    employee: Employee.find_by(email: "john.doe@company.com"),
     last_working_day: Date.current + 5.days,
     status: "in_progress",
     progress: 65,
@@ -868,7 +868,7 @@ offboarding_employees = [
     start_date: Date.current - 10.days
   },
   {
-    employee: employees[1], # David Kim
+    employee: Employee.find_by(email: "jane.smith@company.com"),
     last_working_day: Date.current + 15.days,
     status: "pending",
     progress: 0,
@@ -877,7 +877,7 @@ offboarding_employees = [
     start_date: Date.current - 2.days
   },
   {
-    employee: employees[2], # Mike Chen
+    employee: Employee.find_by(email: "mike.johnson@company.com"),
     last_working_day: Date.current - 5.days,
     status: "completed",
     progress: 100,
@@ -888,7 +888,9 @@ offboarding_employees = [
 ]
 
 offboarding_employees.each do |offboarding_data|
-  offboarding_employee = OffboardingEmployee.create!(offboarding_data)
+  offboarding_employee = OffboardingEmployee.find_or_create_by!(employee: offboarding_data[:employee]) do |oe|
+    oe.assign_attributes(offboarding_data.except(:employee))
+  end
   
   # Create default tasks for each offboarding employee
   default_tasks = [

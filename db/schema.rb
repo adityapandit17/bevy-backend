@@ -142,6 +142,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_112050) do
     t.text "skills"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "hours", default: 0
     t.index ["employee_id"], name: "index_employee_trainings_on_employee_id"
   end
 
@@ -179,10 +180,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_112050) do
     t.string "title"
     t.integer "department_id", null: false
     t.text "description"
-    t.string "status"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.string "requirements"
+    t.string "status"
     t.string "location"
     t.string "job_type"
     t.integer "vacancies"
@@ -192,6 +191,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_112050) do
     t.string "skills"
     t.date "posted"
     t.integer "applications"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["department_id"], name: "index_job_openings_on_department_id"
   end
 

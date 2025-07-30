@@ -97,8 +97,6 @@ class OffboardingEmployee < ApplicationRecord
     end
   end
 
-  private
-
   def calculate_progress
     return if offboarding_tasks.empty?
     
@@ -106,6 +104,8 @@ class OffboardingEmployee < ApplicationRecord
     total_tasks = offboarding_tasks.count
     self.progress = total_tasks > 0 ? ((completed_tasks.to_f / total_tasks) * 100).round : 0
   end
+
+  private
 
   def update_status_based_on_progress
     return if status == 'cancelled'
