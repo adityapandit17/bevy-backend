@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  employee: one
+  period: MyString
+  rating: 9.99
+  reviewer: MyString
+  review_date: 2025-07-30
+  comments: MyText
+  goals: MyText
+  achievements: MyText
+  areas_for_improvement: MyText
+
+two:
+  employee: two
+  period: MyString
+  rating: 9.99
+  reviewer: MyString
+  review_date: 2025-07-30
+  comments: MyText
+  goals: MyText
+  achievements: MyText
+  areas_for_improvement: MyText

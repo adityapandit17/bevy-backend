@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  employee: one
+  name: MyString
+  benefit_type: MyString
+  provider: MyString
+  coverage: MyString
+  start_date: 2025-07-30
+  end_date: 2025-07-30
+  status: MyString
+  cost: 9.99
+
+two:
+  employee: two
+  name: MyString
+  benefit_type: MyString
+  provider: MyString
+  coverage: MyString
+  start_date: 2025-07-30
+  end_date: 2025-07-30
+  status: MyString
+  cost: 9.99

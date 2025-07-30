@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  asset: one
+  employee: one
+  assigned_date: 2025-07-30
+  return_date: 2025-07-30
+  notes: MyText
+  status: MyString
+
+two:
+  asset: two
+  employee: two
+  assigned_date: 2025-07-30
+  return_date: 2025-07-30
+  notes: MyText
+  status: MyString

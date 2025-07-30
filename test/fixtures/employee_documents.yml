@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  employee: one
+  name: MyString
+  document_type: MyString
+  upload_date: 2025-07-30
+  expiry_date: 2025-07-30
+  status: MyString
+  file_size: MyString
+  uploaded_by: MyString
+
+two:
+  employee: two
+  name: MyString
+  document_type: MyString
+  upload_date: 2025-07-30
+  expiry_date: 2025-07-30
+  status: MyString
+  file_size: MyString
+  uploaded_by: MyString

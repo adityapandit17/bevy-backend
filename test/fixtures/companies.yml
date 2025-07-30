@@ -1,19 +1,19 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
-  code: MyString
-  industry: MyString
-  employee_count: MyString
-  address: MyText
-  timezone: MyString
-  currency: MyString
+  name: TechCorp Solutions
+  code: TCS
+  industry: Technology
+  employee_count: "500"
+  address: "123 Tech Street, Silicon Valley, CA"
+  timezone: "America/Los_Angeles"
+  currency: "USD"
 
 two:
-  name: MyString
-  code: MyString
-  industry: MyString
-  employee_count: MyString
-  address: MyText
-  timezone: MyString
-  currency: MyString
+  name: Finance Corp
+  code: FC
+  industry: Finance
+  employee_count: "200"
+  address: "456 Finance Ave, New York, NY"
+  timezone: "America/New_York"
+  currency: "USD"

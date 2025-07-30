@@ -1,4 +1,85 @@
 Rails.application.routes.draw do
+  # Employee Profile System
+  resources :employee_profiles, only: [:show] do
+    member do
+      get :overview
+      get :job_details
+      get :time_off
+      get :pay_info
+      get :documents
+      get :performance
+      get :timesheets
+      get :benefits
+      get :training
+      get :assets
+    end
+  end
+
+  # Employee Documents
+  resources :employee_documents do
+    collection do
+      get :by_employee
+      get :expiring_soon
+    end
+  end
+
+  # Performance Management
+  resources :performance_reviews do
+    collection do
+      get :by_employee
+      get :stats
+    end
+  end
+
+  resources :performance_goals do
+    member do
+      patch :update_progress
+    end
+    collection do
+      get :by_employee
+      get :overdue
+      get :due_soon
+    end
+  end
+
+  # Timesheets
+  resources :timesheets do
+    member do
+      patch :approve
+      patch :reject
+    end
+    collection do
+      get :by_employee
+      get :this_week
+      get :this_month
+      get :stats
+    end
+  end
+
+  # Employee Benefits
+  resources :employee_benefits do
+    collection do
+      get :by_employee
+      get :expiring_soon
+      get :stats
+    end
+  end
+
+  # Employee Training
+  resources :employee_trainings do
+    member do
+      patch :update_progress
+      patch :complete
+      patch :cancel
+    end
+    collection do
+      get :by_employee
+      get :current
+      get :upcoming
+      get :stats
+    end
+  end
+
   # Existing resources
   resources :employees
   resources :departments
@@ -29,6 +110,28 @@ Rails.application.routes.draw do
     end
   end
 
+  # Offboarding System
+  resources :offboarding_employees do
+    member do
+      patch :update_status
+    end
+    collection do
+      get :stats
+    end
+  end
+
+  resources :offboarding_tasks do
+    member do
+      patch :toggle
+    end
+    collection do
+      get :overdue
+      get :due_soon
+      get :by_employee
+      get :stats
+    end
+  end
+
   # ATS System
   resources :candidates do
     member do
@@ -49,6 +152,27 @@ Rails.application.routes.draw do
     collection do
       get :stats
       get :calendar
+    end
+  end
+
+  # Asset Management System
+  resources :assets do
+    collection do
+      get :stats
+      get :allocations
+      get :maintenance
+    end
+  end
+
+  resources :asset_allocations do
+    member do
+      patch :return
+    end
+  end
+
+  resources :maintenance_records do
+    collection do
+      post :schedule
     end
   end
 

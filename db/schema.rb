@@ -10,7 +10,43 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_29_202109) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_30_112050) do
+  create_table "asset_allocations", force: :cascade do |t|
+    t.integer "asset_id", null: false
+    t.integer "employee_id", null: false
+    t.date "assigned_date"
+    t.date "return_date"
+    t.text "notes"
+    t.string "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["asset_id"], name: "index_asset_allocations_on_asset_id"
+    t.index ["employee_id"], name: "index_asset_allocations_on_employee_id"
+  end
+
+  create_table "assets", force: :cascade do |t|
+    t.string "name"
+    t.string "asset_type"
+    t.string "serial_number"
+    t.string "model"
+    t.string "brand"
+    t.date "purchase_date"
+    t.date "warranty_expiry"
+    t.decimal "purchase_cost"
+    t.decimal "current_value"
+    t.string "status"
+    t.string "location"
+    t.string "department"
+    t.text "notes"
+    t.string "condition"
+    t.date "last_maintenance"
+    t.date "next_maintenance"
+    t.integer "employee_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_id"], name: "index_assets_on_employee_id"
+  end
+
   create_table "attendance_records", force: :cascade do |t|
     t.integer "employee_id", null: false
     t.date "date"
@@ -61,6 +97,52 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_29_202109) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "employee_benefits", force: :cascade do |t|
+    t.integer "employee_id", null: false
+    t.string "name"
+    t.string "benefit_type"
+    t.string "provider"
+    t.string "coverage"
+    t.date "start_date"
+    t.date "end_date"
+    t.string "status"
+    t.decimal "cost"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_id"], name: "index_employee_benefits_on_employee_id"
+  end
+
+  create_table "employee_documents", force: :cascade do |t|
+    t.integer "employee_id", null: false
+    t.string "name"
+    t.string "document_type"
+    t.date "upload_date"
+    t.date "expiry_date"
+    t.string "status"
+    t.string "file_size"
+    t.string "uploaded_by"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_id"], name: "index_employee_documents_on_employee_id"
+  end
+
+  create_table "employee_trainings", force: :cascade do |t|
+    t.integer "employee_id", null: false
+    t.string "name"
+    t.string "training_type"
+    t.string "provider"
+    t.date "start_date"
+    t.date "end_date"
+    t.string "status"
+    t.integer "progress"
+    t.string "certificate"
+    t.decimal "cost"
+    t.text "skills"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_id"], name: "index_employee_trainings_on_employee_id"
   end
 
   create_table "employees", force: :cascade do |t|
@@ -122,7 +204,50 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_29_202109) do
     t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "days"
     t.index ["employee_id"], name: "index_leave_requests_on_employee_id"
+  end
+
+  create_table "maintenance_records", force: :cascade do |t|
+    t.integer "asset_id", null: false
+    t.date "maintenance_date"
+    t.string "maintenance_type"
+    t.text "description"
+    t.decimal "cost"
+    t.string "performed_by"
+    t.date "next_maintenance"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["asset_id"], name: "index_maintenance_records_on_asset_id"
+  end
+
+  create_table "offboarding_employees", force: :cascade do |t|
+    t.integer "employee_id", null: false
+    t.date "last_working_day"
+    t.string "status"
+    t.integer "progress"
+    t.string "assigned_to"
+    t.text "notes"
+    t.date "start_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_id"], name: "index_offboarding_employees_on_employee_id"
+  end
+
+  create_table "offboarding_tasks", force: :cascade do |t|
+    t.integer "offboarding_employee_id", null: false
+    t.string "title"
+    t.text "description"
+    t.string "category"
+    t.string "priority"
+    t.date "due_date"
+    t.string "assigned_to"
+    t.boolean "is_completed"
+    t.date "completed_date"
+    t.text "documents"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["offboarding_employee_id"], name: "index_offboarding_tasks_on_offboarding_employee_id"
   end
 
   create_table "onboarding_employees", force: :cascade do |t|
@@ -162,6 +287,34 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_29_202109) do
     t.index ["employee_id"], name: "index_payrolls_on_employee_id"
   end
 
+  create_table "performance_goals", force: :cascade do |t|
+    t.integer "employee_id", null: false
+    t.string "title"
+    t.text "description"
+    t.string "target"
+    t.integer "progress"
+    t.string "status"
+    t.date "due_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_id"], name: "index_performance_goals_on_employee_id"
+  end
+
+  create_table "performance_reviews", force: :cascade do |t|
+    t.integer "employee_id", null: false
+    t.string "period"
+    t.decimal "rating"
+    t.string "reviewer"
+    t.date "review_date"
+    t.text "comments"
+    t.text "goals"
+    t.text "achievements"
+    t.text "areas_for_improvement"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_id"], name: "index_performance_reviews_on_employee_id"
+  end
+
   create_table "salary_structures", force: :cascade do |t|
     t.integer "employee_id", null: false
     t.decimal "basic"
@@ -174,13 +327,39 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_29_202109) do
     t.index ["employee_id"], name: "index_salary_structures_on_employee_id"
   end
 
+  create_table "timesheets", force: :cascade do |t|
+    t.integer "employee_id", null: false
+    t.date "date"
+    t.decimal "hours"
+    t.string "project"
+    t.string "task"
+    t.string "status"
+    t.string "approved_by"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_id"], name: "index_timesheets_on_employee_id"
+  end
+
+  add_foreign_key "asset_allocations", "assets"
+  add_foreign_key "asset_allocations", "employees"
+  add_foreign_key "assets", "employees"
   add_foreign_key "attendance_records", "employees"
+  add_foreign_key "employee_benefits", "employees"
+  add_foreign_key "employee_documents", "employees"
+  add_foreign_key "employee_trainings", "employees"
   add_foreign_key "employees", "departments"
   add_foreign_key "interviews", "candidates"
   add_foreign_key "job_openings", "departments"
   add_foreign_key "leave_requests", "employees"
+  add_foreign_key "maintenance_records", "assets"
+  add_foreign_key "offboarding_employees", "employees"
+  add_foreign_key "offboarding_tasks", "offboarding_employees"
   add_foreign_key "onboarding_employees", "employees"
   add_foreign_key "onboarding_tasks", "onboarding_employees"
   add_foreign_key "payrolls", "employees"
+  add_foreign_key "performance_goals", "employees"
+  add_foreign_key "performance_reviews", "employees"
   add_foreign_key "salary_structures", "employees"
+  add_foreign_key "timesheets", "employees"
 end

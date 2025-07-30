@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  asset: one
+  maintenance_date: 2025-07-30
+  maintenance_type: MyString
+  description: MyText
+  cost: 9.99
+  performed_by: MyString
+  next_maintenance: 2025-07-30
+
+two:
+  asset: two
+  maintenance_date: 2025-07-30
+  maintenance_type: MyString
+  description: MyText
+  cost: 9.99
+  performed_by: MyString
+  next_maintenance: 2025-07-30
