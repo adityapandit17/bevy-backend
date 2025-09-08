@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_30_112050) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_08_100341) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.integer "employee_id", null: false
@@ -196,6 +196,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_112050) do
     t.index ["department_id"], name: "index_job_openings_on_department_id"
   end
 
+  create_table "jwt_denylists", force: :cascade do |t|
+    t.string "jti"
+    t.datetime "exp"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jti"], name: "index_jwt_denylists_on_jti", unique: true
+  end
+
   create_table "leave_requests", force: :cascade do |t|
     t.integer "employee_id", null: false
     t.string "leave_type"
@@ -316,6 +324,34 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_112050) do
     t.index ["employee_id"], name: "index_performance_reviews_on_employee_id"
   end
 
+  create_table "permissions", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "resource", null: false
+    t.string "action", null: false
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_permissions_on_name", unique: true
+    t.index ["resource", "action"], name: "index_permissions_on_resource_and_action", unique: true
+  end
+
+  create_table "role_permissions", force: :cascade do |t|
+    t.integer "role_id", null: false
+    t.integer "permission_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["permission_id"], name: "index_role_permissions_on_permission_id"
+    t.index ["role_id"], name: "index_role_permissions_on_role_id"
+  end
+
+  create_table "roles", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_roles_on_name", unique: true
+  end
+
   create_table "salary_structures", force: :cascade do |t|
     t.integer "employee_id", null: false
     t.decimal "basic"
@@ -342,6 +378,37 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_112050) do
     t.index ["employee_id"], name: "index_timesheets_on_employee_id"
   end
 
+  create_table "user_roles", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "role_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["role_id"], name: "index_user_roles_on_role_id"
+    t.index ["user_id"], name: "index_user_roles_on_user_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "email", null: false
+    t.string "encrypted_password", null: false
+    t.string "first_name", null: false
+    t.string "last_name", null: false
+    t.string "status", default: "active", null: false
+    t.datetime "last_login_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.integer "sign_in_count", default: 0, null: false
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.string "current_sign_in_ip"
+    t.string "last_sign_in_ip"
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["status"], name: "index_users_on_status"
+  end
+
   add_foreign_key "asset_allocations", "assets"
   add_foreign_key "asset_allocations", "employees"
   add_foreign_key "assets", "employees"
@@ -361,6 +428,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_112050) do
   add_foreign_key "payrolls", "employees"
   add_foreign_key "performance_goals", "employees"
   add_foreign_key "performance_reviews", "employees"
+  add_foreign_key "role_permissions", "permissions"
+  add_foreign_key "role_permissions", "roles"
   add_foreign_key "salary_structures", "employees"
   add_foreign_key "timesheets", "employees"
+  add_foreign_key "user_roles", "roles"
+  add_foreign_key "user_roles", "users"
 end

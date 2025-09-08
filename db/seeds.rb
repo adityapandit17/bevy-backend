@@ -980,3 +980,6 @@ puts "Created #{Timesheet.count} timesheets"
 puts "Created #{EmployeeBenefit.count} employee benefits"
 puts "Created #{EmployeeTraining.count} employee trainings"
 puts "Created #{LeaveRequest.count} leave requests"
+
+# Load user roles and permissions
+load Rails.root.join('db', 'seeds', 'users_and_roles.rb')

@@ -109,7 +109,11 @@ class LeaveRequestsControllerTest < ActionDispatch::IntegrationTest
 
       assert_response :unprocessable_entity
       json_response = JSON.parse(@response.body)
-      assert_includes json_response["errors"], "#{field.to_s.humanize} can't be blank"
+      if field == :employee_id
+        assert_includes json_response["errors"], "Employee must exist"
+      else
+        assert_includes json_response["errors"], "#{field.to_s.humanize} can't be blank"
+      end
     end
   end
 
@@ -294,7 +298,8 @@ class LeaveRequestsControllerTest < ActionDispatch::IntegrationTest
       threads << Thread.new do
         attributes = @valid_attributes.merge(
           reason: "Concurrent leave #{i}",
-          start_date: Date.current + (i + 1).weeks
+          start_date: Date.current + (i + 1).weeks,
+          end_date: Date.current + (i + 2).weeks
         )
         response = post leave_requests_url, params: { leave_request: attributes }, as: :json
         results << response
@@ -441,7 +446,8 @@ class LeaveRequestsControllerTest < ActionDispatch::IntegrationTest
       leave_type: "annual",
       start_date: Date.current + 1.week,
       end_date: Date.current + 1.week,
-      reason: "Minimal"
+      reason: "Minimal",
+      status: "pending"
     }
     
     post leave_requests_url, params: { leave_request: minimal_attributes }, as: :json

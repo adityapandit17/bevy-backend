@@ -2,22 +2,22 @@
 
 one:
   candidate: one
-  interview_type: MyString
+  interview_type: video
   scheduled_date: 2025-07-30
-  scheduled_time: 2025-07-30 01:51:09
-  interviewer: MyString
-  status: MyString
-  notes: MyText
-  feedback: MyText
-  rating: 1
+  scheduled_time: 2025-07-30 10:00:00
+  interviewer: John Interviewer
+  status: scheduled
+  notes: Technical interview for software engineer position
+  feedback: 
+  rating: 4
 
 two:
   candidate: two
-  interview_type: MyString
+  interview_type: phone
   scheduled_date: 2025-07-30
-  scheduled_time: 2025-07-30 01:51:09
-  interviewer: MyString
-  status: MyString
-  notes: MyText
-  feedback: MyText
-  rating: 1
+  scheduled_time: 2025-07-30 14:00:00
+  interviewer: Jane Interviewer
+  status: completed
+  notes: Initial screening interview
+  feedback: Good communication skills, strong technical background
+  rating: 5

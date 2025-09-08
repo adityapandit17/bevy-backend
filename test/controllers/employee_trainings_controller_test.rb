@@ -123,6 +123,7 @@ class EmployeeTrainingsControllerTest < ActionDispatch::IntegrationTest
       training_type: "technical",
       provider: "Provider",
       start_date: Date.current + 1.week,
+      end_date: Date.current + 2.weeks,
       status: "not_started",
       progress: 0,
       cost: 100.00
@@ -135,7 +136,6 @@ class EmployeeTrainingsControllerTest < ActionDispatch::IntegrationTest
     assert_equal minimal_attributes[:name], json_response["name"]
     assert_equal minimal_attributes[:training_type], json_response["training_type"]
     # Optional fields should be null
-    assert_nil json_response["end_date"]
     assert_nil json_response["skills"]
     assert_nil json_response["certificate"]
   end

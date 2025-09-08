@@ -7,11 +7,12 @@ class EmployeeDocumentsControllerTest < ActionDispatch::IntegrationTest
     @valid_attributes = {
       employee_id: @employee.id,
       name: "Employment Contract",
-      document_type: "employment",
-      file_path: "contracts/employment_contract.pdf",
+      document_type: "contract",
+      upload_date: Date.current,
       expiry_date: Date.current + 1.year,
       status: "active",
-      description: "Standard employment contract"
+      file_size: "2.5MB",
+      uploaded_by: "HR Manager"
     }
   end
 
@@ -56,13 +57,13 @@ class EmployeeDocumentsControllerTest < ActionDispatch::IntegrationTest
 
   test "should update employee document" do
     patch employee_document_url(@employee_document), params: { 
-      employee_document: { status: "expired", description: "Updated description" } 
+      employee_document: { name: "Updated Document Name", expiry_date: Date.current - 1.day } 
     }, as: :json
     
     assert_response :success
     json_response = JSON.parse(response.body)
     assert_equal "expired", json_response["status"]
-    assert_equal "Updated description", json_response["description"]
+    assert_equal "Updated Document Name", json_response["name"]
   end
 
   test "should not update employee document with invalid attributes" do
@@ -105,7 +106,7 @@ class EmployeeDocumentsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     
     json_response = JSON.parse(response.body)
-    required_fields = %w[id employee_id name document_type file_path status created_at updated_at]
+    required_fields = %w[id employee_id name document_type upload_date status created_at updated_at]
     
     required_fields.each do |field|
       assert_includes json_response.keys, field, "Missing field: #{field}"
@@ -116,9 +117,11 @@ class EmployeeDocumentsControllerTest < ActionDispatch::IntegrationTest
     minimal_attributes = {
       employee_id: @employee.id,
       name: "Minimal Document",
-      document_type: "employment",
-      file_path: "documents/minimal.pdf",
-      status: "active"
+      document_type: "contract",
+      upload_date: Date.current,
+      status: "active",
+      file_size: "1MB",
+      uploaded_by: "HR"
     }
     
     post employee_documents_url, params: { employee_document: minimal_attributes }, as: :json

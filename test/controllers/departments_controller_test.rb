@@ -4,8 +4,7 @@ class DepartmentsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @department = departments(:one)
     @valid_attributes = {
-      name: "Human Resources",
-      description: "Handles all employee-related matters."
+      name: "Human Resources"
     }
   end
 
@@ -49,8 +48,11 @@ class DepartmentsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should destroy department" do
+    # Create a department without associations
+    isolated_department = Department.create!(name: "Isolated Department")
+    
     assert_difference('Department.count', -1) do
-      delete department_url(@department), as: :json
+      delete department_url(isolated_department), as: :json
     end
 
     assert_response :no_content

@@ -2,20 +2,20 @@
 
 one:
   employee: one
-  name: MyString
-  document_type: MyString
+  name: Employment Contract
+  document_type: contract
   upload_date: 2025-07-30
-  expiry_date: 2025-07-30
-  status: MyString
-  file_size: MyString
-  uploaded_by: MyString
+  expiry_date: 2026-07-30
+  status: active
+  file_size: 2.5MB
+  uploaded_by: HR Manager
 
 two:
   employee: two
-  name: MyString
-  document_type: MyString
+  name: ID Proof
+  document_type: id_proof
   upload_date: 2025-07-30
-  expiry_date: 2025-07-30
-  status: MyString
-  file_size: MyString
-  uploaded_by: MyString
+  expiry_date: 2030-07-30
+  status: active
+  file_size: 1.2MB
+  uploaded_by: HR Manager

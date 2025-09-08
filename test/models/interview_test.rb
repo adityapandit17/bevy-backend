@@ -195,7 +195,8 @@ class InterviewTest < ActiveSupport::TestCase
   end
 
   test "this_week scope should return this week's interviews" do
-    @interview.scheduled_date = Date.current + 3.days
+    # Set interview to tomorrow (should be within this week)
+    @interview.scheduled_date = Date.current + 1.day
     @interview.save!
     
     next_week_interview = Interview.create!(

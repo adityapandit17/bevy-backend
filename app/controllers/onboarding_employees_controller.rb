@@ -65,7 +65,7 @@ class OnboardingEmployeesController < ApplicationController
   end
 
   def onboarding_employee_params
-    params.require(:onboarding_employee).permit(:employee_id, :start_date, :status, :notes)
+    params.require(:onboarding_employee).permit(:employee_id, :start_date, :status, :progress, :notes)
   end
 
   def format_onboarding_employee(onboarding_employee)

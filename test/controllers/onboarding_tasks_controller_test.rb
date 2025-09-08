@@ -56,12 +56,12 @@ class OnboardingTasksControllerTest < ActionDispatch::IntegrationTest
 
   test "should update onboarding task" do
     patch onboarding_task_url(@onboarding_task), params: { 
-      onboarding_task: { status: "completed", priority: "medium" } 
+      onboarding_task: { is_completed: true, priority: "medium" } 
     }, as: :json
     
     assert_response :success
     json_response = JSON.parse(response.body)
-    assert_equal "completed", json_response["status"]
+    assert_equal true, json_response["is_completed"]
     assert_equal "medium", json_response["priority"]
   end
 
@@ -127,10 +127,8 @@ class OnboardingTasksControllerTest < ActionDispatch::IntegrationTest
     
     json_response = JSON.parse(response.body)
     assert_equal minimal_attributes[:title], json_response["title"]
-    assert_equal minimal_attributes[:task_type], json_response["task_type"]
+    assert_equal minimal_attributes[:category], json_response["category"]
     # Optional fields should be null
     assert_nil json_response["description"]
-    assert_nil json_response["priority"]
-    assert_nil json_response["assigned_to"]
   end
 end

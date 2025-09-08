@@ -2,22 +2,22 @@
 
 one:
   employee: one
-  name: MyString
-  benefit_type: MyString
-  provider: MyString
-  coverage: MyString
+  name: Health Insurance
+  benefit_type: health_insurance
+  provider: Blue Cross Blue Shield
+  coverage: Family Coverage
   start_date: 2025-07-30
-  end_date: 2025-07-30
-  status: MyString
-  cost: 9.99
+  end_date: 2026-07-30
+  status: active
+  cost: 500.00
 
 two:
   employee: two
-  name: MyString
-  benefit_type: MyString
-  provider: MyString
-  coverage: MyString
+  name: Dental Insurance
+  benefit_type: dental_insurance
+  provider: Delta Dental
+  coverage: Individual Coverage
   start_date: 2025-07-30
-  end_date: 2025-07-30
-  status: MyString
-  cost: 9.99
+  end_date: 2026-07-30
+  status: active
+  cost: 150.00

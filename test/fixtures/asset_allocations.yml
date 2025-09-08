@@ -4,14 +4,14 @@ one:
   asset: one
   employee: one
   assigned_date: 2025-07-30
-  return_date: 2025-07-30
-  notes: MyText
-  status: MyString
+  return_date: 
+  notes: Laptop assigned to software engineer
+  status: active
 
 two:
   asset: two
   employee: two
   assigned_date: 2025-07-30
-  return_date: 2025-07-30
-  notes: MyText
-  status: MyString
+  return_date: 2025-08-30
+  notes: Monitor returned after project completion
+  status: returned

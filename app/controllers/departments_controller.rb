@@ -5,6 +5,10 @@ class DepartmentsController < ApplicationController
   end
 
   def show
+    @department = Department.find(params[:id])
+    render json: @department
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Department not found" }, status: :not_found
   end
 
   def create
@@ -17,13 +21,31 @@ class DepartmentsController < ApplicationController
   end
 
   def update
+    @department = Department.find(params[:id])
     if @department.update(department_params)
       render json: @department
     else
       render json: { errors: @department.errors.full_messages }, status: :unprocessable_entity
     end
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Department not found" }, status: :not_found
   end
 
   def destroy
+    @department = Department.find(params[:id])
+    if @department.employees.any? || @department.job_openings.any?
+      render json: { error: "Cannot delete department with associated employees or job openings" }, status: :unprocessable_entity
+    else
+      @department.destroy
+      head :no_content
+    end
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Department not found" }, status: :not_found
+  end
+
+  private
+
+  def department_params
+    params.require(:department).permit(:name)
   end
 end

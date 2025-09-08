@@ -1,10 +1,13 @@
 class EmployeesController < ApplicationController
+  before_action :set_employee, only: [:show, :update, :destroy]
+
   def index
     @employees = Employee.all
     render json: @employees
   end
 
   def show
+    render json: @employee
   end
 
   def create
@@ -17,7 +20,6 @@ class EmployeesController < ApplicationController
   end
 
   def update
-    @employee = Employee.find(params[:id])
     if @employee.update(employee_params)
       render json: @employee
     else
@@ -26,8 +28,7 @@ class EmployeesController < ApplicationController
   end
 
   def destroy
-    @employee = Employee.find(params[:id])
-    if @employee.update(status: 'Inactive')
+    if @employee.update(status: 'inactive')
       render json: @employee
     else
       render json: { errors: @employee.errors.full_messages }, status: :unprocessable_entity
@@ -35,7 +36,14 @@ class EmployeesController < ApplicationController
   end
 
   private
-    def employee_params
-      params.require(:employee).permit(:first_name, :last_name, :email, :phone, :department_id, :designation, :date_of_joining, :status)
-    end
+
+  def set_employee
+    @employee = Employee.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Employee not found" }, status: :not_found
+  end
+
+  def employee_params
+    params.require(:employee).permit(:first_name, :last_name, :email, :phone, :department_id, :designation, :date_of_joining, :status)
+  end
 end

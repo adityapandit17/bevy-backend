@@ -38,8 +38,8 @@ class AssetsController < ApplicationController
   def show
     render json: {
       asset: format_asset(@asset),
-      maintenance_history: @asset.maintenance_records.recent.map { |record| format_maintenance_record(record) },
-      allocation_history: @asset.allocation_history.map { |allocation| format_allocation(allocation) }
+      maintenance_history: @asset.maintenance_records.order(maintenance_date: :desc).map { |record| format_maintenance_record(record) },
+      allocation_history: @asset.asset_allocations.map { |allocation| format_allocation(allocation) }
     }
   end
 
@@ -191,20 +191,12 @@ class AssetsController < ApplicationController
       condition: asset.condition,
       last_maintenance: asset.last_maintenance&.strftime('%Y-%m-%d'),
       next_maintenance: asset.next_maintenance&.strftime('%Y-%m-%d'),
-      age_in_years: asset.age_in_years,
-      total_maintenance_cost: asset.total_maintenance_cost,
       assigned_to: asset.employee ? {
         id: asset.employee.id,
         name: asset.employee.name,
         email: asset.employee.email,
         department: asset.employee.department&.name
       } : nil,
-      status_color: asset.status_color,
-      condition_color: asset.condition_color,
-      overdue_maintenance: asset.overdue_maintenance?,
-      due_maintenance_soon: asset.due_maintenance_soon?,
-      warranty_expiring_soon: asset.warranty_expiring_soon?,
-      warranty_expired: asset.warranty_expired?,
       created_at: asset.created_at,
       updated_at: asset.updated_at
     }
@@ -219,13 +211,8 @@ class AssetsController < ApplicationController
       cost: record.cost,
       performed_by: record.performed_by,
       next_maintenance: record.next_maintenance&.strftime('%Y-%m-%d'),
-      asset_name: record.asset_name,
-      asset_serial_number: record.asset_serial_number,
-      type_color: record.type_color,
-      cost_category: record.cost_category,
-      expensive: record.expensive?,
-      overdue: record.overdue?,
-      due_soon: record.due_soon?,
+      asset_name: record.asset.name,
+      asset_serial_number: record.asset.serial_number,
       created_at: record.created_at
     }
   end
@@ -234,20 +221,17 @@ class AssetsController < ApplicationController
     {
       id: allocation.id,
       asset_id: allocation.asset_id,
-      asset_name: allocation.asset_name,
-      asset_serial_number: allocation.asset_serial_number,
-      asset_type: allocation.asset_type,
+      asset_name: allocation.asset.name,
+      asset_serial_number: allocation.asset.serial_number,
+      asset_type: allocation.asset.asset_type,
       employee_id: allocation.employee_id,
-      employee_name: allocation.employee_name,
-      employee_email: allocation.employee_email,
-      employee_department: allocation.employee_department,
+      employee_name: allocation.employee.name,
+      employee_email: allocation.employee.email,
+      employee_department: allocation.employee.department&.name,
       assigned_date: allocation.assigned_date.strftime('%Y-%m-%d'),
       return_date: allocation.return_date&.strftime('%Y-%m-%d'),
       notes: allocation.notes,
       status: allocation.status,
-      duration_days: allocation.duration_days,
-      active: allocation.active?,
-      returned: allocation.returned?,
       created_at: allocation.created_at
     }
   end

@@ -1,6 +1,5 @@
 class PerformanceReview < ApplicationRecord
   belongs_to :employee
-  has_many :performance_goals, dependent: :destroy
 
   # Validations
   validates :period, presence: true

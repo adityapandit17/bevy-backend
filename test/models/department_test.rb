@@ -13,7 +13,15 @@ class DepartmentTest < ActiveSupport::TestCase
 
   test "should require name" do
     @department.name = nil
-    assert @department.valid? # No validation exists in model
+    assert_not @department.valid?
+    assert_includes @department.errors[:name], "can't be blank"
+  end
+
+  test "should require unique name" do
+    @department.save!
+    duplicate_department = Department.new(name: "Engineering")
+    assert_not duplicate_department.valid?
+    assert_includes duplicate_department.errors[:name], "has already been taken"
   end
 
   # Basic CRUD tests

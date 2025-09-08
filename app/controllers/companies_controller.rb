@@ -6,6 +6,7 @@ class CompaniesController < ApplicationController
   end
 
   def update
+    authorize!('settings', 'update')
     if @company.update(company_params)
       render json: @company
     else
@@ -16,10 +17,10 @@ class CompaniesController < ApplicationController
   private
 
   def set_company
-    @company = Company.first
+    @company = Company.first || Company.create!(name: "Default Company")
   end
 
   def company_params
-    params.require(:company).permit(:name, :address, :phone, :email)
+    params.require(:company).permit(:name, :code, :industry, :employee_count, :address, :timezone, :currency)
   end
 end

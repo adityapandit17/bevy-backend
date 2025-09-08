@@ -28,17 +28,18 @@ class EmployeesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should create employee with valid parameters" do
+    unique_attributes = @valid_attributes.merge(email: "unique.employee@example.com")
     assert_difference('Employee.count') do
-      post employees_url, params: { employee: @valid_attributes }, as: :json
+      post employees_url, params: { employee: unique_attributes }, as: :json
     end
 
     assert_response :created
     assert_equal "application/json", @response.media_type
     
     json_response = JSON.parse(@response.body)
-    assert_equal @valid_attributes[:first_name], json_response["first_name"]
-    assert_equal @valid_attributes[:last_name], json_response["last_name"]
-    assert_equal @valid_attributes[:email], json_response["email"]
+    assert_equal unique_attributes[:first_name], json_response["first_name"]
+    assert_equal unique_attributes[:last_name], json_response["last_name"]
+    assert_equal unique_attributes[:email], json_response["email"]
   end
 
   test "should not create employee with invalid parameters" do
@@ -56,13 +57,14 @@ class EmployeesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should not create employee with duplicate email" do
-    # First create an employee
-    post employees_url, params: { employee: @valid_attributes }, as: :json
+    # First create an employee with unique email
+    unique_attributes = @valid_attributes.merge(email: "unique@example.com")
+    post employees_url, params: { employee: unique_attributes }, as: :json
     assert_response :created
     
     # Try to create another with same email
     assert_no_difference('Employee.count') do
-      post employees_url, params: { employee: @valid_attributes }, as: :json
+      post employees_url, params: { employee: unique_attributes }, as: :json
     end
 
     assert_response :unprocessable_entity
@@ -243,9 +245,9 @@ class EmployeesControllerTest < ActionDispatch::IntegrationTest
       "123.456.7890"
     ]
     
-    phone_formats.each do |phone|
-      attributes = @valid_attributes.merge(
-        email: "phone#{phone.gsub(/\D/, '')}@example.com",
+    phone_formats.each_with_index do |phone, index|
+      attributes = @valid_attributes.dup.merge(
+        email: "phone#{index}_#{phone.gsub(/\D/, '')}@example.com",
         phone: phone
       )
       

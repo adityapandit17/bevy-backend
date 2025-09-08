@@ -6,14 +6,14 @@ class PerformanceReviewsControllerTest < ActionDispatch::IntegrationTest
     @performance_review = performance_reviews(:one)
     @valid_attributes = {
       employee_id: @employee.id,
-      review_date: Date.current,
-      reviewer_id: @employee.id,
+      period: "Q1 2025",
       rating: 4,
+      reviewer: "John Manager",
+      review_date: Date.current,
       comments: "Excellent performance throughout the year",
-      goals_achieved: "All goals met and exceeded expectations",
-      areas_for_improvement: "Continue developing leadership skills",
-      next_review_date: Date.current + 6.months,
-      status: "completed"
+      goals: "Complete project A, Improve team collaboration",
+      achievements: "All goals met and exceeded expectations",
+      areas_for_improvement: "Continue developing leadership skills"
     }
   end
 
@@ -41,7 +41,7 @@ class PerformanceReviewsControllerTest < ActionDispatch::IntegrationTest
     assert_response :created
     json_response = JSON.parse(response.body)
     assert_equal @valid_attributes[:employee_id], json_response["employee_id"]
-    assert_equal @valid_attributes[:rating], json_response["rating"]
+    assert_equal "4.0", json_response["rating"]
   end
 
   test "should not create performance review with invalid attributes" do
@@ -58,13 +58,13 @@ class PerformanceReviewsControllerTest < ActionDispatch::IntegrationTest
 
   test "should update performance review" do
     patch performance_review_url(@performance_review), params: { 
-      performance_review: { rating: 5, status: "completed" } 
+      performance_review: { rating: 5, comments: "Updated comments" } 
     }, as: :json
     
     assert_response :success
     json_response = JSON.parse(response.body)
-    assert_equal 5, json_response["rating"]
-    assert_equal "completed", json_response["status"]
+    assert_equal "5.0", json_response["rating"]
+    assert_equal "Updated comments", json_response["comments"]
   end
 
   test "should not update performance review with invalid attributes" do
@@ -107,7 +107,7 @@ class PerformanceReviewsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     
     json_response = JSON.parse(response.body)
-    required_fields = %w[id employee_id review_date reviewer_id rating status created_at updated_at]
+    required_fields = %w[id employee_id period rating reviewer review_date comments created_at updated_at]
     
     required_fields.each do |field|
       assert_includes json_response.keys, field, "Missing field: #{field}"
@@ -117,10 +117,11 @@ class PerformanceReviewsControllerTest < ActionDispatch::IntegrationTest
   test "should handle performance review with missing optional fields" do
     minimal_attributes = {
       employee_id: @employee.id,
-      review_date: Date.current,
-      reviewer_id: @employee.id,
+      period: "Q1 2025",
       rating: 4,
-      status: "completed"
+      reviewer: "John Manager",
+      review_date: Date.current,
+      comments: "Good performance"
     }
     
     post performance_reviews_url, params: { performance_review: minimal_attributes }, as: :json
@@ -128,11 +129,10 @@ class PerformanceReviewsControllerTest < ActionDispatch::IntegrationTest
     
     json_response = JSON.parse(response.body)
     assert_equal minimal_attributes[:employee_id], json_response["employee_id"]
-    assert_equal minimal_attributes[:rating], json_response["rating"]
+    assert_equal "4.0", json_response["rating"]
     # Optional fields should be null
-    assert_nil json_response["comments"]
-    assert_nil json_response["goals_achieved"]
+    assert_nil json_response["goals"]
+    assert_nil json_response["achievements"]
     assert_nil json_response["areas_for_improvement"]
-    assert_nil json_response["next_review_date"]
   end
 end

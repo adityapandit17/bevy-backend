@@ -2,16 +2,16 @@
 
 one:
   employee: one
-  leave_type: MyString
+  leave_type: annual
   start_date: 2025-07-29
-  end_date: 2025-07-29
-  reason: MyText
-  status: MyString
+  end_date: 2025-08-02
+  reason: Annual vacation leave
+  status: pending
 
 two:
   employee: two
-  leave_type: MyString
+  leave_type: sick
   start_date: 2025-07-29
-  end_date: 2025-07-29
-  reason: MyText
-  status: MyString
+  end_date: 2025-07-30
+  reason: Medical appointment
+  status: approved

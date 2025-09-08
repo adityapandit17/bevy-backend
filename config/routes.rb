@@ -1,4 +1,53 @@
 Rails.application.routes.draw do
+  get "super_admin/dashboard"
+  get "super_admin/system_logs"
+  get "super_admin/audit_trails"
+  get "super_admin/system_health"
+  get "super_admin/database_management"
+  get "super_admin/backup_restore"
+  get "super_admin/user_activity"
+  get "super_admin/security_settings"
+  get "super_admin/system_configuration"
+  get "super_admin/maintenance_mode"
+  # Custom session routes
+  post '/sessions', to: 'sessions#create'
+  delete '/sessions', to: 'sessions#destroy'
+  get '/sessions/current', to: 'sessions#current'
+  
+  # Test route
+  get '/test/auth', to: 'test#auth_test'
+
+  resources :users do
+    member do
+      patch :update_roles
+    end
+  end
+
+  resources :roles do
+    member do
+      patch :update_permissions
+    end
+  end
+
+  resources :permissions
+
+  # Super Admin Routes
+  namespace :super_admin do
+    get :dashboard
+    get :system_logs
+    get :audit_trails
+    get :system_health
+    get :database_management
+    get :backup_restore
+    post :create_backup
+    get :user_activity
+    get :security_settings
+    put :update_security_settings
+    get :system_configuration
+    put :update_system_configuration
+    get :maintenance_mode
+    post :toggle_maintenance_mode
+  end
   # Employee Profile System
   resources :employee_profiles, only: [:show] do
     member do

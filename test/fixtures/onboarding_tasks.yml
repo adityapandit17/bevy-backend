@@ -2,22 +2,22 @@
 
 one:
   onboarding_employee: one
-  title: MyString
-  description: MyText
-  category: MyString
-  priority: MyString
+  title: Complete HR Paperwork
+  description: Fill out all required HR forms and documentation
+  category: HR
+  priority: high
   due_date: 2025-07-30
-  assigned_to: MyString
+  assigned_to: HR Manager
   is_completed: false
-  documents: MyText
+  documents: Employment contract, Tax forms, Benefits enrollment
 
 two:
   onboarding_employee: two
-  title: MyString
-  description: MyText
-  category: MyString
-  priority: MyString
+  title: IT Setup
+  description: Set up computer, email, and access to systems
+  category: IT
+  priority: medium
   due_date: 2025-07-30
-  assigned_to: MyString
+  assigned_to: IT Support
   is_completed: false
-  documents: MyText
+  documents: Computer setup checklist, Access request form

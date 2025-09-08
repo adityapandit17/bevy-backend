@@ -3,17 +3,17 @@
 one:
   asset: one
   maintenance_date: 2025-07-30
-  maintenance_type: MyString
-  description: MyText
-  cost: 9.99
-  performed_by: MyString
-  next_maintenance: 2025-07-30
+  maintenance_type: routine
+  description: Regular maintenance check
+  cost: 150.00
+  performed_by: John Technician
+  next_maintenance: 2025-08-30
 
 two:
   asset: two
   maintenance_date: 2025-07-30
-  maintenance_type: MyString
-  description: MyText
-  cost: 9.99
-  performed_by: MyString
-  next_maintenance: 2025-07-30
+  maintenance_type: repair
+  description: Fixed hardware issue
+  cost: 300.00
+  performed_by: Jane Engineer
+  next_maintenance: 2025-09-30

@@ -79,7 +79,7 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should not create job opening with invalid attributes" do
-    invalid_attributes = @valid_attributes.merge(title: "Short")
+    invalid_attributes = @valid_attributes.merge(title: "Dev")
     
     assert_no_difference('JobOpening.count') do
       post job_openings_url, params: { job_opening: invalid_attributes }, as: :json
@@ -175,7 +175,7 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
   test "should not update job opening with invalid attributes" do
     patch job_opening_url(@job_opening), params: { 
       job_opening: { 
-        title: "Short",
+        title: "Dev",
         description: "Updated description that meets the minimum length requirement.",
         requirements: "Updated requirements",
         location: "Updated Location",

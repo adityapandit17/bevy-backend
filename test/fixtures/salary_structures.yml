@@ -2,16 +2,16 @@
 
 one:
   employee: one
-  basic: 9.99
-  hra: 9.99
-  allowances: 9.99
-  deductions: 9.99
+  basic: 50000.00
+  hra: 15000.00
+  allowances: 10000.00
+  deductions: 5000.00
   effective_from: 2025-07-29
 
 two:
   employee: two
-  basic: 9.99
-  hra: 9.99
-  allowances: 9.99
-  deductions: 9.99
+  basic: 60000.00
+  hra: 18000.00
+  allowances: 12000.00
+  deductions: 6000.00
   effective_from: 2025-07-29

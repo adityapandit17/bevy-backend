@@ -1,8 +1,13 @@
 class SalaryStructuresController < ApplicationController
+  before_action :set_salary_structure, only: [:show, :update, :destroy]
+
   def index
+    @salary_structures = SalaryStructure.all
+    render json: @salary_structures
   end
 
   def show
+    render json: @salary_structure
   end
 
   def create
@@ -23,5 +28,19 @@ class SalaryStructuresController < ApplicationController
   end
 
   def destroy
+    @salary_structure.destroy
+    head :no_content
+  end
+
+  private
+
+  def set_salary_structure
+    @salary_structure = SalaryStructure.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Salary structure not found" }, status: :not_found
+  end
+
+  def salary_structure_params
+    params.require(:salary_structure).permit(:employee_id, :basic, :hra, :allowances, :deductions, :effective_from)
   end
 end

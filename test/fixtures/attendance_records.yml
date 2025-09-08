@@ -3,13 +3,13 @@
 one:
   employee: one
   date: 2025-07-29
-  status: MyString
-  check_in: 2025-07-29 13:42:46
-  check_out: 2025-07-29 13:42:46
+  status: present
+  check_in: 2025-07-29 09:00:00
+  check_out: 2025-07-29 17:00:00
 
 two:
   employee: two
   date: 2025-07-29
-  status: MyString
-  check_in: 2025-07-29 13:42:46
-  check_out: 2025-07-29 13:42:46
+  status: present
+  check_in: 2025-07-29 09:30:00
+  check_out: 2025-07-29 17:30:00

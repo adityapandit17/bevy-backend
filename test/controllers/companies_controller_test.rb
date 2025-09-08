@@ -6,8 +6,11 @@ class CompaniesControllerTest < ActionDispatch::IntegrationTest
     @valid_attributes = {
       name: "New Company Name",
       address: "123 New Street",
-      phone: "9876543210",
-      email: "contact@newcompany.com"
+      code: "NEWCO",
+      industry: "Technology",
+      employee_count: "100-500",
+      timezone: "UTC",
+      currency: "USD"
     }
   end
 
@@ -19,9 +22,9 @@ class CompaniesControllerTest < ActionDispatch::IntegrationTest
   test "should update company" do
     patch company_url, params: { company: @valid_attributes }, as: :json
     assert_response :success
-    @company.reload
-    assert_equal "New Company Name", @company.name
-    assert_equal "contact@newcompany.com", @company.email
+    json_response = JSON.parse(response.body)
+    assert_equal "New Company Name", json_response["name"]
+    assert_equal "NEWCO", json_response["code"]
   end
 
   test "should not update company with invalid params" do

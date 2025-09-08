@@ -1,13 +1,33 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  title: MyString
+  title: Senior Software Engineer
   department: one
-  description: MyText
-  status: MyString
+  description: We are looking for an experienced software engineer to join our team and help build amazing products. This role involves working with cutting-edge technologies and collaborating with cross-functional teams.
+  requirements: 5+ years of experience in Ruby on Rails, JavaScript, and React. Strong problem-solving skills and ability to work in a fast-paced environment.
+  status: open
+  location: San Francisco, CA
+  job_type: full-time
+  vacancies: 2
+  salary_min: 80000
+  salary_max: 120000
+  experience: 5-8 years
+  skills: Ruby, Rails, JavaScript, React, PostgreSQL
+  posted: <%= Date.current %>
+  applications: 0
 
 two:
-  title: MyString
+  title: Marketing Manager
   department: two
-  description: MyText
-  status: MyString
+  description: We are seeking a creative and strategic marketing manager to lead our marketing initiatives and drive brand awareness. This role involves developing and executing comprehensive marketing campaigns.
+  requirements: 3+ years of marketing experience, strong analytical skills, and experience with digital marketing tools. Bachelor's degree in Marketing or related field.
+  status: open
+  location: New York, NY
+  job_type: full-time
+  vacancies: 1
+  salary_min: 60000
+  salary_max: 90000
+  experience: 3-5 years
+  skills: Digital Marketing, Analytics, Content Creation, Social Media
+  posted: <%= Date.current %>
+  applications: 0

@@ -8,8 +8,7 @@ class OnboardingEmployeesControllerTest < ActionDispatch::IntegrationTest
       employee_id: @employee.id,
       start_date: Date.current + 1.week,
       status: "pending",
-      orientation_date: Date.current + 1.week,
-      mentor_id: @employee.id,
+      progress: 0,
       notes: "New employee onboarding process"
     }
   end
@@ -54,14 +53,27 @@ class OnboardingEmployeesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update onboarding employee" do
+    # Create some tasks for the onboarding employee so the callback works correctly
+    task = @onboarding_employee.onboarding_tasks.create!(
+      title: "Test Task",
+      description: "Test Description",
+      category: "HR",
+      priority: "high",
+      due_date: Date.current + 1.week,
+      assigned_to: "Test Person"
+    )
+    # Mark the task as completed so progress calculation works
+    task.update!(is_completed: true)
+    
     patch onboarding_employee_url(@onboarding_employee), params: { 
-      onboarding_employee: { status: "in_progress", orientation_date: Date.current + 2.weeks } 
+      onboarding_employee: { status: "in_progress" } 
     }, as: :json
     
     assert_response :success
     json_response = JSON.parse(response.body)
     assert_equal "in_progress", json_response["status"]
-    assert_equal (Date.current + 2.weeks).to_s, json_response["orientation_date"]
+    # Progress should be calculated as 50% (1 completed out of 2 total - fixture task + our task)
+    assert_equal 50, json_response["progress"]
   end
 
   test "should not update onboarding employee with invalid attributes" do

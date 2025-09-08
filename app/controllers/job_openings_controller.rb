@@ -29,7 +29,7 @@ class JobOpeningsController < ApplicationController
 
   def destroy
     @job_opening = JobOpening.find(params[:id])
-    if @job_opening.update(status: 'Inactive')
+    if @job_opening.update(status: 'closed')
       render json: @job_opening
     else
       render json: { errors: @job_opening.errors.full_messages }, status: :unprocessable_entity

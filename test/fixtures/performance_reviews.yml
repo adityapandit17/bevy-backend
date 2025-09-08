@@ -2,22 +2,22 @@
 
 one:
   employee: one
-  period: MyString
-  rating: 9.99
-  reviewer: MyString
+  period: Q1 2025
+  rating: 4.5
+  reviewer: John Manager
   review_date: 2025-07-30
-  comments: MyText
-  goals: MyText
-  achievements: MyText
-  areas_for_improvement: MyText
+  comments: Excellent performance this quarter
+  goals: Complete project A, Improve team collaboration
+  achievements: Delivered project A on time, Led team meetings effectively
+  areas_for_improvement: Time management, Technical documentation
 
 two:
   employee: two
-  period: MyString
-  rating: 9.99
-  reviewer: MyString
+  period: Q1 2025
+  rating: 3.8
+  reviewer: Jane Supervisor
   review_date: 2025-07-30
-  comments: MyText
-  goals: MyText
-  achievements: MyText
-  areas_for_improvement: MyText
+  comments: Good performance with room for improvement
+  goals: Learn new technology, Improve code quality
+  achievements: Completed training program, Reduced bugs by 20%
+  areas_for_improvement: Communication skills, Code documentation
