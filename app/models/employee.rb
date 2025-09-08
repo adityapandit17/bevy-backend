@@ -26,6 +26,7 @@ class Employee < ApplicationRecord
   validates :phone, presence: true
   validates :designation, presence: true
   validates :date_of_joining, presence: true
+  validates :date_of_birth, presence: true
   validates :status, presence: true, inclusion: { in: %w[active inactive terminated probation] }
 
   # Scopes
@@ -37,6 +38,16 @@ class Employee < ApplicationRecord
   scope :by_designation, ->(designation) { where(designation: designation) }
   scope :recent_hires, -> { where('date_of_joining >= ?', 3.months.ago) }
   scope :long_term, -> { where('date_of_joining <= ?', 2.years.ago) }
+  scope :birthday_today, -> { where("strftime('%m-%d', date_of_birth) = ?", Date.current.strftime('%m-%d')) }
+  scope :birthday_this_week, -> { 
+    start_of_week = Date.current.beginning_of_week
+    end_of_week = Date.current.end_of_week
+    where("strftime('%m-%d', date_of_birth) BETWEEN ? AND ?", 
+          start_of_week.strftime('%m-%d'), end_of_week.strftime('%m-%d'))
+  }
+  scope :birthday_this_month, -> { 
+    where("strftime('%m', date_of_birth) = ?", Date.current.strftime('%m'))
+  }
 
   # Helper methods
   def active?
@@ -189,5 +200,57 @@ class Employee < ApplicationRecord
   def salary
     # This would need to be implemented based on salary structure
     salary_structures.recent.first&.basic || 0
+  end
+
+  # Birthday methods
+  def birthday_today?
+    return false unless date_of_birth
+    date_of_birth.strftime('%m-%d') == Date.current.strftime('%m-%d')
+  end
+
+  def birthday_this_week?
+    return false unless date_of_birth
+    start_of_week = Date.current.beginning_of_week
+    end_of_week = Date.current.end_of_week
+    birthday_month_day = date_of_birth.strftime('%m-%d')
+    start_month_day = start_of_week.strftime('%m-%d')
+    end_month_day = end_of_week.strftime('%m-%d')
+    
+    birthday_month_day.between?(start_month_day, end_month_day)
+  end
+
+  def birthday_this_month?
+    return false unless date_of_birth
+    date_of_birth.strftime('%m') == Date.current.strftime('%m')
+  end
+
+  def age
+    return nil unless date_of_birth
+    today = Date.current
+    age = today.year - date_of_birth.year
+    age -= 1 if today < date_of_birth + age.years
+    age
+  end
+
+  def next_birthday
+    return nil unless date_of_birth
+    today = Date.current
+    this_year_birthday = Date.new(today.year, date_of_birth.month, date_of_birth.day)
+    
+    if this_year_birthday >= today
+      this_year_birthday
+    else
+      Date.new(today.year + 1, date_of_birth.month, date_of_birth.day)
+    end
+  end
+
+  def days_until_birthday
+    return nil unless next_birthday
+    (next_birthday - Date.current).to_i
+  end
+
+  def birthday_formatted
+    return "Not set" unless date_of_birth
+    date_of_birth.strftime('%B %d')
   end
 end

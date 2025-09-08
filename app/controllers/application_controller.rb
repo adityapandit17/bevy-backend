@@ -13,4 +13,10 @@ class ApplicationController < ActionController::Base
     session[:user_id] = nil
     nil
   end
+
+  def authenticate_user!
+    unless current_user
+      render json: { error: 'Authentication required' }, status: :unauthorized
+    end
+  end
 end

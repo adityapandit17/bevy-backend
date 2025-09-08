@@ -34,6 +34,7 @@ employees = [
     department_id: Department.find_by(name: "Engineering").id,
     designation: "Senior Software Engineer",
     date_of_joining: Date.current - 30.days,
+    date_of_birth: Date.new(1990, 3, 15),
     status: "active"
   },
   {
@@ -205,6 +206,9 @@ employees = [
 employees.each do |emp|
   Employee.find_or_create_by!(email: emp[:email]) do |employee|
     employee.assign_attributes(emp)
+    # Add random date of birth (age between 22-55)
+    age = rand(22..55)
+    employee.date_of_birth = Date.current - age.years - rand(0..365).days
   end
 end
 

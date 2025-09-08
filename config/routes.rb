@@ -13,6 +13,10 @@ Rails.application.routes.draw do
   post '/sessions', to: 'sessions#create'
   delete '/sessions', to: 'sessions#destroy'
   get '/sessions/current', to: 'sessions#current'
+
+  # Dashboard route
+  get '/dashboard', to: 'dashboard#index'
+
   
   # Test route
   get '/test/auth', to: 'test#auth_test'
