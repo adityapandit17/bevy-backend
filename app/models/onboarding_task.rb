@@ -2,7 +2,7 @@ class OnboardingTask < ApplicationRecord
   belongs_to :onboarding_employee
 
   validates :title, presence: true
-  validates :category, presence: true, inclusion: { in: %w[HR IT Department Training Compliance] }
+  validates :category, presence: true, inclusion: { in: %w[HR IT Department Training Compliance Performance] }
   validates :priority, presence: true, inclusion: { in: %w[low medium high] }
   validates :due_date, presence: true
   validates :assigned_to, presence: true

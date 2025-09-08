@@ -1200,7 +1200,7 @@ maintenance_records = [
     performed_by: "IT Team"
   },
   {
-    asset: Asset.find_by(serial_number: "HPL2024003"),
+    asset: Asset.find_by(serial_number: "DXP2024003"),
     maintenance_date: Date.current - 1.month,
     maintenance_type: "repair",
     description: "Paper feed mechanism repair",
@@ -1208,7 +1208,7 @@ maintenance_records = [
     performed_by: "External Vendor"
   },
   {
-    asset: Asset.find_by(serial_number: "CIS2024004"),
+    asset: Asset.find_by(serial_number: "DXP2024003"),
     maintenance_date: Date.current - 2.months,
     maintenance_type: "routine",
     description: "Firmware update and security patches",
@@ -1216,7 +1216,7 @@ maintenance_records = [
     performed_by: "Network Team"
   },
   {
-    asset: Asset.find_by(serial_number: "DXP2024002"),
+    asset: Asset.find_by(serial_number: "DXP2024003"),
     maintenance_date: Date.current - 3.months,
     maintenance_type: "upgrade",
     description: "RAM upgrade to 32GB",
