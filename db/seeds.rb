@@ -25,6 +25,7 @@ end
 
 # Create employees if they don't exist
 employees = [
+  # Engineering Department
   {
     first_name: "John",
     last_name: "Doe",
@@ -36,6 +37,38 @@ employees = [
     status: "active"
   },
   {
+    first_name: "Alice",
+    last_name: "Johnson",
+    email: "alice.johnson@company.com",
+    phone: "+91 98765 43211",
+    department_id: Department.find_by(name: "Engineering").id,
+    designation: "Software Engineer",
+    date_of_joining: Date.current - 20.days,
+    status: "active"
+  },
+  {
+    first_name: "Bob",
+    last_name: "Wilson",
+    email: "bob.wilson@company.com",
+    phone: "+91 98765 43212",
+    department_id: Department.find_by(name: "Engineering").id,
+    designation: "Tech Lead",
+    date_of_joining: Date.current - 60.days,
+    status: "active"
+  },
+  {
+    first_name: "Carol",
+    last_name: "Brown",
+    email: "carol.brown@company.com",
+    phone: "+91 98765 43213",
+    department_id: Department.find_by(name: "Engineering").id,
+    designation: "DevOps Engineer",
+    date_of_joining: Date.current - 45.days,
+    status: "active"
+  },
+  
+  # Marketing Department
+  {
     first_name: "Jane",
     last_name: "Smith",
     email: "jane.smith@company.com",
@@ -46,6 +79,28 @@ employees = [
     status: "active"
   },
   {
+    first_name: "David",
+    last_name: "Lee",
+    email: "david.lee@company.com",
+    phone: "+91 87654 32110",
+    department_id: Department.find_by(name: "Marketing").id,
+    designation: "Content Writer",
+    date_of_joining: Date.current - 25.days,
+    status: "active"
+  },
+  {
+    first_name: "Emma",
+    last_name: "Davis",
+    email: "emma.davis@company.com",
+    phone: "+91 87654 32111",
+    department_id: Department.find_by(name: "Marketing").id,
+    designation: "Social Media Manager",
+    date_of_joining: Date.current - 10.days,
+    status: "active"
+  },
+  
+  # HR Department
+  {
     first_name: "Mike",
     last_name: "Johnson",
     email: "mike.johnson@company.com",
@@ -54,12 +109,328 @@ employees = [
     designation: "HR Specialist",
     date_of_joining: Date.current - 7.days,
     status: "active"
+  },
+  {
+    first_name: "Sarah",
+    last_name: "Miller",
+    email: "sarah.miller@company.com",
+    phone: "+91 76543 21099",
+    department_id: Department.find_by(name: "HR").id,
+    designation: "HR Manager",
+    date_of_joining: Date.current - 90.days,
+    status: "active"
+  },
+  
+  # Finance Department
+  {
+    first_name: "Tom",
+    last_name: "Anderson",
+    email: "tom.anderson@company.com",
+    phone: "+91 65432 10987",
+    department_id: Department.find_by(name: "Finance").id,
+    designation: "Finance Manager",
+    date_of_joining: Date.current - 120.days,
+    status: "active"
+  },
+  {
+    first_name: "Lisa",
+    last_name: "Garcia",
+    email: "lisa.garcia@company.com",
+    phone: "+91 65432 10988",
+    department_id: Department.find_by(name: "Finance").id,
+    designation: "Accountant",
+    date_of_joining: Date.current - 35.days,
+    status: "active"
+  },
+  
+  # Sales Department
+  {
+    first_name: "Mark",
+    last_name: "Taylor",
+    email: "mark.taylor@company.com",
+    phone: "+91 54321 09876",
+    department_id: Department.find_by(name: "Sales").id,
+    designation: "Sales Manager",
+    date_of_joining: Date.current - 75.days,
+    status: "active"
+  },
+  {
+    first_name: "Rachel",
+    last_name: "White",
+    email: "rachel.white@company.com",
+    phone: "+91 54321 09877",
+    department_id: Department.find_by(name: "Sales").id,
+    designation: "Sales Executive",
+    date_of_joining: Date.current - 40.days,
+    status: "active"
+  },
+  
+  # Product Department
+  {
+    first_name: "Kevin",
+    last_name: "Martinez",
+    email: "kevin.martinez@company.com",
+    phone: "+91 43210 98765",
+    department_id: Department.find_by(name: "Product").id,
+    designation: "Product Manager",
+    date_of_joining: Date.current - 50.days,
+    status: "active"
+  },
+  
+  # Design Department
+  {
+    first_name: "Amy",
+    last_name: "Rodriguez",
+    email: "amy.rodriguez@company.com",
+    phone: "+91 32109 87654",
+    department_id: Department.find_by(name: "Design").id,
+    designation: "UI/UX Designer",
+    date_of_joining: Date.current - 30.days,
+    status: "active"
+  },
+  
+  # Operations Department
+  {
+    first_name: "Chris",
+    last_name: "Lopez",
+    email: "chris.lopez@company.com",
+    phone: "+91 21098 76543",
+    department_id: Department.find_by(name: "Operations").id,
+    designation: "Operations Manager",
+    date_of_joining: Date.current - 100.days,
+    status: "active"
   }
 ]
 
 employees.each do |emp|
   Employee.find_or_create_by!(email: emp[:email]) do |employee|
     employee.assign_attributes(emp)
+  end
+end
+
+# Create salary structures for all employees
+puts "Creating salary structures..."
+salary_data = {
+  "Senior Software Engineer" => { basic: 1000000, hra: 200000, allowances: 200000, deductions: 50000 },
+  "Software Engineer" => { basic: 700000, hra: 150000, allowances: 150000, deductions: 35000 },
+  "Tech Lead" => { basic: 1300000, hra: 250000, allowances: 250000, deductions: 60000 },
+  "DevOps Engineer" => { basic: 900000, hra: 180000, allowances: 180000, deductions: 40000 },
+  "Marketing Manager" => { basic: 800000, hra: 160000, allowances: 160000, deductions: 38000 },
+  "Content Writer" => { basic: 400000, hra: 80000, allowances: 80000, deductions: 20000 },
+  "Social Media Manager" => { basic: 500000, hra: 100000, allowances: 100000, deductions: 25000 },
+  "HR Manager" => { basic: 900000, hra: 180000, allowances: 180000, deductions: 40000 },
+  "HR Specialist" => { basic: 600000, hra: 120000, allowances: 120000, deductions: 30000 },
+  "Finance Manager" => { basic: 1000000, hra: 200000, allowances: 200000, deductions: 45000 },
+  "Accountant" => { basic: 500000, hra: 100000, allowances: 100000, deductions: 25000 },
+  "Sales Manager" => { basic: 700000, hra: 150000, allowances: 150000, deductions: 35000 },
+  "Sales Executive" => { basic: 400000, hra: 100000, allowances: 100000, deductions: 20000 },
+  "Product Manager" => { basic: 1200000, hra: 220000, allowances: 220000, deductions: 50000 },
+  "UI/UX Designer" => { basic: 700000, hra: 140000, allowances: 140000, deductions: 32000 },
+  "Operations Manager" => { basic: 800000, hra: 160000, allowances: 160000, deductions: 38000 }
+}
+
+Employee.all.each do |employee|
+  salary_info = salary_data[employee.designation]
+  if salary_info
+    SalaryStructure.find_or_create_by!(employee: employee) do |ss|
+      ss.basic = salary_info[:basic]
+      ss.hra = salary_info[:hra]
+      ss.allowances = salary_info[:allowances]
+      ss.deductions = salary_info[:deductions]
+      ss.effective_from = employee.date_of_joining
+    end
+  end
+end
+
+# Create payroll records for all employees
+puts "Creating payroll records..."
+Employee.all.each do |employee|
+  salary_structure = employee.salary_structures.first
+  
+  if salary_structure
+    gross_salary = salary_structure.basic + salary_structure.hra + salary_structure.allowances
+    net_salary = gross_salary - salary_structure.deductions
+    
+    # Create payroll for current month
+    Payroll.find_or_create_by!(
+      employee: employee,
+      month: Date.current.strftime("%B %Y")
+    ) do |payroll|
+      payroll.gross_salary = gross_salary
+      payroll.net_salary = net_salary
+      payroll.status = "processed"
+    end
+    
+    # Create payroll for previous month
+    Payroll.find_or_create_by!(
+      employee: employee,
+      month: 1.month.ago.strftime("%B %Y")
+    ) do |payroll|
+      payroll.gross_salary = gross_salary
+      payroll.net_salary = net_salary
+      payroll.status = "processed"
+    end
+  end
+end
+
+# Create attendance records for all employees
+puts "Creating attendance records..."
+Employee.all.each do |employee|
+  # Create attendance records for the last 30 days
+  (0..29).each do |day_offset|
+    date = Date.current - day_offset.days
+    next if date.saturday? || date.sunday? # Skip weekends
+    
+    AttendanceRecord.find_or_create_by!(
+      employee: employee,
+      date: date
+    ) do |attendance|
+      attendance.check_in = Time.parse("09:00") + rand(0..30).minutes
+      attendance.check_out = Time.parse("18:00") + rand(-30..30).minutes
+      attendance.status = ["present", "late", "early_departure"].sample
+    end
+  end
+end
+
+# Create job openings
+puts "Creating job openings..."
+job_openings = [
+  {
+    title: "Senior Frontend Developer",
+    department: Department.find_by(name: "Engineering"),
+    description: "We are looking for a Senior Frontend Developer with 5+ years of experience in React, TypeScript, and modern web technologies.",
+    requirements: "5+ years React experience, TypeScript, Redux, CSS/SCSS, Git, Agile methodologies",
+    skills: "React, TypeScript, JavaScript, HTML, CSS, Redux, Git",
+    location: "Bangalore",
+    job_type: "full-time",
+    experience: "5-8 years",
+    salary_min: 1200000,
+    salary_max: 1800000,
+    posted: Date.current - 5.days,
+    status: "open",
+    vacancies: 2,
+    applications: 15
+  },
+  {
+    title: "Marketing Specialist",
+    department: Department.find_by(name: "Marketing"),
+    description: "Join our marketing team to drive growth and brand awareness through innovative campaigns and strategies.",
+    requirements: "3+ years marketing experience, Digital marketing, Content creation, Analytics",
+    skills: "Digital Marketing, Content Writing, SEO, Social Media, Analytics, Campaign Management",
+    location: "Mumbai",
+    job_type: "full-time",
+    experience: "3-5 years",
+    salary_min: 600000,
+    salary_max: 900000,
+    posted: Date.current - 3.days,
+    status: "open",
+    vacancies: 1,
+    applications: 8
+  },
+  {
+    title: "HR Business Partner",
+    department: Department.find_by(name: "HR"),
+    description: "Support business growth by providing strategic HR guidance and implementing people programs.",
+    requirements: "4+ years HR experience, Employee relations, Performance management, HR policies",
+    skills: "HR Management, Employee Relations, Performance Management, HR Policies, Recruitment",
+    location: "Delhi",
+    job_type: "full-time",
+    experience: "4-6 years",
+    salary_min: 800000,
+    salary_max: 1200000,
+    posted: Date.current - 7.days,
+    status: "open",
+    vacancies: 1,
+    applications: 12
+  },
+  {
+    title: "Financial Analyst",
+    department: Department.find_by(name: "Finance"),
+    description: "Analyze financial data and provide insights to support business decision making.",
+    requirements: "2+ years finance experience, Financial modeling, Excel, Accounting principles",
+    skills: "Financial Analysis, Excel, Financial Modeling, Accounting, Budgeting, Forecasting",
+    location: "Chennai",
+    job_type: "full-time",
+    experience: "2-4 years",
+    salary_min: 500000,
+    salary_max: 750000,
+    posted: Date.current - 10.days,
+    status: "open",
+    vacancies: 2,
+    applications: 20
+  },
+  {
+    title: "Sales Development Representative",
+    department: Department.find_by(name: "Sales"),
+    description: "Generate new business opportunities and build relationships with potential clients.",
+    requirements: "1+ years sales experience, Communication skills, CRM experience, Target driven",
+    skills: "Sales, CRM, Communication, Lead Generation, Customer Relationship Management",
+    location: "Pune",
+    job_type: "full-time",
+    experience: "1-3 years",
+    salary_min: 400000,
+    salary_max: 600000,
+    posted: Date.current - 2.days,
+    status: "open",
+    vacancies: 3,
+    applications: 25
+  },
+  {
+    title: "Product Designer",
+    department: Department.find_by(name: "Design"),
+    description: "Design user-centered products and experiences that delight our customers.",
+    requirements: "3+ years design experience, UI/UX design, Design tools, User research",
+    skills: "UI Design, UX Design, Figma, Sketch, User Research, Prototyping, Design Systems",
+    location: "Hyderabad",
+    job_type: "full-time",
+    experience: "3-5 years",
+    salary_min: 700000,
+    salary_max: 1100000,
+    posted: Date.current - 4.days,
+    status: "open",
+    vacancies: 1,
+    applications: 18
+  },
+  {
+    title: "DevOps Engineer",
+    department: Department.find_by(name: "Engineering"),
+    description: "Build and maintain our cloud infrastructure and deployment pipelines.",
+    requirements: "3+ years DevOps experience, AWS/Azure, Docker, Kubernetes, CI/CD",
+    skills: "AWS, Docker, Kubernetes, CI/CD, Terraform, Linux, Python, Monitoring",
+    location: "Bangalore",
+    job_type: "full-time",
+    experience: "3-6 years",
+    salary_min: 1000000,
+    salary_max: 1500000,
+    posted: Date.current - 6.days,
+    status: "open",
+    vacancies: 1,
+    applications: 10
+  },
+  {
+    title: "Operations Coordinator",
+    department: Department.find_by(name: "Operations"),
+    description: "Coordinate daily operations and ensure smooth business processes.",
+    requirements: "2+ years operations experience, Process improvement, Project management",
+    skills: "Operations Management, Process Improvement, Project Management, Data Analysis",
+    location: "Kolkata",
+    job_type: "full-time",
+    experience: "2-4 years",
+    salary_min: 450000,
+    salary_max: 650000,
+    posted: Date.current - 8.days,
+    status: "open",
+    vacancies: 1,
+    applications: 14
+  }
+]
+
+job_openings.each do |job_attrs|
+  JobOpening.find_or_create_by!(
+    title: job_attrs[:title],
+    department: job_attrs[:department]
+  ) do |job|
+    job.assign_attributes(job_attrs)
   end
 end
 
@@ -158,9 +529,9 @@ candidates = [
     name: "Sarah Wilson",
     email: "sarah.wilson@email.com",
     phone: "+91 65432 10987",
-    position: "Frontend Developer",
+    position: "Senior Frontend Developer",
     department: "Engineering",
-    experience: "3 years",
+    experience: "5 years",
     location: "Mumbai",
     status: "interview",
     applied_date: Date.current - 5.days,
@@ -168,10 +539,10 @@ candidates = [
     resume: "sarah_wilson_resume.pdf",
     cover_letter: "sarah_wilson_cover.pdf",
     notes: "Strong React skills, good communication",
-    skills: "React, JavaScript, TypeScript, HTML, CSS",
+    skills: "React, JavaScript, TypeScript, HTML, CSS, Redux",
     education: "B.Tech Computer Science",
     current_company: "TechCorp",
-    expected_salary: "₹8,00,000",
+    expected_salary: "₹12,00,000",
     availability: "2 weeks notice"
   },
   {
@@ -191,14 +562,14 @@ candidates = [
     skills: "Product Strategy, User Research, Agile, Analytics",
     education: "MBA Marketing",
     current_company: "SaaS Solutions",
-    expected_salary: "₹12,00,000",
+    expected_salary: "₹15,00,000",
     availability: "1 month notice"
   },
   {
     name: "Lisa Chen",
     email: "lisa.chen@email.com",
     phone: "+91 43210 98765",
-    position: "UX Designer",
+    position: "Product Designer",
     department: "Design",
     experience: "4 years",
     location: "Delhi",
@@ -208,11 +579,131 @@ candidates = [
     resume: "lisa_chen_resume.pdf",
     cover_letter: "lisa_chen_cover.pdf",
     notes: "Excellent portfolio, strong user research skills",
-    skills: "Figma, Sketch, User Research, Prototyping",
+    skills: "Figma, Sketch, User Research, Prototyping, Design Systems",
     education: "B.Des Interaction Design",
     current_company: "Design Studio",
-    expected_salary: "₹9,00,000",
+    expected_salary: "₹10,00,000",
     availability: "Immediate"
+  },
+  {
+    name: "Michael Rodriguez",
+    email: "michael.rodriguez@email.com",
+    phone: "+91 32109 87654",
+    position: "Marketing Specialist",
+    department: "Marketing",
+    experience: "3 years",
+    location: "Mumbai",
+    status: "interview",
+    applied_date: Date.current - 4.days,
+    last_contact: Date.current - 1.day,
+    resume: "michael_rodriguez_resume.pdf",
+    cover_letter: "michael_rodriguez_cover.pdf",
+    notes: "Strong digital marketing background",
+    skills: "Digital Marketing, SEO, Social Media, Content Creation, Analytics",
+    education: "BBA Marketing",
+    current_company: "Digital Agency",
+    expected_salary: "₹7,00,000",
+    availability: "3 weeks notice"
+  },
+  {
+    name: "Jennifer Kim",
+    email: "jennifer.kim@email.com",
+    phone: "+91 21098 76543",
+    position: "HR Business Partner",
+    department: "HR",
+    experience: "4 years",
+    location: "Delhi",
+    status: "screening",
+    applied_date: Date.current - 6.days,
+    last_contact: Date.current - 2.days,
+    resume: "jennifer_kim_resume.pdf",
+    cover_letter: "jennifer_kim_cover.pdf",
+    notes: "Strong employee relations experience",
+    skills: "HR Management, Employee Relations, Performance Management, HR Policies",
+    education: "MBA HR",
+    current_company: "HR Consultancy",
+    expected_salary: "₹9,00,000",
+    availability: "1 month notice"
+  },
+  {
+    name: "Robert Johnson",
+    email: "robert.johnson@email.com",
+    phone: "+91 10987 65432",
+    position: "Financial Analyst",
+    department: "Finance",
+    experience: "2 years",
+    location: "Chennai",
+    status: "interview",
+    applied_date: Date.current - 7.days,
+    last_contact: Date.current - 1.day,
+    resume: "robert_johnson_resume.pdf",
+    cover_letter: "robert_johnson_cover.pdf",
+    notes: "Strong analytical skills, CFA candidate",
+    skills: "Financial Analysis, Excel, Financial Modeling, Accounting, Budgeting",
+    education: "B.Com Finance",
+    current_company: "Investment Bank",
+    expected_salary: "₹6,00,000",
+    availability: "2 weeks notice"
+  },
+  {
+    name: "Amanda Davis",
+    email: "amanda.davis@email.com",
+    phone: "+91 09876 54321",
+    position: "Sales Development Representative",
+    department: "Sales",
+    experience: "2 years",
+    location: "Pune",
+    status: "screening",
+    applied_date: Date.current - 2.days,
+    last_contact: Date.current - 1.day,
+    resume: "amanda_davis_resume.pdf",
+    cover_letter: "amanda_davis_cover.pdf",
+    notes: "High energy, target-driven professional",
+    skills: "Sales, CRM, Communication, Lead Generation, Customer Relationship",
+    education: "BBA Sales",
+    current_company: "Sales Company",
+    expected_salary: "₹5,00,000",
+    availability: "Immediate"
+  },
+  {
+    name: "Kevin Park",
+    email: "kevin.park@email.com",
+    phone: "+91 98765 43210",
+    position: "DevOps Engineer",
+    department: "Engineering",
+    experience: "4 years",
+    location: "Bangalore",
+    status: "interview",
+    applied_date: Date.current - 8.days,
+    last_contact: Date.current - 1.day,
+    resume: "kevin_park_resume.pdf",
+    cover_letter: "kevin_park_cover.pdf",
+    notes: "Strong cloud infrastructure experience",
+    skills: "AWS, Docker, Kubernetes, CI/CD, Terraform, Linux, Python",
+    education: "B.Tech Computer Science",
+    current_company: "Cloud Solutions",
+    expected_salary: "₹13,00,000",
+    availability: "1 month notice"
+  },
+  {
+    name: "Maria Garcia",
+    email: "maria.garcia@email.com",
+    phone: "+91 87654 32109",
+    position: "Operations Coordinator",
+    department: "Operations",
+    experience: "3 years",
+    location: "Kolkata",
+    status: "screening",
+    applied_date: Date.current - 9.days,
+    last_contact: Date.current - 2.days,
+    resume: "maria_garcia_resume.pdf",
+    cover_letter: "maria_garcia_cover.pdf",
+    notes: "Process improvement specialist",
+    skills: "Operations Management, Process Improvement, Project Management, Data Analysis",
+    education: "BBA Operations",
+    current_company: "Manufacturing Company",
+    expected_salary: "₹5,50,000",
+    availability: "3 weeks notice"
   }
 ]
 
@@ -251,6 +742,60 @@ interviews = [
     status: "completed",
     feedback: "Excellent portfolio, strong design thinking, recommended for next round",
     notes: "Portfolio review and design challenge discussion"
+  },
+  {
+    candidate: Candidate.find_by(email: "michael.rodriguez@email.com"),
+    interviewer: "Jane Smith",
+    interview_type: "video",
+    scheduled_date: Date.current + 1.day,
+    scheduled_time: Time.parse("15:00"),
+    status: "scheduled",
+    notes: "Marketing strategy and campaign planning discussion"
+  },
+  {
+    candidate: Candidate.find_by(email: "jennifer.kim@email.com"),
+    interviewer: "Sarah Miller",
+    interview_type: "video",
+    scheduled_date: Date.current + 4.days,
+    scheduled_time: Time.parse("11:00"),
+    status: "scheduled",
+    notes: "HR policies and employee relations case study"
+  },
+  {
+    candidate: Candidate.find_by(email: "robert.johnson@email.com"),
+    interviewer: "Tom Anderson",
+    interview_type: "onsite",
+    scheduled_date: Date.current + 3.days,
+    scheduled_time: Time.parse("16:00"),
+    status: "scheduled",
+    notes: "Financial modeling and analysis test"
+  },
+  {
+    candidate: Candidate.find_by(email: "amanda.davis@email.com"),
+    interviewer: "Mark Taylor",
+    interview_type: "video",
+    scheduled_date: Date.current + 1.day,
+    scheduled_time: Time.parse("10:30"),
+    status: "scheduled",
+    notes: "Sales process and CRM experience assessment"
+  },
+  {
+    candidate: Candidate.find_by(email: "kevin.park@email.com"),
+    interviewer: "Bob Wilson",
+    interview_type: "video",
+    scheduled_date: Date.current + 5.days,
+    scheduled_time: Time.parse("14:30"),
+    status: "scheduled",
+    notes: "DevOps architecture and cloud infrastructure discussion"
+  },
+  {
+    candidate: Candidate.find_by(email: "maria.garcia@email.com"),
+    interviewer: "Chris Lopez",
+    interview_type: "video",
+    scheduled_date: Date.current + 2.days,
+    scheduled_time: Time.parse("13:00"),
+    status: "scheduled",
+    notes: "Operations process improvement and project management"
   }
 ]
 
@@ -266,6 +811,7 @@ end
 
 # Create assets
 assets = [
+  # Engineering Department Assets
   {
     name: "MacBook Pro 16-inch",
     asset_type: "laptop",
@@ -286,15 +832,74 @@ assets = [
     employee_id: Employee.find_by(email: "john.doe@company.com").id
   },
   {
-    name: "Dell XPS 15",
+    name: "MacBook Air M2",
     asset_type: "laptop",
-    serial_number: "DXP2024002",
-    model: "XPS 15 9520",
-    brand: "Dell",
+    serial_number: "MBA2024002",
+    model: "MacBook Air 13-inch M2",
+    brand: "Apple",
     purchase_date: Date.current - 4.months,
     warranty_expiry: Date.current + 1.year + 8.months,
+    purchase_cost: 1299.00,
+    current_value: 1150.00,
+    status: "assigned",
+    location: "Engineering Department",
+    department: "Engineering",
+    notes: "Assigned to software engineer",
+    condition: "excellent",
+    last_maintenance: Date.current - 1.month,
+    next_maintenance: Date.current + 5.months,
+    employee_id: Employee.find_by(email: "alice.johnson@company.com").id
+  },
+  {
+    name: "Dell XPS 15",
+    asset_type: "laptop",
+    serial_number: "DXP2024003",
+    model: "XPS 15 9520",
+    brand: "Dell",
+    purchase_date: Date.current - 5.months,
+    warranty_expiry: Date.current + 1.year + 7.months,
     purchase_cost: 1899.00,
     current_value: 1700.00,
+    status: "assigned",
+    location: "Engineering Department",
+    department: "Engineering",
+    notes: "Assigned to tech lead",
+    condition: "excellent",
+    last_maintenance: Date.current - 1.month,
+    next_maintenance: Date.current + 5.months,
+    employee_id: Employee.find_by(email: "bob.wilson@company.com").id
+  },
+  {
+    name: "ThinkPad X1 Carbon",
+    asset_type: "laptop",
+    serial_number: "TPX2024004",
+    model: "ThinkPad X1 Carbon Gen 10",
+    brand: "Lenovo",
+    purchase_date: Date.current - 3.months,
+    warranty_expiry: Date.current + 1.year + 9.months,
+    purchase_cost: 1599.00,
+    current_value: 1400.00,
+    status: "assigned",
+    location: "Engineering Department",
+    department: "Engineering",
+    notes: "Assigned to DevOps engineer",
+    condition: "excellent",
+    last_maintenance: Date.current - 2.weeks,
+    next_maintenance: Date.current + 5.months,
+    employee_id: Employee.find_by(email: "carol.brown@company.com").id
+  },
+  
+  # Marketing Department Assets
+  {
+    name: "MacBook Pro 14-inch",
+    asset_type: "laptop",
+    serial_number: "MBP2024005",
+    model: "MacBook Pro 14-inch M2",
+    brand: "Apple",
+    purchase_date: Date.current - 4.months,
+    warranty_expiry: Date.current + 1.year + 8.months,
+    purchase_cost: 1999.00,
+    current_value: 1800.00,
     status: "assigned",
     location: "Marketing Department",
     department: "Marketing",
@@ -305,9 +910,30 @@ assets = [
     employee_id: Employee.find_by(email: "jane.smith@company.com").id
   },
   {
+    name: "iPad Pro 12.9-inch",
+    asset_type: "mobile",
+    serial_number: "IPP2024006",
+    model: "iPad Pro 12.9-inch M2",
+    brand: "Apple",
+    purchase_date: Date.current - 2.months,
+    warranty_expiry: Date.current + 1.year + 10.months,
+    purchase_cost: 1099.00,
+    current_value: 1000.00,
+    status: "assigned",
+    location: "Marketing Department",
+    department: "Marketing",
+    notes: "Assigned to content writer",
+    condition: "excellent",
+    last_maintenance: Date.current - 1.week,
+    next_maintenance: Date.current + 5.months,
+    employee_id: Employee.find_by(email: "david.lee@company.com").id
+  },
+  
+  # HR Department Assets
+  {
     name: "HP LaserJet Pro",
     asset_type: "printer",
-    serial_number: "HPL2024003",
+    serial_number: "HPL2024007",
     model: "LaserJet Pro M404n",
     brand: "HP",
     purchase_date: Date.current - 8.months,
@@ -323,9 +949,171 @@ assets = [
     next_maintenance: Date.current + 5.months
   },
   {
+    name: "Dell OptiPlex Desktop",
+    asset_type: "desktop",
+    serial_number: "DOP2024008",
+    model: "OptiPlex 7010",
+    brand: "Dell",
+    purchase_date: Date.current - 6.months,
+    warranty_expiry: Date.current + 1.year + 6.months,
+    purchase_cost: 799.00,
+    current_value: 650.00,
+    status: "assigned",
+    location: "HR Department",
+    department: "HR",
+    notes: "Assigned to HR specialist",
+    condition: "good",
+    last_maintenance: Date.current - 2.months,
+    next_maintenance: Date.current + 4.months,
+    employee_id: Employee.find_by(email: "mike.johnson@company.com").id
+  },
+  
+  # Finance Department Assets
+  {
+    name: "Dell OptiPlex Desktop",
+    asset_type: "desktop",
+    serial_number: "DOP2024009",
+    model: "OptiPlex 7010",
+    brand: "Dell",
+    purchase_date: Date.current - 8.months,
+    warranty_expiry: Date.current + 1.year + 4.months,
+    purchase_cost: 799.00,
+    current_value: 650.00,
+    status: "assigned",
+    location: "Finance Department",
+    department: "Finance",
+    notes: "Assigned to finance manager",
+    condition: "good",
+    last_maintenance: Date.current - 4.months,
+    next_maintenance: Date.current + 2.months,
+    employee_id: Employee.find_by(email: "tom.anderson@company.com").id
+  },
+  {
+    name: "HP EliteBook",
+    asset_type: "laptop",
+    serial_number: "HPE2024010",
+    model: "EliteBook 850 G9",
+    brand: "HP",
+    purchase_date: Date.current - 3.months,
+    warranty_expiry: Date.current + 1.year + 9.months,
+    purchase_cost: 1299.00,
+    current_value: 1150.00,
+    status: "assigned",
+    location: "Finance Department",
+    department: "Finance",
+    notes: "Assigned to accountant",
+    condition: "excellent",
+    last_maintenance: Date.current - 1.month,
+    next_maintenance: Date.current + 5.months,
+    employee_id: Employee.find_by(email: "lisa.garcia@company.com").id
+  },
+  
+  # Sales Department Assets
+  {
+    name: "iPhone 15 Pro",
+    asset_type: "mobile",
+    serial_number: "IPH2024011",
+    model: "iPhone 15 Pro 256GB",
+    brand: "Apple",
+    purchase_date: Date.current - 3.months,
+    warranty_expiry: Date.current + 1.year + 9.months,
+    purchase_cost: 1199.00,
+    current_value: 1100.00,
+    status: "assigned",
+    location: "Sales Department",
+    department: "Sales",
+    notes: "Assigned to sales manager",
+    condition: "excellent",
+    last_maintenance: Date.current - 1.month,
+    next_maintenance: Date.current + 5.months,
+    employee_id: Employee.find_by(email: "mark.taylor@company.com").id
+  },
+  {
+    name: "Samsung Galaxy S24",
+    asset_type: "mobile",
+    serial_number: "SGS2024012",
+    model: "Galaxy S24 256GB",
+    brand: "Samsung",
+    purchase_date: Date.current - 2.months,
+    warranty_expiry: Date.current + 1.year + 10.months,
+    purchase_cost: 999.00,
+    current_value: 900.00,
+    status: "assigned",
+    location: "Sales Department",
+    department: "Sales",
+    notes: "Assigned to sales executive",
+    condition: "excellent",
+    last_maintenance: Date.current - 2.weeks,
+    next_maintenance: Date.current + 5.months,
+    employee_id: Employee.find_by(email: "rachel.white@company.com").id
+  },
+  
+  # Design Department Assets
+  {
+    name: "MacBook Pro 16-inch",
+    asset_type: "laptop",
+    serial_number: "MBP2024013",
+    model: "MacBook Pro 16-inch M2",
+    brand: "Apple",
+    purchase_date: Date.current - 4.months,
+    warranty_expiry: Date.current + 1.year + 8.months,
+    purchase_cost: 2499.00,
+    current_value: 2200.00,
+    status: "assigned",
+    location: "Design Department",
+    department: "Design",
+    notes: "Assigned to UI/UX designer",
+    condition: "excellent",
+    last_maintenance: Date.current - 1.month,
+    next_maintenance: Date.current + 5.months,
+    employee_id: Employee.find_by(email: "amy.rodriguez@company.com").id
+  },
+  {
+    name: "Wacom Cintiq 22",
+    asset_type: "other",
+    serial_number: "WAC2024014",
+    model: "Cintiq 22",
+    brand: "Wacom",
+    purchase_date: Date.current - 5.months,
+    warranty_expiry: Date.current + 1.year + 7.months,
+    purchase_cost: 1199.00,
+    current_value: 1000.00,
+    status: "assigned",
+    location: "Design Department",
+    department: "Design",
+    notes: "Assigned to UI/UX designer",
+    condition: "excellent",
+    last_maintenance: Date.current - 2.months,
+    next_maintenance: Date.current + 4.months,
+    employee_id: Employee.find_by(email: "amy.rodriguez@company.com").id
+  },
+  
+  # Operations Department Assets
+  {
+    name: "Dell Latitude",
+    asset_type: "laptop",
+    serial_number: "DLT2024015",
+    model: "Latitude 7420",
+    brand: "Dell",
+    purchase_date: Date.current - 7.months,
+    warranty_expiry: Date.current + 1.year + 5.months,
+    purchase_cost: 1399.00,
+    current_value: 1200.00,
+    status: "assigned",
+    location: "Operations Department",
+    department: "Operations",
+    notes: "Assigned to operations manager",
+    condition: "good",
+    last_maintenance: Date.current - 3.months,
+    next_maintenance: Date.current + 3.months,
+    employee_id: Employee.find_by(email: "chris.lopez@company.com").id
+  },
+  
+  # Network Infrastructure
+  {
     name: "Cisco Switch",
     asset_type: "network",
-    serial_number: "CIS2024004",
+    serial_number: "CIS2024016",
     model: "Catalyst 2960",
     brand: "Cisco",
     purchase_date: Date.current - 12.months,
@@ -341,41 +1129,40 @@ assets = [
     next_maintenance: Date.current + 4.months
   },
   {
-    name: "iPhone 15 Pro",
-    asset_type: "mobile",
-    serial_number: "IPH2024005",
-    model: "iPhone 15 Pro 256GB",
-    brand: "Apple",
-    purchase_date: Date.current - 3.months,
-    warranty_expiry: Date.current + 1.year + 9.months,
-    purchase_cost: 1199.00,
-    current_value: 1100.00,
-    status: "assigned",
-    location: "Sales Department",
-    department: "Sales",
-    notes: "Assigned to sales representative",
+    name: "Ubiquiti Access Point",
+    asset_type: "network",
+    serial_number: "UAP2024017",
+    model: "UniFi AP AC Pro",
+    brand: "Ubiquiti",
+    purchase_date: Date.current - 6.months,
+    warranty_expiry: Date.current + 1.year + 6.months,
+    purchase_cost: 149.00,
+    current_value: 120.00,
+    status: "available",
+    location: "Office Floor 1",
+    department: "IT",
+    notes: "WiFi access point",
     condition: "excellent",
     last_maintenance: Date.current - 1.month,
-    next_maintenance: Date.current + 5.months,
-    employee_id: Employee.find_by(email: "jane.smith@company.com").id
+    next_maintenance: Date.current + 5.months
   },
   {
-    name: "Dell OptiPlex Desktop",
-    asset_type: "desktop",
-    serial_number: "DOP2024006",
-    model: "OptiPlex 7010",
-    brand: "Dell",
-    purchase_date: Date.current - 8.months,
-    warranty_expiry: Date.current + 1.year + 4.months,
-    purchase_cost: 799.00,
-    current_value: 650.00,
+    name: "Ubiquiti Access Point",
+    asset_type: "network",
+    serial_number: "UAP2024018",
+    model: "UniFi AP AC Pro",
+    brand: "Ubiquiti",
+    purchase_date: Date.current - 6.months,
+    warranty_expiry: Date.current + 1.year + 6.months,
+    purchase_cost: 149.00,
+    current_value: 120.00,
     status: "available",
-    location: "Finance Department",
-    department: "Finance",
-    notes: "Finance team desktop",
-    condition: "good",
-    last_maintenance: Date.current - 4.months,
-    next_maintenance: Date.current + 2.months
+    location: "Office Floor 2",
+    department: "IT",
+    notes: "WiFi access point",
+    condition: "excellent",
+    last_maintenance: Date.current - 1.month,
+    next_maintenance: Date.current + 5.months
   }
 ]
 
@@ -966,6 +1753,10 @@ puts "Created #{OffboardingEmployee.count} offboarding employees with #{Offboard
 puts "Seed data created successfully!"
 puts "Created #{Department.count} departments"
 puts "Created #{Employee.count} employees"
+puts "Created #{SalaryStructure.count} salary structures"
+puts "Created #{Payroll.count} payroll records"
+puts "Created #{AttendanceRecord.count} attendance records"
+puts "Created #{JobOpening.count} job openings"
 puts "Created #{OnboardingEmployee.count} onboarding employees"
 puts "Created #{OnboardingTask.count} onboarding tasks"
 puts "Created #{Candidate.count} candidates"
