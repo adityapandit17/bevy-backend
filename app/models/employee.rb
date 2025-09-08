@@ -26,8 +26,8 @@ class Employee < ApplicationRecord
   validates :phone, presence: true
   validates :designation, presence: true
   validates :date_of_joining, presence: true
-  validates :date_of_birth, presence: true
-  validates :status, presence: true, inclusion: { in: %w[active inactive terminated probation] }
+  # validates :date_of_birth, presence: true
+  # validates :status, presence: true, inclusion: { in: %w[active inactive terminated probation] }
 
   # Scopes
   scope :active, -> { where(status: 'active') }
