@@ -20,7 +20,7 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
 
     post employees_url, params: { employee: employee_attributes }, as: :json
     assert_response :created
-    
+
     employee_response = JSON.parse(@response.body)
     employee_id = employee_response["id"]
     assert_equal "Jane Smith", employee_response["name"]
@@ -44,7 +44,7 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
 
     post assets_url, params: { asset: laptop_attributes }, as: :json
     assert_response :created
-    
+
     laptop_response = JSON.parse(@response.body)
     laptop_id = laptop_response["asset"]["id"]
     assert_equal "available", laptop_response["asset"]["status"]
@@ -52,7 +52,7 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
     # Step 3: Allocate laptop to employee
     patch asset_url(laptop_id), params: { asset: { employee_id: employee_id } }, as: :json
     assert_response :success
-    
+
     laptop_updated = JSON.parse(@response.body)
     assert_equal "assigned", laptop_updated["asset"]["status"]
     assert_equal employee_id, laptop_updated["asset"]["assigned_to"]["id"]
@@ -69,7 +69,7 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
 
     post leave_requests_url, params: { leave_request: leave_attributes }, as: :json
     assert_response :created
-    
+
     leave_response = JSON.parse(@response.body)
     leave_id = leave_response["id"]
     assert_equal "pending", leave_response["status"]
@@ -78,21 +78,21 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
     # Step 5: Approve the leave request
     patch leave_request_url(leave_id), params: { leave_request: { status: "approved" } }, as: :json
     assert_response :success
-    
+
     leave_updated = JSON.parse(@response.body)
     assert_equal "approved", leave_updated["status"]
 
     # Step 6: Update employee information
     patch employee_url(employee_id), params: { employee: { designation: "Senior Software Engineer" } }, as: :json
     assert_response :success
-    
+
     employee_updated = JSON.parse(@response.body)
     assert_equal "Senior Software Engineer", employee_updated["designation"]
 
     # Step 7: Verify all relationships are working
     get employee_url(employee_id), as: :json
     assert_response :success
-    
+
     employee_details = JSON.parse(@response.body)
     assert_equal "Jane Smith", employee_details["name"]
     assert_equal "Senior Software Engineer", employee_details["designation"]
@@ -100,7 +100,7 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
     # Step 8: Check asset allocation
     get asset_url(laptop_id), as: :json
     assert_response :success
-    
+
     asset_details = JSON.parse(@response.body)
     assert_equal "assigned", asset_details["asset"]["status"]
     assert_equal "Jane Smith", asset_details["asset"]["assigned_to"]["name"]
@@ -108,7 +108,7 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
     # Step 9: Check leave request details
     get leave_request_url(leave_id), as: :json
     assert_response :success
-    
+
     leave_details = JSON.parse(@response.body)
     assert_equal "approved", leave_details["status"]
     assert_equal "Jane Smith", leave_details["employee_name"]
@@ -116,7 +116,7 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
     # Step 10: Test employee statistics
     get employees_url, as: :json
     assert_response :success
-    
+
     employees_list = JSON.parse(@response.body)
     assert employees_list.any? { |emp| emp["id"] == employee_id }
   end
@@ -136,7 +136,7 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
 
     post employees_url, params: { employee: employee_attributes }, as: :json
     assert_response :created
-    
+
     employee_response = JSON.parse(@response.body)
     employee_id = employee_response["id"]
 
@@ -158,7 +158,7 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
 
     post assets_url, params: { asset: asset_attributes }, as: :json
     assert_response :created
-    
+
     asset_response = JSON.parse(@response.body)
     asset_id = asset_response["asset"]["id"]
 
@@ -173,14 +173,14 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
     # Step 4: Verify employee status is inactive
     get employee_url(employee_id), as: :json
     assert_response :success
-    
+
     employee_terminated = JSON.parse(@response.body)
     assert_equal "inactive", employee_terminated["status"]
 
     # Step 5: Verify asset is no longer assigned
     get asset_url(asset_id), as: :json
     assert_response :success
-    
+
     asset_unassigned = JSON.parse(@response.body)
     assert_equal "available", asset_unassigned["asset"]["status"]
     assert_nil asset_unassigned["asset"]["assigned_to"]
@@ -189,10 +189,10 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
   test "department management workflow" do
     # Step 1: Create a new department
     department_attributes = { name: "Quality Assurance" }
-    
+
     post departments_url, params: { department: department_attributes }, as: :json
     assert_response :created
-    
+
     department_response = JSON.parse(@response.body)
     department_id = department_response["id"]
     assert_equal "Quality Assurance", department_response["name"]
@@ -211,7 +211,7 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
 
     post employees_url, params: { employee: employee1_attributes }, as: :json
     assert_response :created
-    
+
     employee1_response = JSON.parse(@response.body)
     employee1_id = employee1_response["id"]
 
@@ -228,27 +228,27 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
 
     post employees_url, params: { employee: employee2_attributes }, as: :json
     assert_response :created
-    
+
     employee2_response = JSON.parse(@response.body)
     employee2_id = employee2_response["id"]
 
     # Step 3: Update department name
     patch department_url(department_id), params: { department: { name: "Quality Assurance & Testing" } }, as: :json
     assert_response :success
-    
+
     department_updated = JSON.parse(@response.body)
     assert_equal "Quality Assurance & Testing", department_updated["name"]
 
     # Step 4: Verify employees are in the updated department
     get employee_url(employee1_id), as: :json
     assert_response :success
-    
+
     employee1_details = JSON.parse(@response.body)
     assert_equal department_id, employee1_details["department_id"]
 
     get employee_url(employee2_id), as: :json
     assert_response :success
-    
+
     employee2_details = JSON.parse(@response.body)
     assert_equal department_id, employee2_details["department_id"]
 
@@ -276,7 +276,7 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
 
     post assets_url, params: { asset: asset_attributes }, as: :json
     assert_response :created
-    
+
     asset_response = JSON.parse(@response.body)
     asset_id = asset_response["asset"]["id"]
     assert_equal "available", asset_response["asset"]["status"]
@@ -295,28 +295,28 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
 
     post employees_url, params: { employee: employee_attributes }, as: :json
     assert_response :created
-    
+
     employee_response = JSON.parse(@response.body)
     employee_id = employee_response["id"]
 
     # Step 3: Assign asset to employee
     patch asset_url(asset_id), params: { asset: { employee_id: employee_id } }, as: :json
     assert_response :success
-    
+
     asset_assigned = JSON.parse(@response.body)
     assert_equal "assigned", asset_assigned["asset"]["status"]
 
     # Step 4: Put asset under maintenance
     patch asset_url(asset_id), params: { asset: { status: "maintenance" } }, as: :json
     assert_response :success
-    
+
     asset_maintenance = JSON.parse(@response.body)
     assert_equal "maintenance", asset_maintenance["asset"]["status"]
 
     # Step 5: Return asset to available status
     patch asset_url(asset_id), params: { asset: { status: "available", employee_id: nil } }, as: :json
     assert_response :success
-    
+
     asset_available = JSON.parse(@response.body)
     assert_equal "available", asset_available["asset"]["status"]
     assert_nil asset_available["asset"]["assigned_to"]
@@ -324,7 +324,7 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
     # Step 6: Retire the asset
     patch asset_url(asset_id), params: { asset: { status: "retired" } }, as: :json
     assert_response :success
-    
+
     asset_retired = JSON.parse(@response.body)
     assert_equal "retired", asset_retired["asset"]["status"]
 
@@ -348,7 +348,7 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
 
     post employees_url, params: { employee: employee_attributes }, as: :json
     assert_response :created
-    
+
     employee_response = JSON.parse(@response.body)
     employee_id = employee_response["id"]
 
@@ -364,7 +364,7 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
 
     post leave_requests_url, params: { leave_request: leave1_attributes }, as: :json
     assert_response :created
-    
+
     leave1_response = JSON.parse(@response.body)
     leave1_id = leave1_response["id"]
 
@@ -379,21 +379,21 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
 
     post leave_requests_url, params: { leave_request: leave2_attributes }, as: :json
     assert_response :created
-    
+
     leave2_response = JSON.parse(@response.body)
     leave2_id = leave2_response["id"]
 
     # Step 3: Approve first leave request
     patch leave_request_url(leave1_id), params: { leave_request: { status: "approved" } }, as: :json
     assert_response :success
-    
+
     leave1_approved = JSON.parse(@response.body)
     assert_equal "approved", leave1_approved["status"]
 
     # Step 4: Reject second leave request
     patch leave_request_url(leave2_id), params: { leave_request: { status: "rejected" } }, as: :json
     assert_response :success
-    
+
     leave2_rejected = JSON.parse(@response.body)
     assert_equal "rejected", leave2_rejected["status"]
 
@@ -409,20 +409,20 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
 
     post leave_requests_url, params: { leave_request: leave3_attributes }, as: :json
     assert_response :created
-    
+
     leave3_response = JSON.parse(@response.body)
     leave3_id = leave3_response["id"]
 
     patch leave_request_url(leave3_id), params: { leave_request: { status: "cancelled" } }, as: :json
     assert_response :success
-    
+
     leave3_cancelled = JSON.parse(@response.body)
     assert_equal "cancelled", leave3_cancelled["status"]
 
     # Step 6: Verify all leave requests have correct statuses
     get leave_requests_url, as: :json
     assert_response :success
-    
+
     leave_requests = JSON.parse(@response.body)
     approved_requests = leave_requests.select { |lr| lr["status"] == "approved" }
     rejected_requests = leave_requests.select { |lr| lr["status"] == "rejected" }
@@ -435,11 +435,11 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
 
   test "concurrent operations workflow" do
     # Test that multiple operations can happen concurrently without conflicts
-    
+
     # Create multiple employees simultaneously
     threads = []
     employee_ids = []
-    
+
     5.times do |i|
       threads << Thread.new do
         employee_attributes = {
@@ -452,22 +452,22 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
           date_of_joining: Date.current,
           status: "active"
         }
-        
+
         response = post employees_url, params: { employee: employee_attributes }, as: :json
         if response == 201
           employee_ids << JSON.parse(@response.body)["id"]
         end
       end
     end
-    
+
     threads.each(&:join)
-    
+
     # Verify all employees were created
     assert_equal 5, employee_ids.length
-    
+
     # Create assets for each employee
     asset_threads = []
-    
+
     employee_ids.each_with_index do |employee_id, i|
       asset_threads << Thread.new do
         asset_attributes = {
@@ -484,7 +484,7 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
           department: "Engineering",
           condition: "good"
         }
-        
+
         post assets_url, params: { asset: asset_attributes }, as: :json
         if @response.status == 201
           asset_id = JSON.parse(@response.body)["asset"]["id"]
@@ -493,20 +493,20 @@ class EmployeeWorkflowTest < ActionDispatch::IntegrationTest
         end
       end
     end
-    
+
     asset_threads.each(&:join)
-    
+
     # Verify all operations completed successfully
     get employees_url, as: :json
     assert_response :success
-    
+
     employees = JSON.parse(@response.body)
     assert employees.length >= 5
-    
+
     get assets_url, as: :json
     assert_response :success
-    
+
     assets = JSON.parse(@response.body)
     assert assets["total_count"] >= 5
   end
-end 
+end

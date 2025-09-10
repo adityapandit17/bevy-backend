@@ -1,6 +1,6 @@
 class Employee < ApplicationRecord
   belongs_to :department
-  
+
   # Existing associations
   has_many :attendance_records, dependent: :destroy
   has_many :leave_requests, dependent: :destroy
@@ -9,7 +9,7 @@ class Employee < ApplicationRecord
   has_many :assets, dependent: :destroy
   has_many :asset_allocations, dependent: :destroy
   has_many :onboarding_employees, dependent: :destroy
-  
+
   # New associations for employee profile
   has_many :employee_documents, dependent: :destroy
   has_many :performance_reviews, dependent: :destroy
@@ -30,40 +30,40 @@ class Employee < ApplicationRecord
   # validates :status, presence: true, inclusion: { in: %w[active inactive terminated probation] }
 
   # Scopes
-  scope :active, -> { where(status: 'active') }
-  scope :inactive, -> { where(status: 'inactive') }
-  scope :terminated, -> { where(status: 'terminated') }
-  scope :probation, -> { where(status: 'probation') }
+  scope :active, -> { where(status: "active") }
+  scope :inactive, -> { where(status: "inactive") }
+  scope :terminated, -> { where(status: "terminated") }
+  scope :probation, -> { where(status: "probation") }
   scope :by_department, ->(department_id) { where(department_id: department_id) }
   scope :by_designation, ->(designation) { where(designation: designation) }
-  scope :recent_hires, -> { where('date_of_joining >= ?', 3.months.ago) }
-  scope :long_term, -> { where('date_of_joining <= ?', 2.years.ago) }
-  scope :birthday_today, -> { where("strftime('%m-%d', date_of_birth) = ?", Date.current.strftime('%m-%d')) }
-  scope :birthday_this_week, -> { 
+  scope :recent_hires, -> { where("date_of_joining >= ?", 3.months.ago) }
+  scope :long_term, -> { where("date_of_joining <= ?", 2.years.ago) }
+  scope :birthday_today, -> { where("strftime('%m-%d', date_of_birth) = ?", Date.current.strftime("%m-%d")) }
+  scope :birthday_this_week, -> {
     start_of_week = Date.current.beginning_of_week
     end_of_week = Date.current.end_of_week
-    where("strftime('%m-%d', date_of_birth) BETWEEN ? AND ?", 
-          start_of_week.strftime('%m-%d'), end_of_week.strftime('%m-%d'))
+    where("strftime('%m-%d', date_of_birth) BETWEEN ? AND ?",
+          start_of_week.strftime("%m-%d"), end_of_week.strftime("%m-%d"))
   }
-  scope :birthday_this_month, -> { 
-    where("strftime('%m', date_of_birth) = ?", Date.current.strftime('%m'))
+  scope :birthday_this_month, -> {
+    where("strftime('%m', date_of_birth) = ?", Date.current.strftime("%m"))
   }
 
   # Helper methods
   def active?
-    status == 'active'
+    status == "active"
   end
 
   def inactive?
-    status == 'inactive'
+    status == "inactive"
   end
 
   def terminated?
-    status == 'terminated'
+    status == "terminated"
   end
 
   def probation?
-    status == 'probation'
+    status == "probation"
   end
 
   def name
@@ -75,7 +75,7 @@ class Employee < ApplicationRecord
   end
 
   def formatted_hire_date
-    date_of_joining.strftime('%B %d, %Y')
+    date_of_joining.strftime("%B %d, %Y")
   end
 
   def tenure_years
@@ -96,16 +96,16 @@ class Employee < ApplicationRecord
 
   def status_color
     case status
-    when 'active'
-      'green'
-    when 'inactive'
-      'gray'
-    when 'terminated'
-      'red'
-    when 'probation'
-      'yellow'
+    when "active"
+      "green"
+    when "inactive"
+      "gray"
+    when "terminated"
+      "red"
+    when "probation"
+      "yellow"
     else
-      'gray'
+      "gray"
     end
   end
 
@@ -183,7 +183,7 @@ class Employee < ApplicationRecord
 
   def profile_completion_percentage
     # Calculate profile completion based on filled fields
-    fields = [first_name, last_name, email, phone, designation, date_of_joining, department_id]
+    fields = [ first_name, last_name, email, phone, designation, date_of_joining, department_id ]
     filled_fields = fields.compact.count
     (filled_fields.to_f / fields.count * 100).round(1)
   end
@@ -205,23 +205,23 @@ class Employee < ApplicationRecord
   # Birthday methods
   def birthday_today?
     return false unless date_of_birth
-    date_of_birth.strftime('%m-%d') == Date.current.strftime('%m-%d')
+    date_of_birth.strftime("%m-%d") == Date.current.strftime("%m-%d")
   end
 
   def birthday_this_week?
     return false unless date_of_birth
     start_of_week = Date.current.beginning_of_week
     end_of_week = Date.current.end_of_week
-    birthday_month_day = date_of_birth.strftime('%m-%d')
-    start_month_day = start_of_week.strftime('%m-%d')
-    end_month_day = end_of_week.strftime('%m-%d')
-    
+    birthday_month_day = date_of_birth.strftime("%m-%d")
+    start_month_day = start_of_week.strftime("%m-%d")
+    end_month_day = end_of_week.strftime("%m-%d")
+
     birthday_month_day.between?(start_month_day, end_month_day)
   end
 
   def birthday_this_month?
     return false unless date_of_birth
-    date_of_birth.strftime('%m') == Date.current.strftime('%m')
+    date_of_birth.strftime("%m") == Date.current.strftime("%m")
   end
 
   def age
@@ -236,7 +236,7 @@ class Employee < ApplicationRecord
     return nil unless date_of_birth
     today = Date.current
     this_year_birthday = Date.new(today.year, date_of_birth.month, date_of_birth.day)
-    
+
     if this_year_birthday >= today
       this_year_birthday
     else
@@ -251,6 +251,6 @@ class Employee < ApplicationRecord
 
   def birthday_formatted
     return "Not set" unless date_of_birth
-    date_of_birth.strftime('%B %d')
+    date_of_birth.strftime("%B %d")
   end
 end

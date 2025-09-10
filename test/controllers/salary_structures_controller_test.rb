@@ -16,7 +16,7 @@ class SalaryStructuresControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should create salary structure" do
-    post salary_structures_url, params: { 
+    post salary_structures_url, params: {
       salary_structure: {
         employee_id: @salary_structure.employee_id,
         basic_salary: 50000,
@@ -29,7 +29,7 @@ class SalaryStructuresControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update salary structure" do
-    patch salary_structure_url(@salary_structure), params: { 
+    patch salary_structure_url(@salary_structure), params: {
       salary_structure: { basic_salary: 55000 }
     }, as: :json
     assert_response :success

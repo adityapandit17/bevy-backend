@@ -201,7 +201,7 @@ class JobOpeningTest < ActiveSupport::TestCase
   # Scope tests
   test "open scope should return open job openings" do
     @job_opening.save!
-    
+
     closed_job = JobOpening.create!(
       title: "Closed Position",
       department: @department,
@@ -215,14 +215,14 @@ class JobOpeningTest < ActiveSupport::TestCase
       skills: "JavaScript, React",
       posted: Date.current
     )
-    
+
     assert_includes JobOpening.open, @job_opening
     assert_not_includes JobOpening.open, closed_job
   end
 
   test "recent scope should return job openings posted in last 30 days" do
     @job_opening.save!
-    
+
     old_job = JobOpening.create!(
       title: "Old Position",
       department: @department,
@@ -236,14 +236,14 @@ class JobOpeningTest < ActiveSupport::TestCase
       skills: "JavaScript, React",
       posted: 35.days.ago
     )
-    
+
     assert_includes JobOpening.recent, @job_opening
     assert_not_includes JobOpening.recent, old_job
   end
 
   test "by_location scope should filter by location" do
     @job_opening.save!
-    
+
     ny_job = JobOpening.create!(
       title: "NY Position",
       department: @department,
@@ -257,14 +257,14 @@ class JobOpeningTest < ActiveSupport::TestCase
       skills: "JavaScript, React",
       posted: Date.current
     )
-    
+
     assert_includes JobOpening.by_location("San Francisco, CA"), @job_opening
     assert_not_includes JobOpening.by_location("San Francisco, CA"), ny_job
   end
 
   test "high_salary scope should return high-paying jobs" do
     @job_opening.save!
-    
+
     low_salary_job = JobOpening.create!(
       title: "Low Salary Position",
       department: @department,
@@ -280,7 +280,7 @@ class JobOpeningTest < ActiveSupport::TestCase
       skills: "JavaScript, React",
       posted: Date.current
     )
-    
+
     assert_includes JobOpening.high_salary, @job_opening
     assert_not_includes JobOpening.high_salary, low_salary_job
   end
@@ -355,19 +355,19 @@ class JobOpeningTest < ActiveSupport::TestCase
 
   test "skills_list should return array of skills" do
     @job_opening.skills = "Ruby, Rails, JavaScript, React, PostgreSQL"
-    assert_equal ["Ruby", "Rails", "JavaScript", "React", "PostgreSQL"], @job_opening.skills_list
+    assert_equal [ "Ruby", "Rails", "JavaScript", "React", "PostgreSQL" ], @job_opening.skills_list
   end
 
   test "skills_list should return empty array for blank skills" do
     @job_opening.skills = nil
     assert_equal [], @job_opening.skills_list
-    
+
     @job_opening.skills = ""
     assert_equal [], @job_opening.skills_list
   end
 
   test "skills_list= should set skills from array" do
-    skills_array = ["Ruby", "Rails", "JavaScript"]
+    skills_array = [ "Ruby", "Rails", "JavaScript" ]
     @job_opening.skills_list = skills_array
     assert_equal "Ruby, Rails, JavaScript", @job_opening.skills
   end
@@ -408,7 +408,7 @@ class JobOpeningTest < ActiveSupport::TestCase
 
   # CRUD tests
   test "should be able to create job opening" do
-    assert_difference('JobOpening.count') do
+    assert_difference("JobOpening.count") do
       @job_opening.save!
     end
   end
@@ -422,7 +422,7 @@ class JobOpeningTest < ActiveSupport::TestCase
 
   test "should be able to delete job opening" do
     @job_opening.save!
-    assert_difference('JobOpening.count', -1) do
+    assert_difference("JobOpening.count", -1) do
       @job_opening.destroy
     end
   end
@@ -430,12 +430,12 @@ class JobOpeningTest < ActiveSupport::TestCase
   # Edge cases
   test "should handle skills with extra spaces" do
     @job_opening.skills = "Ruby , Rails , JavaScript , React"
-    assert_equal ["Ruby", "Rails", "JavaScript", "React"], @job_opening.skills_list
+    assert_equal [ "Ruby", "Rails", "JavaScript", "React" ], @job_opening.skills_list
   end
 
   test "should handle single skill" do
     @job_opening.skills = "Ruby"
-    assert_equal ["Ruby"], @job_opening.skills_list
+    assert_equal [ "Ruby" ], @job_opening.skills_list
   end
 
   test "should handle empty skills string" do

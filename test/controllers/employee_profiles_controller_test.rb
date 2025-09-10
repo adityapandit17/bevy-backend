@@ -9,7 +9,7 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
     skip "Model has issues with hours column and recent scope"
     get employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "employee"
     assert_includes json_response.keys, "overview"
@@ -28,7 +28,7 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
     skip "Model has issues with hours column and recent scope"
     get overview_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "employee"
     assert_includes json_response.keys, "stats"
@@ -37,7 +37,7 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
   test "should get job_details" do
     get job_details_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "basic_info"
     assert_includes json_response.keys, "contact_info"
@@ -48,7 +48,7 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
     skip "Model has issues with recent scope"
     get time_off_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "leave_balance"
     assert_includes json_response.keys, "recent_requests"
@@ -59,7 +59,7 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
     skip "Model has issues with recent scope"
     get pay_info_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "current_salary"
     assert_includes json_response.keys, "salary_history"
@@ -70,7 +70,7 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
     skip "Model has issues with recent scope"
     get documents_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "documents"
     assert_includes json_response.keys, "categories"
@@ -79,7 +79,7 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
   test "should get performance" do
     get performance_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "summary"
     assert_includes json_response.keys, "reviews"
@@ -89,7 +89,7 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
   test "should get timesheets" do
     get timesheets_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "summary"
     assert_includes json_response.keys, "timesheets"
@@ -98,7 +98,7 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
   test "should get benefits" do
     get benefits_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "benefits"
     assert_includes json_response.keys, "summary"
@@ -108,7 +108,7 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
     skip "Model has issues with hours column"
     get training_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "trainings"
     assert_includes json_response.keys, "summary"
@@ -117,7 +117,7 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
   test "should get assets" do
     get assets_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "assets"
     assert_includes json_response.keys, "allocations"
@@ -126,7 +126,7 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
   test "should return 404 for non-existent employee" do
     get employee_profile_url(99999), as: :json
     assert_response :not_found
-    
+
     json_response = JSON.parse(response.body)
     assert_equal "Employee not found", json_response["error"]
   end
@@ -135,10 +135,10 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
     skip "Model has issues with hours column and recent scope"
     get employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     employee_data = json_response["employee"]
-    
+
     assert_equal @employee.id, employee_data["id"]
     assert_equal @employee.name, employee_data["name"]
     assert_equal @employee.email, employee_data["email"]
@@ -157,10 +157,10 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
     skip "Model has issues with hours column and recent scope"
     get overview_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     stats = json_response["stats"]
-    
+
     assert_includes stats.keys, "total_leave_days"
     assert_includes stats.keys, "pending_leave_requests"
     assert_includes stats.keys, "total_assets"
@@ -188,10 +188,10 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
       date_of_joining: Date.current,
       status: "active"
     )
-    
+
     get employee_profile_url(new_employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_not_nil json_response["employee"]
     assert_not_nil json_response["overview"]
@@ -200,7 +200,7 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
   test "should return job details with correct format" do
     get job_details_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     basic_info = json_response["basic_info"]
     assert_equal @employee.designation, basic_info["position"]
@@ -213,12 +213,12 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
     skip "Model has issues with recent scope"
     get time_off_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "leave_balance"
     assert_includes json_response.keys, "recent_requests"
     assert_includes json_response.keys, "upcoming_requests"
-    
+
     # Check leave balance structure
     leave_balance = json_response["leave_balance"]
     assert_includes leave_balance.keys, "annual"
@@ -230,7 +230,7 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
     skip "Model has issues with recent scope"
     get pay_info_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "current_salary"
     assert_includes json_response.keys, "salary_history"
@@ -241,11 +241,11 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
     skip "Model has issues with recent scope"
     get documents_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "documents"
     assert_includes json_response.keys, "categories"
-    
+
     # Check categories structure
     categories = json_response["categories"]
     assert_includes categories.keys, "personal"
@@ -257,7 +257,7 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
   test "should return performance structure" do
     get performance_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "summary"
     assert_includes json_response.keys, "reviews"
@@ -267,11 +267,11 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
   test "should return timesheets structure" do
     get timesheets_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "summary"
     assert_includes json_response.keys, "timesheets"
-    
+
     # Check summary structure
     summary = json_response["summary"]
     assert_includes summary.keys, "weekly_hours"
@@ -282,11 +282,11 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
   test "should return benefits structure" do
     get benefits_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "benefits"
     assert_includes json_response.keys, "summary"
-    
+
     # Check summary structure
     summary = json_response["summary"]
     assert_includes summary.keys, "total_benefits"
@@ -298,11 +298,11 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
     skip "Model has issues with hours column"
     get training_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "trainings"
     assert_includes json_response.keys, "summary"
-    
+
     # Check summary structure
     summary = json_response["summary"]
     assert_includes summary.keys, "total_trainings"
@@ -314,11 +314,11 @@ class EmployeeProfilesControllerTest < ActionDispatch::IntegrationTest
   test "should return assets structure" do
     get assets_employee_profile_url(@employee), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_includes json_response.keys, "assets"
     assert_includes json_response.keys, "allocations"
-    
+
     # Check allocations structure - it's an array, not a hash
     allocations = json_response["allocations"]
     assert_kind_of Array, allocations

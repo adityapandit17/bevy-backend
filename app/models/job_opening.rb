@@ -17,20 +17,20 @@ class JobOpening < ApplicationRecord
 
   validate :salary_range_validity
 
-  scope :open, -> { where(status: 'open') }
-  scope :closed, -> { where(status: 'closed') }
-  scope :draft, -> { where(status: 'draft') }
-  scope :filled, -> { where(status: 'filled') }
-  scope :recent, -> { where('posted >= ?', 30.days.ago) }
+  scope :open, -> { where(status: "open") }
+  scope :closed, -> { where(status: "closed") }
+  scope :draft, -> { where(status: "draft") }
+  scope :filled, -> { where(status: "filled") }
+  scope :recent, -> { where("posted >= ?", 30.days.ago) }
   scope :by_location, ->(location) { where(location: location) }
   scope :by_job_type, ->(job_type) { where(job_type: job_type) }
   scope :by_department, ->(department_id) { where(department_id: department_id) }
-  scope :high_salary, -> { where('salary_max >= ?', 100000) }
-  scope :entry_level, -> { where('salary_max <= ?', 50000) }
+  scope :high_salary, -> { where("salary_max >= ?", 100000) }
+  scope :entry_level, -> { where("salary_max <= ?", 50000) }
 
   def salary_range_validity
     return unless salary_min.present? && salary_max.present?
-    
+
     if salary_min > salary_max
       errors.add(:salary_max, "must be greater than minimum salary")
     end
@@ -47,19 +47,19 @@ class JobOpening < ApplicationRecord
   end
 
   def is_open?
-    status == 'open'
+    status == "open"
   end
 
   def is_closed?
-    status == 'closed'
+    status == "closed"
   end
 
   def is_draft?
-    status == 'draft'
+    status == "draft"
   end
 
   def is_filled?
-    status == 'filled'
+    status == "filled"
   end
 
   def days_since_posted
@@ -79,11 +79,11 @@ class JobOpening < ApplicationRecord
 
   def skills_list
     return [] if skills.blank?
-    skills.split(',').map(&:strip)
+    skills.split(",").map(&:strip)
   end
 
   def skills_list=(skill_list)
-    self.skills = skill_list.is_a?(Array) ? skill_list.join(', ') : skill_list
+    self.skills = skill_list.is_a?(Array) ? skill_list.join(", ") : skill_list
   end
 
   def formatted_posted_date
@@ -93,16 +93,16 @@ class JobOpening < ApplicationRecord
 
   def status_color
     case status
-    when 'open'
-      'green'
-    when 'closed'
-      'red'
-    when 'draft'
-      'gray'
-    when 'filled'
-      'blue'
+    when "open"
+      "green"
+    when "closed"
+      "red"
+    when "draft"
+      "gray"
+    when "filled"
+      "blue"
     else
-      'gray'
+      "gray"
     end
   end
 

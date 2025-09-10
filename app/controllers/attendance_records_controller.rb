@@ -1,5 +1,5 @@
 class AttendanceRecordsController < ApplicationController
-  before_action :set_attendance_record, only: [:show, :update, :destroy]
+  before_action :set_attendance_record, only: [ :show, :update, :destroy ]
 
   def index
     @attendance_records = AttendanceRecord.all

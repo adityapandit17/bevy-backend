@@ -1,16 +1,16 @@
 class OnboardingTasksController < ApplicationController
-  before_action :set_onboarding_task, only: [:show, :update, :destroy]
+  before_action :set_onboarding_task, only: [ :show, :update, :destroy ]
 
   # GET /onboarding_tasks
   def index
     @onboarding_tasks = OnboardingTask.includes(:onboarding_employee)
-    
+
     # Apply filters
     @onboarding_tasks = @onboarding_tasks.where(onboarding_employee_id: params[:onboarding_employee_id]) if params[:onboarding_employee_id].present?
     @onboarding_tasks = @onboarding_tasks.by_status(params[:status]) if params[:status].present?
     @onboarding_tasks = @onboarding_tasks.by_category(params[:category]) if params[:category].present?
     @onboarding_tasks = @onboarding_tasks.by_priority(params[:priority]) if params[:priority].present?
-    
+
     render json: @onboarding_tasks.map { |task| format_task(task) }
   end
 
@@ -22,11 +22,11 @@ class OnboardingTasksController < ApplicationController
   # POST /onboarding_tasks
   def create
     @onboarding_task = OnboardingTask.new(onboarding_task_params)
-    
+
     if @onboarding_task.save
       # Update the onboarding employee's progress
       @onboarding_task.onboarding_employee.save
-      
+
       render json: format_task(@onboarding_task), status: :created
     else
       render json: { errors: @onboarding_task.errors.full_messages }, status: :unprocessable_entity
@@ -38,7 +38,7 @@ class OnboardingTasksController < ApplicationController
     if @onboarding_task.update(onboarding_task_params)
       # Update the onboarding employee's progress
       @onboarding_task.onboarding_employee.save
-      
+
       render json: format_task(@onboarding_task)
     else
       render json: { errors: @onboarding_task.errors.full_messages }, status: :unprocessable_entity
@@ -49,10 +49,10 @@ class OnboardingTasksController < ApplicationController
   def destroy
     onboarding_employee = @onboarding_task.onboarding_employee
     @onboarding_task.destroy
-    
+
     # Update the onboarding employee's progress
     onboarding_employee.save
-    
+
     head :no_content
   end
 
@@ -60,10 +60,10 @@ class OnboardingTasksController < ApplicationController
   def toggle
     @onboarding_task = OnboardingTask.find(params[:id])
     @onboarding_task.update(is_completed: !@onboarding_task.is_completed)
-    
+
     # Update the onboarding employee's progress
     @onboarding_task.onboarding_employee.save
-    
+
     render json: format_task(@onboarding_task)
   end
 
@@ -75,7 +75,7 @@ class OnboardingTasksController < ApplicationController
 
   # GET /onboarding_tasks/due_soon
   def due_soon
-    @due_soon_tasks = OnboardingTask.where('due_date <= ? AND is_completed = ?', Date.current + 3.days, false).includes(:onboarding_employee)
+    @due_soon_tasks = OnboardingTask.where("due_date <= ? AND is_completed = ?", Date.current + 3.days, false).includes(:onboarding_employee)
     render json: @due_soon_tasks.map { |task| format_task(task) }
   end
 

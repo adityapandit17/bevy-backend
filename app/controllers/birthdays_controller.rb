@@ -23,23 +23,23 @@ class BirthdaysController < ApplicationController
   def upcoming
     # Get birthdays for the next 30 days
     upcoming_birthdays = []
-    
+
     (0..29).each do |day_offset|
       date = Date.current + day_offset.days
       birthdays_on_date = Employee.active.where(
-        "strftime('%m-%d', date_of_birth) = ?", 
-        date.strftime('%m-%d')
+        "strftime('%m-%d', date_of_birth) = ?",
+        date.strftime("%m-%d")
       ).includes(:department)
-      
+
       if birthdays_on_date.any?
         upcoming_birthdays << {
-          date: date.strftime('%Y-%m-%d'),
-          day_name: date.strftime('%A'),
+          date: date.strftime("%Y-%m-%d"),
+          day_name: date.strftime("%A"),
           employees: format_birthday_employees(birthdays_on_date)
         }
       end
     end
-    
+
     render json: {
       upcoming_birthdays: upcoming_birthdays,
       total_count: upcoming_birthdays.sum { |day| day[:employees].count }

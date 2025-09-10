@@ -1,5 +1,5 @@
 class TimesheetsController < ApplicationController
-  before_action :set_timesheet, only: [:show, :update, :destroy]
+  before_action :set_timesheet, only: [ :show, :update, :destroy ]
 
   def index
     @timesheets = Timesheet.all

@@ -11,7 +11,7 @@ module TestHelpers
       date_of_joining: Date.current,
       status: "active"
     }
-    
+
     Employee.create!(default_attributes.merge(attributes))
   end
 
@@ -19,7 +19,7 @@ module TestHelpers
     default_attributes = {
       name: "Test Department"
     }
-    
+
     Department.create!(default_attributes.merge(attributes))
   end
 
@@ -38,7 +38,7 @@ module TestHelpers
       department: "Engineering",
       condition: "good"
     }
-    
+
     Asset.create!(default_attributes.merge(attributes))
   end
 
@@ -51,7 +51,7 @@ module TestHelpers
       reason: "Test leave",
       status: "pending"
     }
-    
+
     LeaveRequest.create!(default_attributes.merge(attributes))
   end
 
@@ -137,7 +137,7 @@ module TestHelpers
   def assert_status_transition(model, from_status, to_status)
     model.update!(status: from_status)
     assert_equal from_status, model.reload.status
-    
+
     model.update!(status: to_status)
     assert_equal to_status, model.reload.status
   end
@@ -177,7 +177,7 @@ module TestHelpers
     counter = ->(name, started, finished, unique_id, payload) {
       count += 1 unless payload[:name].in? %w[ CACHE SCHEMA ]
     }
-    
+
     ActiveSupport::Notifications.subscribed(counter, "sql.active_record", &block)
     assert_equal expected_count, count
   end
@@ -186,21 +186,21 @@ module TestHelpers
   def run_concurrent_operations(operation_count, &block)
     threads = []
     results = []
-    
+
     operation_count.times do |i|
       threads << Thread.new do
         result = block.call(i)
         results << result
       end
     end
-    
+
     threads.each(&:join)
     results
   end
 
   # Helper methods for file upload testing
   def create_test_file(filename, content = "test content")
-    file = Tempfile.new([filename, File.extname(filename)])
+    file = Tempfile.new([ filename, File.extname(filename) ])
     file.write(content)
     file.rewind
     file
@@ -271,7 +271,7 @@ module TestHelpers
     when :bad_request
       assert_json_bad_request
     end
-    
+
     if error_message
       json_response = JSON.parse(@response.body)
       assert_includes json_response["errors"], error_message
@@ -292,7 +292,7 @@ module TestHelpers
     assert_not_nil response_data["results"]
     assert_not_nil response_data["search_term"]
     assert_equal search_term, response_data["search_term"]
-    
+
     if expected_count
       assert_equal expected_count, response_data["total_count"]
     end
@@ -302,11 +302,11 @@ module TestHelpers
   def assert_filtered_results(response_data, filters, expected_count = nil)
     assert_not_nil response_data["results"]
     assert_not_nil response_data["filters"]
-    
+
     filters.each do |key, value|
       assert_equal value, response_data["filters"][key.to_s]
     end
-    
+
     if expected_count
       assert_equal expected_count, response_data["total_count"]
     end
@@ -323,7 +323,7 @@ module TestHelpers
   def assert_export_response(content_type, filename = nil)
     assert_response :success
     assert_equal content_type, @response.content_type
-    
+
     if filename
       assert_equal "attachment; filename=\"#{filename}\"", @response.headers["Content-Disposition"]
     end
@@ -359,10 +359,10 @@ module TestHelpers
     assert_emails(1) do
       block.call
     end
-    
+
     email = ActionMailer::Base.deliveries.last
     assert_equal to, email.to.first
-    
+
     if subject
       assert_equal subject, email.subject
     end
@@ -406,4 +406,4 @@ end
 
 class ActiveSupport::TestCase
   include TestHelpers
-end 
+end

@@ -115,7 +115,7 @@ class EmployeeBenefitTest < ActiveSupport::TestCase
   # Scope tests
   test "by_employee scope should filter by employee" do
     @benefit.save!
-    
+
     other_employee = employees(:two)
     other_benefit = EmployeeBenefit.create!(
       employee: other_employee,
@@ -127,14 +127,14 @@ class EmployeeBenefitTest < ActiveSupport::TestCase
       status: "active",
       cost: 300.00
     )
-    
+
     assert_includes EmployeeBenefit.by_employee(@employee.id), @benefit
     assert_not_includes EmployeeBenefit.by_employee(@employee.id), other_benefit
   end
 
   test "by_type scope should filter by benefit type" do
     @benefit.save!
-    
+
     dental_benefit = EmployeeBenefit.create!(
       employee: @employee,
       name: "Dental Insurance",
@@ -145,14 +145,14 @@ class EmployeeBenefitTest < ActiveSupport::TestCase
       status: "active",
       cost: 200.00
     )
-    
+
     assert_includes EmployeeBenefit.by_type("health_insurance"), @benefit
     assert_not_includes EmployeeBenefit.by_type("health_insurance"), dental_benefit
   end
 
   test "active scope should return active benefits" do
     @benefit.save!
-    
+
     inactive_benefit = EmployeeBenefit.create!(
       employee: @employee,
       name: "Inactive Benefit",
@@ -163,7 +163,7 @@ class EmployeeBenefitTest < ActiveSupport::TestCase
       status: "inactive",
       cost: 100.00
     )
-    
+
     assert_includes EmployeeBenefit.active, @benefit
     assert_not_includes EmployeeBenefit.active, inactive_benefit
   end
@@ -171,7 +171,7 @@ class EmployeeBenefitTest < ActiveSupport::TestCase
   test "expiring_soon scope should return benefits expiring soon" do
     @benefit.end_date = Date.current + 15.days
     @benefit.save!
-    
+
     long_term_benefit = EmployeeBenefit.create!(
       employee: @employee,
       name: "Long Term Benefit",
@@ -183,7 +183,7 @@ class EmployeeBenefitTest < ActiveSupport::TestCase
       status: "active",
       cost: 100.00
     )
-    
+
     assert_includes EmployeeBenefit.expiring_soon, @benefit
     assert_not_includes EmployeeBenefit.expiring_soon, long_term_benefit
   end
@@ -371,7 +371,7 @@ class EmployeeBenefitTest < ActiveSupport::TestCase
 
   # CRUD tests
   test "should be able to create benefit" do
-    assert_difference('EmployeeBenefit.count') do
+    assert_difference("EmployeeBenefit.count") do
       @benefit.save!
     end
   end
@@ -385,7 +385,7 @@ class EmployeeBenefitTest < ActiveSupport::TestCase
 
   test "should be able to delete benefit" do
     @benefit.save!
-    assert_difference('EmployeeBenefit.count', -1) do
+    assert_difference("EmployeeBenefit.count", -1) do
       @benefit.destroy
     end
   end

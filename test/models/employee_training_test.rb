@@ -109,7 +109,7 @@ class EmployeeTrainingTest < ActiveSupport::TestCase
   end
 
   test "should accept valid progress values" do
-    [0, 25, 50, 75, 100].each do |progress|
+    [ 0, 25, 50, 75, 100 ].each do |progress|
       @training.progress = progress
       assert @training.valid?, "Progress #{progress} should be valid"
     end
@@ -140,7 +140,7 @@ class EmployeeTrainingTest < ActiveSupport::TestCase
   # Scope tests
   test "by_employee scope should filter by employee" do
     @training.save!
-    
+
     other_employee = employees(:two)
     other_training = EmployeeTraining.create!(
       employee: other_employee,
@@ -153,14 +153,14 @@ class EmployeeTrainingTest < ActiveSupport::TestCase
       progress: 0,
       cost: 1000.00
     )
-    
+
     assert_includes EmployeeTraining.by_employee(@employee.id), @training
     assert_not_includes EmployeeTraining.by_employee(@employee.id), other_training
   end
 
   test "by_type scope should filter by training type" do
     @training.save!
-    
+
     soft_skills_training = EmployeeTraining.create!(
       employee: @employee,
       name: "Communication Skills",
@@ -172,7 +172,7 @@ class EmployeeTrainingTest < ActiveSupport::TestCase
       progress: 0,
       cost: 800.00
     )
-    
+
     assert_includes EmployeeTraining.by_type("technical"), @training
     assert_not_includes EmployeeTraining.by_type("technical"), soft_skills_training
   end
@@ -180,7 +180,7 @@ class EmployeeTrainingTest < ActiveSupport::TestCase
   test "completed scope should return completed trainings" do
     @training.status = "completed"
     @training.save!
-    
+
     in_progress_training = EmployeeTraining.create!(
       employee: @employee,
       name: "In Progress Training",
@@ -192,7 +192,7 @@ class EmployeeTrainingTest < ActiveSupport::TestCase
       progress: 50,
       cost: 1200.00
     )
-    
+
     assert_includes EmployeeTraining.completed, @training
     assert_not_includes EmployeeTraining.completed, in_progress_training
   end
@@ -200,7 +200,7 @@ class EmployeeTrainingTest < ActiveSupport::TestCase
   test "in_progress scope should return in progress trainings" do
     @training.status = "in_progress"
     @training.save!
-    
+
     completed_training = EmployeeTraining.create!(
       employee: @employee,
       name: "Completed Training",
@@ -212,7 +212,7 @@ class EmployeeTrainingTest < ActiveSupport::TestCase
       progress: 100,
       cost: 1200.00
     )
-    
+
     assert_includes EmployeeTraining.in_progress, @training
     assert_not_includes EmployeeTraining.in_progress, completed_training
   end
@@ -221,7 +221,7 @@ class EmployeeTrainingTest < ActiveSupport::TestCase
     @training.start_date = Date.current - 1.day
     @training.end_date = Date.current + 1.day
     @training.save!
-    
+
     future_training = EmployeeTraining.create!(
       employee: @employee,
       name: "Future Training",
@@ -233,14 +233,14 @@ class EmployeeTrainingTest < ActiveSupport::TestCase
       progress: 0,
       cost: 1200.00
     )
-    
+
     assert_includes EmployeeTraining.current, @training
     assert_not_includes EmployeeTraining.current, future_training
   end
 
   test "upcoming scope should return future trainings" do
     @training.save!
-    
+
     past_training = EmployeeTraining.create!(
       employee: @employee,
       name: "Past Training",
@@ -252,7 +252,7 @@ class EmployeeTrainingTest < ActiveSupport::TestCase
       progress: 100,
       cost: 1200.00
     )
-    
+
     assert_includes EmployeeTraining.upcoming, @training
     assert_not_includes EmployeeTraining.upcoming, past_training
   end
@@ -422,7 +422,7 @@ class EmployeeTrainingTest < ActiveSupport::TestCase
 
   test "skills_list should return array of skills" do
     @training.skills = "Ruby, Rails, JavaScript, PostgreSQL"
-    assert_equal ["Ruby", "Rails", "JavaScript", "PostgreSQL"], @training.skills_list
+    assert_equal [ "Ruby", "Rails", "JavaScript", "PostgreSQL" ], @training.skills_list
   end
 
   test "skills_list should return empty array for nil skills" do
@@ -525,7 +525,7 @@ class EmployeeTrainingTest < ActiveSupport::TestCase
 
   # CRUD tests
   test "should be able to create training" do
-    assert_difference('EmployeeTraining.count') do
+    assert_difference("EmployeeTraining.count") do
       @training.save!
     end
   end
@@ -539,7 +539,7 @@ class EmployeeTrainingTest < ActiveSupport::TestCase
 
   test "should be able to delete training" do
     @training.save!
-    assert_difference('EmployeeTraining.count', -1) do
+    assert_difference("EmployeeTraining.count", -1) do
       @training.destroy
     end
   end
@@ -554,11 +554,11 @@ class EmployeeTrainingTest < ActiveSupport::TestCase
 
   test "should handle skills with extra spaces" do
     @training.skills = "Ruby , Rails , JavaScript"
-    assert_equal ["Ruby", "Rails", "JavaScript"], @training.skills_list
+    assert_equal [ "Ruby", "Rails", "JavaScript" ], @training.skills_list
   end
 
   test "should handle empty skills string" do
     @training.skills = "   "
-    assert_equal [""], @training.skills_list
+    assert_equal [ "" ], @training.skills_list
   end
 end

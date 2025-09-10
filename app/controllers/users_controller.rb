@@ -1,15 +1,15 @@
 class UsersController < ApplicationController
-  before_action :set_user, only: [:show, :update, :destroy]
+  before_action :set_user, only: [ :show, :update, :destroy ]
   before_action :authorize_users_access!
 
   # GET /users
   def index
     @users = User.includes(:roles, :employee)
-    
+
     # Apply filters
     @users = @users.where(status: params[:status]) if params[:status].present?
     @users = @users.joins(:roles).where(roles: { name: params[:role] }) if params[:role].present?
-    
+
     # Search functionality
     if params[:search].present?
       search_term = "%#{params[:search]}%"
@@ -18,9 +18,9 @@ class UsersController < ApplicationController
         search_term, search_term, search_term
       )
     end
-    
+
     @users = @users.order(:first_name, :last_name)
-    
+
     render json: {
       users: @users.map { |user| format_user(user) },
       total_count: @users.count,
@@ -40,20 +40,20 @@ class UsersController < ApplicationController
   # POST /users
   def create
     @user = User.new(user_params)
-    
+
     if @user.save
       # Assign roles if provided
       if params[:role_ids].present?
         @user.role_ids = params[:role_ids]
       end
-      
+
       render json: {
-        message: 'User created successfully',
+        message: "User created successfully",
         user: format_user(@user)
       }, status: :created
     else
       render json: {
-        message: 'Failed to create user',
+        message: "Failed to create user",
         errors: @user.errors.full_messages
       }, status: :unprocessable_entity
     end
@@ -66,14 +66,14 @@ class UsersController < ApplicationController
       if params[:role_ids].present?
         @user.role_ids = params[:role_ids]
       end
-      
+
       render json: {
-        message: 'User updated successfully',
+        message: "User updated successfully",
         user: format_user(@user)
       }
     else
       render json: {
-        message: 'Failed to update user',
+        message: "Failed to update user",
         errors: @user.errors.full_messages
       }, status: :unprocessable_entity
     end
@@ -82,26 +82,26 @@ class UsersController < ApplicationController
   # DELETE /users/:id
   def destroy
     if @user == current_user
-      render json: { error: 'Cannot delete your own account' }, status: :unprocessable_entity
+      render json: { error: "Cannot delete your own account" }, status: :unprocessable_entity
       return
     end
-    
+
     @user.destroy
-    render json: { message: 'User deleted successfully' }
+    render json: { message: "User deleted successfully" }
   end
 
   # PATCH /users/:id/update_roles
   def update_roles
     @user = User.find(params[:id])
-    
+
     if @user.update(role_ids: params[:role_ids])
       render json: {
-        message: 'User roles updated successfully',
+        message: "User roles updated successfully",
         user: format_user(@user)
       }
     else
       render json: {
-        message: 'Failed to update user roles',
+        message: "Failed to update user roles",
         errors: @user.errors.full_messages
       }, status: :unprocessable_entity
     end
@@ -112,7 +112,7 @@ class UsersController < ApplicationController
   def set_user
     @user = User.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render json: { error: 'User not found' }, status: :not_found
+    render json: { error: "User not found" }, status: :not_found
   end
 
   def user_params
@@ -120,7 +120,7 @@ class UsersController < ApplicationController
   end
 
   def authorize_users_access!
-    authorize!('users', 'index')
+    authorize!("users", "index")
   end
 
   def format_user(user)

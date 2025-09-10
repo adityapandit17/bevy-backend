@@ -1,14 +1,14 @@
 class OnboardingEmployeesController < ApplicationController
-  before_action :set_onboarding_employee, only: [:show, :update, :destroy]
+  before_action :set_onboarding_employee, only: [ :show, :update, :destroy ]
 
   # GET /onboarding_employees
   def index
     @onboarding_employees = OnboardingEmployee.includes(:employee, :onboarding_tasks)
-    
+
     # Apply filters
     @onboarding_employees = @onboarding_employees.by_status(params[:status]) if params[:status].present?
     @onboarding_employees = @onboarding_employees.joins(:employee).where("employees.first_name ILIKE ? OR employees.last_name ILIKE ?", "%#{params[:search]}%", "%#{params[:search]}%") if params[:search].present?
-    
+
     render json: @onboarding_employees.map { |oe| format_onboarding_employee(oe) }
   end
 
@@ -20,11 +20,11 @@ class OnboardingEmployeesController < ApplicationController
   # POST /onboarding_employees
   def create
     @onboarding_employee = OnboardingEmployee.new(onboarding_employee_params)
-    
+
     if @onboarding_employee.save
       # Create default onboarding tasks
       create_default_tasks(@onboarding_employee)
-      
+
       render json: format_onboarding_employee(@onboarding_employee), status: :created
     else
       render json: { errors: @onboarding_employee.errors.full_messages }, status: :unprocessable_entity
@@ -50,11 +50,11 @@ class OnboardingEmployeesController < ApplicationController
   def stats
     stats = {
       active_onboarding: OnboardingEmployee.active.count,
-      completed_this_month: OnboardingEmployee.completed.where('updated_at >= ?', 1.month.ago).count,
+      completed_this_month: OnboardingEmployee.completed.where("updated_at >= ?", 1.month.ago).count,
       pending_tasks: OnboardingTask.pending.count,
       documents_pending: OnboardingTask.where("documents IS NOT NULL AND documents != ''").pending.count
     }
-    
+
     render json: stats
   end
 
@@ -111,7 +111,7 @@ class OnboardingEmployeesController < ApplicationController
         priority: "high",
         due_date: onboarding_employee.start_date - 5.days,
         assigned_to: "HR Team",
-        documents: ["Employment Contract", "Tax Forms", "Emergency Contact"]
+        documents: [ "Employment Contract", "Tax Forms", "Emergency Contact" ]
       },
       {
         title: "IT Setup",

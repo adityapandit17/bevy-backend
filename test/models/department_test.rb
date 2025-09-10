@@ -26,7 +26,7 @@ class DepartmentTest < ActiveSupport::TestCase
 
   # Basic CRUD tests
   test "should be able to create department" do
-    assert_difference('Department.count') do
+    assert_difference("Department.count") do
       @department.save!
     end
   end
@@ -40,7 +40,7 @@ class DepartmentTest < ActiveSupport::TestCase
 
   test "should be able to delete department" do
     @department.save!
-    assert_difference('Department.count', -1) do
+    assert_difference("Department.count", -1) do
       @department.destroy
     end
   end

@@ -1,5 +1,5 @@
 class EmployeesController < ApplicationController
-  before_action :set_employee, only: [:show, :update, :destroy]
+  before_action :set_employee, only: [ :show, :update, :destroy ]
 
   def index
     @employees = Employee.all
@@ -28,7 +28,7 @@ class EmployeesController < ApplicationController
   end
 
   def destroy
-    if @employee.update(status: 'inactive')
+    if @employee.update(status: "inactive")
       render json: @employee
     else
       render json: { errors: @employee.errors.full_messages }, status: :unprocessable_entity

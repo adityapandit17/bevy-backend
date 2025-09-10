@@ -14,7 +14,7 @@ class DepartmentsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should create department" do
-    assert_difference('Department.count') do
+    assert_difference("Department.count") do
       post departments_url, params: { department: @valid_attributes }, as: :json
     end
 
@@ -23,7 +23,7 @@ class DepartmentsControllerTest < ActionDispatch::IntegrationTest
 
   test "should not create department with invalid name" do
     invalid_attributes = @valid_attributes.merge(name: nil)
-    assert_no_difference('Department.count') do
+    assert_no_difference("Department.count") do
       post departments_url, params: { department: invalid_attributes }, as: :json
     end
 
@@ -50,8 +50,8 @@ class DepartmentsControllerTest < ActionDispatch::IntegrationTest
   test "should destroy department" do
     # Create a department without associations
     isolated_department = Department.create!(name: "Isolated Department")
-    
-    assert_difference('Department.count', -1) do
+
+    assert_difference("Department.count", -1) do
       delete department_url(isolated_department), as: :json
     end
 

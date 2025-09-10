@@ -11,9 +11,9 @@ class Timesheet < ApplicationRecord
   # Scopes
   scope :by_employee, ->(employee_id) { where(employee_id: employee_id) }
   scope :by_status, ->(status) { where(status: status) }
-  scope :approved, -> { where(status: 'approved') }
-  scope :pending, -> { where(status: 'pending') }
-  scope :rejected, -> { where(status: 'rejected') }
+  scope :approved, -> { where(status: "approved") }
+  scope :pending, -> { where(status: "pending") }
+  scope :rejected, -> { where(status: "rejected") }
   scope :by_project, ->(project) { where(project: project) }
   scope :by_date_range, ->(start_date, end_date) { where(date: start_date..end_date) }
   scope :this_week, -> { where(date: Date.current.beginning_of_week..Date.current.end_of_week) }
@@ -25,15 +25,15 @@ class Timesheet < ApplicationRecord
 
   # Helper methods
   def approved?
-    status == 'approved'
+    status == "approved"
   end
 
   def pending?
-    status == 'pending'
+    status == "pending"
   end
 
   def rejected?
-    status == 'rejected'
+    status == "rejected"
   end
 
   def employee_name
@@ -49,7 +49,7 @@ class Timesheet < ApplicationRecord
   end
 
   def formatted_date
-    date.strftime('%B %d, %Y')
+    date.strftime("%B %d, %Y")
   end
 
   def formatted_hours
@@ -58,14 +58,14 @@ class Timesheet < ApplicationRecord
 
   def status_color
     case status
-    when 'approved'
-      'green'
-    when 'pending'
-      'yellow'
-    when 'rejected'
-      'red'
+    when "approved"
+      "green"
+    when "pending"
+      "yellow"
+    when "rejected"
+      "red"
     else
-      'gray'
+      "gray"
     end
   end
 
@@ -118,6 +118,6 @@ class Timesheet < ApplicationRecord
   private
 
   def set_default_status
-    self.status ||= 'pending'
+    self.status ||= "pending"
   end
 end

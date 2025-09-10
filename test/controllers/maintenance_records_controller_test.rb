@@ -16,7 +16,7 @@ class MaintenanceRecordsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should create maintenance record" do
-    post maintenance_records_url, params: { 
+    post maintenance_records_url, params: {
       maintenance_record: {
         asset_id: @maintenance_record.asset_id,
         maintenance_date: Date.current,
@@ -30,7 +30,7 @@ class MaintenanceRecordsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update maintenance record" do
-    patch maintenance_record_url(@maintenance_record), params: { 
+    patch maintenance_record_url(@maintenance_record), params: {
       maintenance_record: { description: "Updated description" }
     }, as: :json
     assert_response :success

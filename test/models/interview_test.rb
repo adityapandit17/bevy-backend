@@ -112,7 +112,7 @@ class InterviewTest < ActiveSupport::TestCase
   # Scope tests
   test "scheduled scope should return scheduled interviews" do
     @interview.save!
-    
+
     completed_interview = Interview.create!(
       candidate: @candidate,
       interview_type: "phone",
@@ -121,7 +121,7 @@ class InterviewTest < ActiveSupport::TestCase
       interviewer: "Jane Interviewer",
       status: "completed"
     )
-    
+
     assert_includes Interview.scheduled, @interview
     assert_not_includes Interview.scheduled, completed_interview
   end
@@ -129,7 +129,7 @@ class InterviewTest < ActiveSupport::TestCase
   test "completed scope should return completed interviews" do
     @interview.status = "completed"
     @interview.save!
-    
+
     scheduled_interview = Interview.create!(
       candidate: @candidate,
       interview_type: "phone",
@@ -138,14 +138,14 @@ class InterviewTest < ActiveSupport::TestCase
       interviewer: "Jane Interviewer",
       status: "scheduled"
     )
-    
+
     assert_includes Interview.completed, @interview
     assert_not_includes Interview.completed, scheduled_interview
   end
 
   test "upcoming scope should return future interviews" do
     @interview.save!
-    
+
     past_interview = Interview.create!(
       candidate: @candidate,
       interview_type: "phone",
@@ -154,7 +154,7 @@ class InterviewTest < ActiveSupport::TestCase
       interviewer: "Jane Interviewer",
       status: "completed"
     )
-    
+
     assert_includes Interview.upcoming, @interview
     assert_not_includes Interview.upcoming, past_interview
   end
@@ -163,7 +163,7 @@ class InterviewTest < ActiveSupport::TestCase
     @interview.scheduled_date = Date.current - 1.week
     @interview.scheduled_time = Time.current - 1.week
     @interview.save!
-    
+
     future_interview = Interview.create!(
       candidate: @candidate,
       interview_type: "phone",
@@ -172,7 +172,7 @@ class InterviewTest < ActiveSupport::TestCase
       interviewer: "Jane Interviewer",
       status: "scheduled"
     )
-    
+
     assert_includes Interview.past, @interview
     assert_not_includes Interview.past, future_interview
   end
@@ -180,7 +180,7 @@ class InterviewTest < ActiveSupport::TestCase
   test "today scope should return today's interviews" do
     @interview.scheduled_date = Date.current
     @interview.save!
-    
+
     tomorrow_interview = Interview.create!(
       candidate: @candidate,
       interview_type: "phone",
@@ -189,7 +189,7 @@ class InterviewTest < ActiveSupport::TestCase
       interviewer: "Jane Interviewer",
       status: "scheduled"
     )
-    
+
     assert_includes Interview.today, @interview
     assert_not_includes Interview.today, tomorrow_interview
   end
@@ -198,7 +198,7 @@ class InterviewTest < ActiveSupport::TestCase
     # Set interview to tomorrow (should be within this week)
     @interview.scheduled_date = Date.current + 1.day
     @interview.save!
-    
+
     next_week_interview = Interview.create!(
       candidate: @candidate,
       interview_type: "phone",
@@ -207,14 +207,14 @@ class InterviewTest < ActiveSupport::TestCase
       interviewer: "Jane Interviewer",
       status: "scheduled"
     )
-    
+
     assert_includes Interview.this_week, @interview
     assert_not_includes Interview.this_week, next_week_interview
   end
 
   test "by_status scope should filter by status" do
     @interview.save!
-    
+
     completed_interview = Interview.create!(
       candidate: @candidate,
       interview_type: "phone",
@@ -223,14 +223,14 @@ class InterviewTest < ActiveSupport::TestCase
       interviewer: "Jane Interviewer",
       status: "completed"
     )
-    
+
     assert_includes Interview.by_status("scheduled"), @interview
     assert_not_includes Interview.by_status("scheduled"), completed_interview
   end
 
   test "by_type scope should filter by interview type" do
     @interview.save!
-    
+
     phone_interview = Interview.create!(
       candidate: @candidate,
       interview_type: "phone",
@@ -239,7 +239,7 @@ class InterviewTest < ActiveSupport::TestCase
       interviewer: "Jane Interviewer",
       status: "scheduled"
     )
-    
+
     assert_includes Interview.by_type("video"), @interview
     assert_not_includes Interview.by_type("video"), phone_interview
   end
@@ -287,7 +287,7 @@ class InterviewTest < ActiveSupport::TestCase
   test "formatted_time should return formatted time" do
     @interview.scheduled_time = Time.utc(2023, 6, 15, 14, 30, 0)
     # Adjusting test to match actual time zone behavior
-    expected_time = @interview.scheduled_time.strftime('%I:%M %p')
+    expected_time = @interview.scheduled_time.strftime("%I:%M %p")
     assert_equal expected_time, @interview.formatted_time
   end
 
@@ -318,7 +318,7 @@ class InterviewTest < ActiveSupport::TestCase
 
   # CRUD tests
   test "should be able to create interview" do
-    assert_difference('Interview.count') do
+    assert_difference("Interview.count") do
       @interview.save!
     end
   end
@@ -332,7 +332,7 @@ class InterviewTest < ActiveSupport::TestCase
 
   test "should be able to delete interview" do
     @interview.save!
-    assert_difference('Interview.count', -1) do
+    assert_difference("Interview.count", -1) do
       @interview.destroy
     end
   end

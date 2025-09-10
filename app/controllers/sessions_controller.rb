@@ -1,27 +1,27 @@
 class SessionsController < ApplicationController
   def create
     user = User.find_by(email: params[:email]&.downcase)
-    
+
     if user&.valid_password?(params[:password])
       if user.active?
         session[:user_id] = user.id
         render json: {
-          message: 'Login successful',
+          message: "Login successful",
           user: format_user(user),
           roles: user.roles.map { |role| { id: role.id, name: role.name, description: role.description } },
           permissions: user.permissions.map { |permission| format_permission(permission) }
         }
       else
-        render json: { error: 'Account is inactive' }, status: :unauthorized
+        render json: { error: "Account is inactive" }, status: :unauthorized
       end
     else
-      render json: { error: 'Invalid email or password' }, status: :unauthorized
+      render json: { error: "Invalid email or password" }, status: :unauthorized
     end
   end
 
   def destroy
     session[:user_id] = nil
-    render json: { message: 'Logout successful' }
+    render json: { message: "Logout successful" }
   end
 
   def current
@@ -32,7 +32,7 @@ class SessionsController < ApplicationController
         permissions: current_user.permissions.map { |permission| format_permission(permission) }
       }
     else
-      render json: { error: 'Not authenticated' }, status: :unauthorized
+      render json: { error: "Not authenticated" }, status: :unauthorized
     end
   end
 

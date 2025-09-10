@@ -102,7 +102,7 @@ class CompanyTest < ActiveSupport::TestCase
       timezone: "America/New_York",
       currency: "USD"
     )
-    
+
     assert_includes Company.by_industry("Technology"), @company
     assert_not_includes Company.by_industry("Technology"), finance_company
   end
@@ -110,7 +110,7 @@ class CompanyTest < ActiveSupport::TestCase
   test "large_companies scope should return companies with more than 1000 employees" do
     @company.employee_count = "1500"
     @company.save!
-    
+
     small_company = Company.create!(
       name: "Small Corp",
       code: "SMALL",
@@ -119,7 +119,7 @@ class CompanyTest < ActiveSupport::TestCase
       timezone: "America/New_York",
       currency: "USD"
     )
-    
+
     assert_includes Company.large_companies, @company
     assert_not_includes Company.large_companies, small_company
   end
@@ -127,7 +127,7 @@ class CompanyTest < ActiveSupport::TestCase
   test "small_companies scope should return companies with 100 or fewer employees" do
     @company.employee_count = "50"
     @company.save!
-    
+
     large_company = Company.create!(
       name: "Large Corp",
       code: "LARGE",
@@ -136,7 +136,7 @@ class CompanyTest < ActiveSupport::TestCase
       timezone: "America/New_York",
       currency: "USD"
     )
-    
+
     assert_includes Company.small_companies, @company
     assert_not_includes Company.small_companies, large_company
   end
@@ -153,7 +153,7 @@ class CompanyTest < ActiveSupport::TestCase
 
   # CRUD tests
   test "should be able to create company" do
-    assert_difference('Company.count') do
+    assert_difference("Company.count") do
       @company.save!
     end
   end
@@ -167,7 +167,7 @@ class CompanyTest < ActiveSupport::TestCase
 
   test "should be able to delete company" do
     @company.save!
-    assert_difference('Company.count', -1) do
+    assert_difference("Company.count", -1) do
       @company.destroy
     end
   end

@@ -10,7 +10,7 @@ class SuperAdminController < ApplicationController
       total_employees: Employee.count,
       total_roles: Role.count,
       total_permissions: Permission.count,
-      recent_logins: User.where('last_login_at > ?', 24.hours.ago).count,
+      recent_logins: User.where("last_login_at > ?", 24.hours.ago).count,
       system_uptime: system_uptime,
       database_size: database_size,
       last_backup: last_backup_time
@@ -29,7 +29,7 @@ class SuperAdminController < ApplicationController
   # GET /super_admin/system_logs
   def system_logs
     @logs = fetch_system_logs(params[:level], params[:date], params[:limit] || 100)
-    
+
     render json: {
       logs: @logs,
       total_count: @logs.count,
@@ -41,7 +41,7 @@ class SuperAdminController < ApplicationController
   # GET /super_admin/audit_trails
   def audit_trails
     @audit_trails = fetch_audit_trails(params[:user_id], params[:action], params[:resource], params[:date])
-    
+
     render json: {
       audit_trails: @audit_trails,
       total_count: @audit_trails.count,
@@ -97,9 +97,9 @@ class SuperAdminController < ApplicationController
   # POST /super_admin/backup_restore/create_backup
   def create_backup
     if create_system_backup
-      render json: { message: 'Backup created successfully' }
+      render json: { message: "Backup created successfully" }
     else
-      render json: { error: 'Failed to create backup' }, status: :unprocessable_entity
+      render json: { error: "Failed to create backup" }, status: :unprocessable_entity
     end
   end
 
@@ -132,9 +132,9 @@ class SuperAdminController < ApplicationController
   # PUT /super_admin/security_settings
   def update_security_settings
     if update_security_configuration(params[:settings])
-      render json: { message: 'Security settings updated successfully' }
+      render json: { message: "Security settings updated successfully" }
     else
-      render json: { error: 'Failed to update security settings' }, status: :unprocessable_entity
+      render json: { error: "Failed to update security settings" }, status: :unprocessable_entity
     end
   end
 
@@ -154,9 +154,9 @@ class SuperAdminController < ApplicationController
   # PUT /super_admin/system_configuration
   def update_system_configuration
     if update_system_config(params[:configuration])
-      render json: { message: 'System configuration updated successfully' }
+      render json: { message: "System configuration updated successfully" }
     else
-      render json: { error: 'Failed to update system configuration' }, status: :unprocessable_entity
+      render json: { error: "Failed to update system configuration" }, status: :unprocessable_entity
     end
   end
 
@@ -174,16 +174,16 @@ class SuperAdminController < ApplicationController
 
   # POST /super_admin/maintenance_mode/toggle
   def toggle_maintenance_mode
-    enabled = params[:enabled] == 'true'
-    message = params[:message] || 'System is under maintenance. Please try again later.'
+    enabled = params[:enabled] == "true"
+    message = params[:message] || "System is under maintenance. Please try again later."
 
     if toggle_maintenance_mode_status(enabled, message)
-      render json: { 
-        message: enabled ? 'Maintenance mode enabled' : 'Maintenance mode disabled',
+      render json: {
+        message: enabled ? "Maintenance mode enabled" : "Maintenance mode disabled",
         maintenance_mode: enabled
       }
     else
-      render json: { error: 'Failed to toggle maintenance mode' }, status: :unprocessable_entity
+      render json: { error: "Failed to toggle maintenance mode" }, status: :unprocessable_entity
     end
   end
 
@@ -191,36 +191,36 @@ class SuperAdminController < ApplicationController
 
   def require_super_admin!
     unless current_user&.super_admin?
-      render json: { error: 'Super admin access required' }, status: :forbidden
+      render json: { error: "Super admin access required" }, status: :forbidden
     end
   end
 
   def authorize_super_admin_access!
-    authorize!('super_admin', action_name)
+    authorize!("super_admin", action_name)
   end
 
   # Helper methods for dashboard
   def system_uptime
     # Calculate system uptime
-    `uptime`.split(',')[0].strip rescue 'Unknown'
+    `uptime`.split(",")[0].strip rescue "Unknown"
   end
 
   def database_size
     # Calculate database size
-    ActiveRecord::Base.connection.execute("SELECT pg_size_pretty(pg_database_size(current_database()))").first['pg_size_pretty'] rescue 'Unknown'
+    ActiveRecord::Base.connection.execute("SELECT pg_size_pretty(pg_database_size(current_database()))").first["pg_size_pretty"] rescue "Unknown"
   end
 
   def last_backup_time
     # Get last backup time
-    File.mtime(Rails.root.join('backups', 'latest.tar.gz')) rescue nil
+    File.mtime(Rails.root.join("backups", "latest.tar.gz")) rescue nil
   end
 
   def recent_activities
     # Get recent system activities
-    User.where('last_login_at > ?', 1.hour.ago).limit(10).map do |user|
+    User.where("last_login_at > ?", 1.hour.ago).limit(10).map do |user|
       {
         user: user.name,
-        action: 'login',
+        action: "login",
         timestamp: user.last_login_at
       }
     end
@@ -228,14 +228,14 @@ class SuperAdminController < ApplicationController
 
   def system_alerts
     alerts = []
-    
+
     # Check for various system issues
-    if User.where('last_login_at < ?', 30.days.ago).count > 0
-      alerts << { type: 'warning', message: 'Some users have not logged in for 30+ days' }
+    if User.where("last_login_at < ?", 30.days.ago).count > 0
+      alerts << { type: "warning", message: "Some users have not logged in for 30+ days" }
     end
 
     if database_size.to_i > 1.gigabyte
-      alerts << { type: 'info', message: 'Database size is growing large' }
+      alerts << { type: "info", message: "Database size is growing large" }
     end
 
     alerts
@@ -268,45 +268,45 @@ class SuperAdminController < ApplicationController
 
   # Helper methods for system health
   def database_health
-    { status: 'healthy', response_time: '5ms', connections: 10 }
+    { status: "healthy", response_time: "5ms", connections: 10 }
   end
 
   def redis_health
-    { status: 'healthy', memory_usage: '50MB', connected_clients: 5 }
+    { status: "healthy", memory_usage: "50MB", connected_clients: 5 }
   end
 
   def storage_health
-    { status: 'healthy', used_space: '2GB', free_space: '8GB' }
+    { status: "healthy", used_space: "2GB", free_space: "8GB" }
   end
 
   def memory_health
-    { status: 'healthy', usage: '60%', available: '1.6GB' }
+    { status: "healthy", usage: "60%", available: "1.6GB" }
   end
 
   def cpu_health
-    { status: 'healthy', usage: '25%', load_average: '0.5' }
+    { status: "healthy", usage: "25%", load_average: "0.5" }
   end
 
   def disk_space_health
-    { status: 'healthy', usage: '40%', free_space: '6GB' }
+    { status: "healthy", usage: "40%", free_space: "6GB" }
   end
 
   def overall_health_status(health_status)
     statuses = health_status.values.map { |h| h[:status] }
-    return 'critical' if statuses.include?('critical')
-    return 'warning' if statuses.include?('warning')
-    'healthy'
+    return "critical" if statuses.include?("critical")
+    return "warning" if statuses.include?("warning")
+    "healthy"
   end
 
   def health_recommendations(health_status)
     recommendations = []
-    
+
     if health_status[:memory][:usage].to_i > 80
-      recommendations << 'Consider increasing memory allocation'
+      recommendations << "Consider increasing memory allocation"
     end
 
     if health_status[:disk_space][:usage].to_i > 80
-      recommendations << 'Consider cleaning up old files or increasing storage'
+      recommendations << "Consider cleaning up old files or increasing storage"
     end
 
     recommendations
@@ -317,7 +317,7 @@ class SuperAdminController < ApplicationController
     ActiveRecord::Base.connection.tables.map do |table|
       {
         name: table,
-        rows: ActiveRecord::Base.connection.execute("SELECT COUNT(*) FROM #{table}").first['count']
+        rows: ActiveRecord::Base.connection.execute("SELECT COUNT(*) FROM #{table}").first["count"]
       }
     end
   end
@@ -350,8 +350,8 @@ class SuperAdminController < ApplicationController
 
   def backup_settings
     {
-      frequency: 'daily',
-      retention: '30 days',
+      frequency: "daily",
+      retention: "30 days",
       compression: true,
       encryption: false
     }
@@ -374,14 +374,14 @@ class SuperAdminController < ApplicationController
   end
 
   def active_users_today
-    User.where('last_login_at > ?', 1.day.ago).count
+    User.where("last_login_at > ?", 1.day.ago).count
   end
 
   def login_statistics
     {
-      today: User.where('last_login_at > ?', 1.day.ago).count,
-      this_week: User.where('last_login_at > ?', 1.week.ago).count,
-      this_month: User.where('last_login_at > ?', 1.month.ago).count
+      today: User.where("last_login_at > ?", 1.day.ago).count,
+      this_week: User.where("last_login_at > ?", 1.week.ago).count,
+      this_month: User.where("last_login_at > ?", 1.month.ago).count
     }
   end
 
@@ -409,7 +409,7 @@ class SuperAdminController < ApplicationController
     {
       expiration_hours: 24,
       refresh_token_expiration_days: 7,
-      algorithm: 'HS256'
+      algorithm: "HS256"
     }
   end
 
@@ -485,7 +485,7 @@ class SuperAdminController < ApplicationController
   end
 
   def maintenance_message
-    'System is under maintenance. Please try again later.'
+    "System is under maintenance. Please try again later."
   end
 
   def allowed_ips_during_maintenance

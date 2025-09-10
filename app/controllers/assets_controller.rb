@@ -1,16 +1,16 @@
 class AssetsController < ApplicationController
-  before_action :set_asset, only: [:show, :update, :destroy]
+  before_action :set_asset, only: [ :show, :update, :destroy ]
 
   # GET /assets
   def index
     @assets = Asset.includes(:employee, :department)
-    
+
     # Apply filters
     @assets = @assets.by_type(params[:asset_type]) if params[:asset_type].present?
     @assets = @assets.by_department(params[:department]) if params[:department].present?
     @assets = @assets.by_condition(params[:condition]) if params[:condition].present?
     @assets = @assets.where(status: params[:status]) if params[:status].present?
-    
+
     # Apply search
     if params[:search].present?
       search_term = "%#{params[:search]}%"
@@ -19,9 +19,9 @@ class AssetsController < ApplicationController
         search_term, search_term, search_term, search_term
       )
     end
-    
+
     @assets = @assets.order(created_at: :desc)
-    
+
     render json: {
       assets: @assets.map { |asset| format_asset(asset) },
       total_count: @assets.count,
@@ -46,15 +46,15 @@ class AssetsController < ApplicationController
   # POST /assets
   def create
     @asset = Asset.new(asset_params)
-    
+
     if @asset.save
       render json: {
-        message: 'Asset created successfully',
+        message: "Asset created successfully",
         asset: format_asset(@asset)
       }, status: :created
     else
       render json: {
-        message: 'Failed to create asset',
+        message: "Failed to create asset",
         errors: @asset.errors.full_messages
       }, status: :unprocessable_entity
     end
@@ -64,12 +64,12 @@ class AssetsController < ApplicationController
   def update
     if @asset.update(asset_params)
       render json: {
-        message: 'Asset updated successfully',
+        message: "Asset updated successfully",
         asset: format_asset(@asset)
       }
     else
       render json: {
-        message: 'Failed to update asset',
+        message: "Failed to update asset",
         errors: @asset.errors.full_messages
       }, status: :unprocessable_entity
     end
@@ -78,7 +78,7 @@ class AssetsController < ApplicationController
   # DELETE /assets/:id
   def destroy
     @asset.destroy
-    render json: { message: 'Asset deleted successfully' }
+    render json: { message: "Asset deleted successfully" }
   end
 
   # GET /assets/stats
@@ -89,16 +89,16 @@ class AssetsController < ApplicationController
     maintenance_assets = Asset.maintenance.count
     total_value = Asset.sum(:current_value)
     purchase_value = Asset.sum(:purchase_cost)
-    
+
     asset_types = Asset.group(:asset_type).count
     status_distribution = Asset.group(:status).count
     condition_distribution = Asset.group(:condition).count
     department_distribution = Asset.group(:department).count
-    
+
     overdue_maintenance = Asset.overdue_maintenance.count
     due_maintenance_soon = Asset.due_maintenance_soon.count
     warranty_expiring_soon = Asset.warranty_expiring_soon.count
-    
+
     render json: {
       overview: {
         total_assets: total_assets,
@@ -130,7 +130,7 @@ class AssetsController < ApplicationController
   # GET /assets/allocations
   def allocations
     @allocations = AssetAllocation.includes(:asset, :employee).active.recent
-    
+
     render json: {
       allocations: @allocations.map { |allocation| format_allocation(allocation) },
       total_active_allocations: @allocations.count
@@ -142,7 +142,7 @@ class AssetsController < ApplicationController
     @maintenance_records = MaintenanceRecord.includes(:asset).recent.limit(20)
     @overdue_assets = Asset.overdue_maintenance.includes(:employee)
     @due_soon_assets = Asset.due_maintenance_soon.includes(:employee)
-    
+
     render json: {
       recent_maintenance: @maintenance_records.map { |record| format_maintenance_record(record) },
       overdue_maintenance: @overdue_assets.map { |asset| format_asset(asset) },
@@ -160,7 +160,7 @@ class AssetsController < ApplicationController
   def set_asset
     @asset = Asset.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render json: { message: 'Asset not found' }, status: :not_found
+    render json: { message: "Asset not found" }, status: :not_found
   end
 
   def asset_params
@@ -180,8 +180,8 @@ class AssetsController < ApplicationController
       serial_number: asset.serial_number,
       model: asset.model,
       brand: asset.brand,
-      purchase_date: asset.purchase_date&.strftime('%Y-%m-%d'),
-      warranty_expiry: asset.warranty_expiry&.strftime('%Y-%m-%d'),
+      purchase_date: asset.purchase_date&.strftime("%Y-%m-%d"),
+      warranty_expiry: asset.warranty_expiry&.strftime("%Y-%m-%d"),
       purchase_cost: asset.purchase_cost,
       current_value: asset.current_value,
       status: asset.status,
@@ -189,8 +189,8 @@ class AssetsController < ApplicationController
       department: asset.department,
       notes: asset.notes,
       condition: asset.condition,
-      last_maintenance: asset.last_maintenance&.strftime('%Y-%m-%d'),
-      next_maintenance: asset.next_maintenance&.strftime('%Y-%m-%d'),
+      last_maintenance: asset.last_maintenance&.strftime("%Y-%m-%d"),
+      next_maintenance: asset.next_maintenance&.strftime("%Y-%m-%d"),
       assigned_to: asset.employee ? {
         id: asset.employee.id,
         name: asset.employee.name,
@@ -205,12 +205,12 @@ class AssetsController < ApplicationController
   def format_maintenance_record(record)
     {
       id: record.id,
-      maintenance_date: record.maintenance_date.strftime('%Y-%m-%d'),
+      maintenance_date: record.maintenance_date.strftime("%Y-%m-%d"),
       maintenance_type: record.maintenance_type,
       description: record.description,
       cost: record.cost,
       performed_by: record.performed_by,
-      next_maintenance: record.next_maintenance&.strftime('%Y-%m-%d'),
+      next_maintenance: record.next_maintenance&.strftime("%Y-%m-%d"),
       asset_name: record.asset.name,
       asset_serial_number: record.asset.serial_number,
       created_at: record.created_at
@@ -228,8 +228,8 @@ class AssetsController < ApplicationController
       employee_name: allocation.employee.name,
       employee_email: allocation.employee.email,
       employee_department: allocation.employee.department&.name,
-      assigned_date: allocation.assigned_date.strftime('%Y-%m-%d'),
-      return_date: allocation.return_date&.strftime('%Y-%m-%d'),
+      assigned_date: allocation.assigned_date.strftime("%Y-%m-%d"),
+      return_date: allocation.return_date&.strftime("%Y-%m-%d"),
       notes: allocation.notes,
       status: allocation.status,
       created_at: allocation.created_at

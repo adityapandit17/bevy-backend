@@ -67,7 +67,7 @@ employees = [
     date_of_joining: Date.current - 45.days,
     status: "active"
   },
-  
+
   # Marketing Department
   {
     first_name: "Jane",
@@ -99,7 +99,7 @@ employees = [
     date_of_joining: Date.current - 10.days,
     status: "active"
   },
-  
+
   # HR Department
   {
     first_name: "Mike",
@@ -121,7 +121,7 @@ employees = [
     date_of_joining: Date.current - 90.days,
     status: "active"
   },
-  
+
   # Finance Department
   {
     first_name: "Tom",
@@ -143,7 +143,7 @@ employees = [
     date_of_joining: Date.current - 35.days,
     status: "active"
   },
-  
+
   # Sales Department
   {
     first_name: "Mark",
@@ -165,7 +165,7 @@ employees = [
     date_of_joining: Date.current - 40.days,
     status: "active"
   },
-  
+
   # Product Department
   {
     first_name: "Kevin",
@@ -177,7 +177,7 @@ employees = [
     date_of_joining: Date.current - 50.days,
     status: "active"
   },
-  
+
   # Design Department
   {
     first_name: "Amy",
@@ -189,7 +189,7 @@ employees = [
     date_of_joining: Date.current - 30.days,
     status: "active"
   },
-  
+
   # Operations Department
   {
     first_name: "Chris",
@@ -250,11 +250,11 @@ end
 puts "Creating payroll records..."
 Employee.all.each do |employee|
   salary_structure = employee.salary_structures.first
-  
+
   if salary_structure
     gross_salary = salary_structure.basic + salary_structure.hra + salary_structure.allowances
     net_salary = gross_salary - salary_structure.deductions
-    
+
     # Create payroll for current month
     Payroll.find_or_create_by!(
       employee: employee,
@@ -264,7 +264,7 @@ Employee.all.each do |employee|
       payroll.net_salary = net_salary
       payroll.status = "processed"
     end
-    
+
     # Create payroll for previous month
     Payroll.find_or_create_by!(
       employee: employee,
@@ -284,14 +284,14 @@ Employee.all.each do |employee|
   (0..29).each do |day_offset|
     date = Date.current - day_offset.days
     next if date.saturday? || date.sunday? # Skip weekends
-    
+
     AttendanceRecord.find_or_create_by!(
       employee: employee,
       date: date
     ) do |attendance|
       attendance.check_in = Time.parse("09:00") + rand(0..30).minutes
       attendance.check_out = Time.parse("18:00") + rand(-30..30).minutes
-      attendance.status = ["present", "late", "early_departure"].sample
+      attendance.status = [ "present", "late", "early_departure" ].sample
     end
   end
 end
@@ -465,7 +465,7 @@ end
 # Create onboarding tasks for existing onboarding employees
 OnboardingEmployee.all.each do |oe|
   next if oe.onboarding_tasks.any?
-  
+
   default_tasks = [
     {
       title: "Complete HR Paperwork",
@@ -892,7 +892,7 @@ assets = [
     next_maintenance: Date.current + 5.months,
     employee_id: Employee.find_by(email: "carol.brown@company.com").id
   },
-  
+
   # Marketing Department Assets
   {
     name: "MacBook Pro 14-inch",
@@ -932,7 +932,7 @@ assets = [
     next_maintenance: Date.current + 5.months,
     employee_id: Employee.find_by(email: "david.lee@company.com").id
   },
-  
+
   # HR Department Assets
   {
     name: "HP LaserJet Pro",
@@ -971,7 +971,7 @@ assets = [
     next_maintenance: Date.current + 4.months,
     employee_id: Employee.find_by(email: "mike.johnson@company.com").id
   },
-  
+
   # Finance Department Assets
   {
     name: "Dell OptiPlex Desktop",
@@ -1011,7 +1011,7 @@ assets = [
     next_maintenance: Date.current + 5.months,
     employee_id: Employee.find_by(email: "lisa.garcia@company.com").id
   },
-  
+
   # Sales Department Assets
   {
     name: "iPhone 15 Pro",
@@ -1051,7 +1051,7 @@ assets = [
     next_maintenance: Date.current + 5.months,
     employee_id: Employee.find_by(email: "rachel.white@company.com").id
   },
-  
+
   # Design Department Assets
   {
     name: "MacBook Pro 16-inch",
@@ -1091,7 +1091,7 @@ assets = [
     next_maintenance: Date.current + 4.months,
     employee_id: Employee.find_by(email: "amy.rodriguez@company.com").id
   },
-  
+
   # Operations Department Assets
   {
     name: "Dell Latitude",
@@ -1112,7 +1112,7 @@ assets = [
     next_maintenance: Date.current + 3.months,
     employee_id: Employee.find_by(email: "chris.lopez@company.com").id
   },
-  
+
   # Network Infrastructure
   {
     name: "Cisco Switch",
@@ -1179,7 +1179,7 @@ end
 # Create asset allocations for assigned assets
 Asset.where.not(employee_id: nil).each do |asset|
   next if asset.asset_allocations.active.any?
-  
+
   AssetAllocation.create!(
     asset: asset,
     employee: asset.employee,
@@ -1682,7 +1682,7 @@ offboarding_employees.each do |offboarding_data|
   offboarding_employee = OffboardingEmployee.find_or_create_by!(employee: offboarding_data[:employee]) do |oe|
     oe.assign_attributes(offboarding_data.except(:employee))
   end
-  
+
   # Create default tasks for each offboarding employee
   default_tasks = [
     {

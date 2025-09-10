@@ -1,17 +1,17 @@
 class OffboardingTasksController < ApplicationController
-  before_action :set_offboarding_task, only: [:show, :update, :destroy, :toggle]
+  before_action :set_offboarding_task, only: [ :show, :update, :destroy, :toggle ]
 
   def index
     @offboarding_tasks = OffboardingTask.includes(:offboarding_employee)
-    
+
     # Apply filters
     @offboarding_tasks = @offboarding_tasks.where(is_completed: params[:completed]) if params[:completed].present?
     @offboarding_tasks = @offboarding_tasks.by_category(params[:category]) if params[:category].present?
     @offboarding_tasks = @offboarding_tasks.by_priority(params[:priority]) if params[:priority].present?
-    
+
     # Apply special filters
-    @offboarding_tasks = @offboarding_tasks.overdue if params[:overdue] == 'true'
-    @offboarding_tasks = @offboarding_tasks.due_soon if params[:due_soon] == 'true'
+    @offboarding_tasks = @offboarding_tasks.overdue if params[:overdue] == "true"
+    @offboarding_tasks = @offboarding_tasks.due_soon if params[:due_soon] == "true"
 
     render json: @offboarding_tasks.map { |task| format_task(task) }
   end
@@ -63,7 +63,7 @@ class OffboardingTasksController < ApplicationController
     @tasks = OffboardingTask.joins(:offboarding_employee)
       .where(offboarding_employees: { employee_id: employee_id })
       .includes(:offboarding_employee)
-    
+
     render json: @tasks.map { |task| format_task(task) }
   end
 
@@ -154,4 +154,4 @@ class OffboardingTasksController < ApplicationController
     }
     task_data
   end
-end 
+end

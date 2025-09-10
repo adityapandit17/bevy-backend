@@ -1,5 +1,5 @@
 class EmployeeTrainingsController < ApplicationController
-  before_action :set_employee_training, only: [:show, :update, :destroy]
+  before_action :set_employee_training, only: [ :show, :update, :destroy ]
 
   def index
     @employee_trainings = EmployeeTraining.all

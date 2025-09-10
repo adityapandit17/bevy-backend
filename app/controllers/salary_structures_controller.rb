@@ -1,5 +1,5 @@
 class SalaryStructuresController < ApplicationController
-  before_action :set_salary_structure, only: [:show, :update, :destroy]
+  before_action :set_salary_structure, only: [ :show, :update, :destroy ]
 
   def index
     @salary_structures = SalaryStructure.all

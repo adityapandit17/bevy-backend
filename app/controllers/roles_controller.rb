@@ -1,18 +1,16 @@
 class RolesController < ApplicationController
-  before_action :set_role, only: [:show, :update, :destroy]
+  before_action :set_role, only: [ :show, :update, :destroy ]
   before_action :authorize_roles_access!
 
-  # GET /roles
   def index
     @roles = Role.includes(:permissions, :users)
-    
+
     render json: {
       roles: @roles.map { |role| format_role(role) },
       total_count: @roles.count
     }
   end
 
-  # GET /roles/:id
   def show
     render json: {
       role: format_role(@role),
@@ -21,23 +19,22 @@ class RolesController < ApplicationController
     }
   end
 
-  # POST /roles
   def create
     @role = Role.new(role_params)
-    
+
     if @role.save
       # Assign permissions if provided
       if params[:permission_ids].present?
         @role.permission_ids = params[:permission_ids]
       end
-      
+
       render json: {
-        message: 'Role created successfully',
+        message: "Role created successfully",
         role: format_role(@role)
       }, status: :created
     else
       render json: {
-        message: 'Failed to create role',
+        message: "Failed to create role",
         errors: @role.errors.full_messages
       }, status: :unprocessable_entity
     end
@@ -50,14 +47,14 @@ class RolesController < ApplicationController
       if params[:permission_ids].present?
         @role.permission_ids = params[:permission_ids]
       end
-      
+
       render json: {
-        message: 'Role updated successfully',
+        message: "Role updated successfully",
         role: format_role(@role)
       }
     else
       render json: {
-        message: 'Failed to update role',
+        message: "Failed to update role",
         errors: @role.errors.full_messages
       }, status: :unprocessable_entity
     end
@@ -66,26 +63,26 @@ class RolesController < ApplicationController
   # DELETE /roles/:id
   def destroy
     if @role.users.any?
-      render json: { error: 'Cannot delete role with assigned users' }, status: :unprocessable_entity
+      render json: { error: "Cannot delete role with assigned users" }, status: :unprocessable_entity
       return
     end
-    
+
     @role.destroy
-    render json: { message: 'Role deleted successfully' }
+    render json: { message: "Role deleted successfully" }
   end
 
   # PATCH /roles/:id/update_permissions
   def update_permissions
     @role = Role.find(params[:id])
-    
+
     if @role.update(permission_ids: params[:permission_ids])
       render json: {
-        message: 'Role permissions updated successfully',
+        message: "Role permissions updated successfully",
         role: format_role(@role)
       }
     else
       render json: {
-        message: 'Failed to update role permissions',
+        message: "Failed to update role permissions",
         errors: @role.errors.full_messages
       }, status: :unprocessable_entity
     end
@@ -96,7 +93,7 @@ class RolesController < ApplicationController
   def set_role
     @role = Role.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render json: { error: 'Role not found' }, status: :not_found
+    render json: { error: "Role not found" }, status: :not_found
   end
 
   def role_params
@@ -104,7 +101,7 @@ class RolesController < ApplicationController
   end
 
   def authorize_roles_access!
-    authorize!('roles', 'index')
+    authorize!("roles", "index")
   end
 
   def format_role(role)

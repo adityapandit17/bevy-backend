@@ -6,7 +6,7 @@ class CompaniesController < ApplicationController
   end
 
   def update
-    authorize!('settings', 'update')
+    authorize!("settings", "update")
     if @company.update(company_params)
       render json: @company
     else

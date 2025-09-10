@@ -52,7 +52,7 @@ class CandidateTest < ActiveSupport::TestCase
       "user.name@domain.co.uk",
       "user+tag@example.org"
     ]
-    
+
     valid_emails.each do |email|
       @candidate.email = email
       assert @candidate.valid?, "#{email} should be valid"
@@ -117,8 +117,8 @@ class CandidateTest < ActiveSupport::TestCase
       interviewer: "John Interviewer",
       status: "scheduled"
     )
-    
-    assert_difference('Interview.count', -1) do
+
+    assert_difference("Interview.count", -1) do
       @candidate.destroy
     end
   end
@@ -126,7 +126,7 @@ class CandidateTest < ActiveSupport::TestCase
   # Scope tests
   test "active scope should return non-hired and non-rejected candidates" do
     @candidate.save!
-    
+
     hired_candidate = Candidate.create!(
       name: "Hired Person",
       email: "hired@example.com",
@@ -136,7 +136,7 @@ class CandidateTest < ActiveSupport::TestCase
       status: "hired",
       applied_date: Date.current
     )
-    
+
     rejected_candidate = Candidate.create!(
       name: "Rejected Person",
       email: "rejected@example.com",
@@ -146,7 +146,7 @@ class CandidateTest < ActiveSupport::TestCase
       status: "rejected",
       applied_date: Date.current
     )
-    
+
     assert_includes Candidate.active, @candidate
     assert_not_includes Candidate.active, hired_candidate
     assert_not_includes Candidate.active, rejected_candidate
@@ -154,7 +154,7 @@ class CandidateTest < ActiveSupport::TestCase
 
   test "by_status scope should filter by status" do
     @candidate.save!
-    
+
     screening_candidate = Candidate.create!(
       name: "Screening Person",
       email: "screening@example.com",
@@ -164,7 +164,7 @@ class CandidateTest < ActiveSupport::TestCase
       status: "screening",
       applied_date: Date.current
     )
-    
+
     assert_includes Candidate.by_status("applied"), @candidate
     assert_not_includes Candidate.by_status("applied"), screening_candidate
   end
@@ -172,7 +172,7 @@ class CandidateTest < ActiveSupport::TestCase
   test "recent scope should return candidates who applied in last 30 days" do
     @candidate.applied_date = 15.days.ago
     @candidate.save!
-    
+
     old_candidate = Candidate.create!(
       name: "Old Person",
       email: "old@example.com",
@@ -182,14 +182,14 @@ class CandidateTest < ActiveSupport::TestCase
       status: "applied",
       applied_date: 35.days.ago
     )
-    
+
     assert_includes Candidate.recent, @candidate
     assert_not_includes Candidate.recent, old_candidate
   end
 
   test "by_department scope should filter by department" do
     @candidate.save!
-    
+
     marketing_candidate = Candidate.create!(
       name: "Marketing Person",
       email: "marketing@example.com",
@@ -199,7 +199,7 @@ class CandidateTest < ActiveSupport::TestCase
       status: "applied",
       applied_date: Date.current
     )
-    
+
     assert_includes Candidate.by_department("Engineering"), @candidate
     assert_not_includes Candidate.by_department("Engineering"), marketing_candidate
   end
@@ -211,19 +211,19 @@ class CandidateTest < ActiveSupport::TestCase
 
   test "skills_list should return array of skills" do
     @candidate.skills = "Ruby, Rails, JavaScript, React"
-    assert_equal ["Ruby", "Rails", "JavaScript", "React"], @candidate.skills_list
+    assert_equal [ "Ruby", "Rails", "JavaScript", "React" ], @candidate.skills_list
   end
 
   test "skills_list should return empty array for blank skills" do
     @candidate.skills = nil
     assert_equal [], @candidate.skills_list
-    
+
     @candidate.skills = ""
     assert_equal [], @candidate.skills_list
   end
 
   test "skills_list= should set skills from array" do
-    skills_array = ["Ruby", "Rails", "JavaScript"]
+    skills_array = [ "Ruby", "Rails", "JavaScript" ]
     @candidate.skills_list = skills_array
     assert_equal "Ruby, Rails, JavaScript", @candidate.skills
   end
@@ -242,7 +242,7 @@ class CandidateTest < ActiveSupport::TestCase
       interviewer: "John Interviewer",
       status: "scheduled"
     )
-    
+
     past_interview = @candidate.interviews.create!(
       scheduled_date: Date.current - 1.week,
       scheduled_time: Time.current - 1.week,
@@ -250,7 +250,7 @@ class CandidateTest < ActiveSupport::TestCase
       interviewer: "Jane Interviewer",
       status: "completed"
     )
-    
+
     assert_equal future_interview, @candidate.next_interview
   end
 
@@ -263,7 +263,7 @@ class CandidateTest < ActiveSupport::TestCase
       interviewer: "Jane Interviewer",
       status: "completed"
     )
-    
+
     assert_nil @candidate.next_interview
   end
 
@@ -276,7 +276,7 @@ class CandidateTest < ActiveSupport::TestCase
       interviewer: "Jane Interviewer",
       status: "completed"
     )
-    
+
     second_interview = @candidate.interviews.create!(
       scheduled_date: Date.current - 1.week,
       scheduled_time: Time.current - 1.week,
@@ -284,7 +284,7 @@ class CandidateTest < ActiveSupport::TestCase
       interviewer: "John Interviewer",
       status: "completed"
     )
-    
+
     assert_equal second_interview, @candidate.last_interview
   end
 
@@ -297,7 +297,7 @@ class CandidateTest < ActiveSupport::TestCase
       interviewer: "John Interviewer",
       status: "scheduled"
     )
-    
+
     @candidate.interviews.create!(
       scheduled_date: Date.current + 2.weeks,
       scheduled_time: Time.current + 2.weeks,
@@ -305,7 +305,7 @@ class CandidateTest < ActiveSupport::TestCase
       interviewer: "Jane Interviewer",
       status: "scheduled"
     )
-    
+
     assert_equal 2, @candidate.interview_count
   end
 
@@ -326,7 +326,7 @@ class CandidateTest < ActiveSupport::TestCase
 
   # CRUD tests
   test "should be able to create candidate" do
-    assert_difference('Candidate.count') do
+    assert_difference("Candidate.count") do
       @candidate.save!
     end
   end
@@ -340,7 +340,7 @@ class CandidateTest < ActiveSupport::TestCase
 
   test "should be able to delete candidate" do
     @candidate.save!
-    assert_difference('Candidate.count', -1) do
+    assert_difference("Candidate.count", -1) do
       @candidate.destroy
     end
   end
@@ -348,12 +348,12 @@ class CandidateTest < ActiveSupport::TestCase
   # Edge cases
   test "should handle skills with extra spaces" do
     @candidate.skills = "Ruby , Rails , JavaScript , React"
-    assert_equal ["Ruby", "Rails", "JavaScript", "React"], @candidate.skills_list
+    assert_equal [ "Ruby", "Rails", "JavaScript", "React" ], @candidate.skills_list
   end
 
   test "should handle single skill" do
     @candidate.skills = "Ruby"
-    assert_equal ["Ruby"], @candidate.skills_list
+    assert_equal [ "Ruby" ], @candidate.skills_list
   end
 
   test "should handle empty skills string" do

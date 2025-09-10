@@ -1,5 +1,5 @@
 class PerformanceGoalsController < ApplicationController
-  before_action :set_performance_goal, only: [:show, :update, :destroy]
+  before_action :set_performance_goal, only: [ :show, :update, :destroy ]
 
   def index
     @performance_goals = PerformanceGoal.all

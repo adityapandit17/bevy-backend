@@ -10,14 +10,14 @@ class LeaveRequest < ApplicationRecord
   validate :end_date_after_start_date
 
   # Scopes
-  scope :approved, -> { where(status: 'approved') }
-  scope :pending, -> { where(status: 'pending') }
-  scope :rejected, -> { where(status: 'rejected') }
+  scope :approved, -> { where(status: "approved") }
+  scope :pending, -> { where(status: "pending") }
+  scope :rejected, -> { where(status: "rejected") }
   scope :by_type, ->(type) { where(leave_type: type) }
   scope :by_employee, ->(employee_id) { where(employee_id: employee_id) }
-  scope :current_year, -> { where('start_date >= ?', Date.current.beginning_of_year) }
-  scope :upcoming, -> { where('start_date >= ?', Date.current) }
-  scope :past, -> { where('end_date < ?', Date.current) }
+  scope :current_year, -> { where("start_date >= ?", Date.current.beginning_of_year) }
+  scope :upcoming, -> { where("start_date >= ?", Date.current) }
+  scope :past, -> { where("end_date < ?", Date.current) }
 
   # Callbacks
   before_save :calculate_days
@@ -25,19 +25,19 @@ class LeaveRequest < ApplicationRecord
 
   # Helper methods
   def approved?
-    status == 'approved'
+    status == "approved"
   end
 
   def pending?
-    status == 'pending'
+    status == "pending"
   end
 
   def rejected?
-    status == 'rejected'
+    status == "rejected"
   end
 
   def cancelled?
-    status == 'cancelled'
+    status == "cancelled"
   end
 
   def duration_days
@@ -70,25 +70,25 @@ class LeaveRequest < ApplicationRecord
   end
 
   def formatted_start_date
-    start_date.strftime('%B %d, %Y')
+    start_date.strftime("%B %d, %Y")
   end
 
   def formatted_end_date
-    end_date.strftime('%B %d, %Y')
+    end_date.strftime("%B %d, %Y")
   end
 
   def status_color
     case status
-    when 'approved'
-      'green'
-    when 'pending'
-      'yellow'
-    when 'rejected'
-      'red'
-    when 'cancelled'
-      'gray'
+    when "approved"
+      "green"
+    when "pending"
+      "yellow"
+    when "rejected"
+      "red"
+    when "cancelled"
+      "gray"
     else
-      'gray'
+      "gray"
     end
   end
 
@@ -103,7 +103,7 @@ class LeaveRequest < ApplicationRecord
   end
 
   def set_default_status
-    self.status ||= 'pending'
+    self.status ||= "pending"
   end
 
   def end_date_after_start_date

@@ -13,32 +13,32 @@ class EmployeeBenefit < ApplicationRecord
   # Scopes
   scope :by_employee, ->(employee_id) { where(employee_id: employee_id) }
   scope :by_type, ->(type) { where(benefit_type: type) }
-  scope :active, -> { where(status: 'active') }
-  scope :inactive, -> { where(status: 'inactive') }
-  scope :pending, -> { where(status: 'pending') }
-  scope :expired, -> { where(status: 'expired') }
+  scope :active, -> { where(status: "active") }
+  scope :inactive, -> { where(status: "inactive") }
+  scope :pending, -> { where(status: "pending") }
+  scope :expired, -> { where(status: "expired") }
   scope :by_provider, ->(provider) { where(provider: provider) }
-  scope :expiring_soon, -> { where('end_date BETWEEN ? AND ?', Date.current, Date.current + 30.days) }
-  scope :expired_benefits, -> { where('end_date < ?', Date.current) }
+  scope :expiring_soon, -> { where("end_date BETWEEN ? AND ?", Date.current, Date.current + 30.days) }
+  scope :expired_benefits, -> { where("end_date < ?", Date.current) }
 
   # Callbacks
   before_save :check_expiry_status
 
   # Helper methods
   def active?
-    status == 'active'
+    status == "active"
   end
 
   def inactive?
-    status == 'inactive'
+    status == "inactive"
   end
 
   def pending?
-    status == 'pending'
+    status == "pending"
   end
 
   def expired?
-    status == 'expired'
+    status == "expired"
   end
 
   def is_expired?
@@ -75,25 +75,25 @@ class EmployeeBenefit < ApplicationRecord
   end
 
   def formatted_start_date
-    start_date.strftime('%B %d, %Y')
+    start_date.strftime("%B %d, %Y")
   end
 
   def formatted_end_date
-    end_date&.strftime('%B %d, %Y') || 'No end date'
+    end_date&.strftime("%B %d, %Y") || "No end date"
   end
 
   def status_color
     case status
-    when 'active'
-      'green'
-    when 'inactive'
-      'gray'
-    when 'pending'
-      'yellow'
-    when 'expired'
-      'red'
+    when "active"
+      "green"
+    when "inactive"
+      "gray"
+    when "pending"
+      "yellow"
+    when "expired"
+      "red"
     else
-      'gray'
+      "gray"
     end
   end
 
@@ -128,20 +128,20 @@ class EmployeeBenefit < ApplicationRecord
 
   def benefit_icon
     case benefit_type
-    when 'health_insurance'
-      '🏥'
-    when 'life_insurance'
-      '🛡️'
-    when 'dental_insurance'
-      '🦷'
-    when 'vision_insurance'
-      '👁️'
-    when 'retirement'
-      '💰'
-    when 'wellness'
-      '💪'
+    when "health_insurance"
+      "🏥"
+    when "life_insurance"
+      "🛡️"
+    when "dental_insurance"
+      "🦷"
+    when "vision_insurance"
+      "👁️"
+    when "retirement"
+      "💰"
+    when "wellness"
+      "💪"
     else
-      '🎁'
+      "🎁"
     end
   end
 
@@ -157,9 +157,9 @@ class EmployeeBenefit < ApplicationRecord
 
   def check_expiry_status
     if end_date.present? && end_date < Date.current
-      self.status = 'expired'
-    elsif status == 'expired' && end_date.present? && end_date >= Date.current
-      self.status = 'active'
+      self.status = "expired"
+    elsif status == "expired" && end_date.present? && end_date >= Date.current
+      self.status = "active"
     end
   end
 end

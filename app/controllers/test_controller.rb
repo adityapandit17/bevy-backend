@@ -2,7 +2,7 @@ class TestController < ApplicationController
   def auth_test
     if current_user
       render json: {
-        message: 'Authentication working',
+        message: "Authentication working",
         user: {
           id: current_user.id,
           email: current_user.email,
@@ -11,7 +11,7 @@ class TestController < ApplicationController
         }
       }
     else
-      render json: { error: 'Not authenticated' }, status: :unauthorized
+      render json: { error: "Not authenticated" }, status: :unauthorized
     end
   end
 end

@@ -9,9 +9,9 @@ class OnboardingTask < ApplicationRecord
 
   scope :completed, -> { where(is_completed: true) }
   scope :pending, -> { where(is_completed: false) }
-  scope :high_priority, -> { where(priority: 'high') }
-  scope :overdue, -> { where('due_date < ? AND is_completed = ?', Date.current, false) }
-  scope :by_status, ->(status) { where(is_completed: status == 'completed') }
+  scope :high_priority, -> { where(priority: "high") }
+  scope :overdue, -> { where("due_date < ? AND is_completed = ?", Date.current, false) }
+  scope :by_status, ->(status) { where(is_completed: status == "completed") }
   scope :by_category, ->(category) { where(category: category) }
   scope :by_priority, ->(priority) { where(priority: priority) }
 
@@ -25,10 +25,10 @@ class OnboardingTask < ApplicationRecord
 
   def documents_list
     return [] if documents.blank?
-    documents.split(',').map(&:strip)
+    documents.split(",").map(&:strip)
   end
 
   def documents_list=(docs)
-    self.documents = docs.is_a?(Array) ? docs.join(', ') : docs
+    self.documents = docs.is_a?(Array) ? docs.join(", ") : docs
   end
 end

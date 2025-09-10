@@ -22,7 +22,7 @@ class EmployeeTrainingsControllerTest < ActionDispatch::IntegrationTest
   test "should get index" do
     get employee_trainings_url, as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_kind_of Array, json_response
   end
@@ -30,13 +30,13 @@ class EmployeeTrainingsControllerTest < ActionDispatch::IntegrationTest
   test "should show employee training" do
     get employee_training_url(@employee_training), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_equal @employee_training.id, json_response["id"]
   end
 
   test "should create employee training" do
-    assert_difference('EmployeeTraining.count') do
+    assert_difference("EmployeeTraining.count") do
       post employee_trainings_url, params: { employee_training: @valid_attributes }, as: :json
     end
 
@@ -48,8 +48,8 @@ class EmployeeTrainingsControllerTest < ActionDispatch::IntegrationTest
 
   test "should not create employee training with invalid attributes" do
     invalid_attributes = @valid_attributes.merge(employee_id: 99999)
-    
-    assert_no_difference('EmployeeTraining.count') do
+
+    assert_no_difference("EmployeeTraining.count") do
       post employee_trainings_url, params: { employee_training: invalid_attributes }, as: :json
     end
 
@@ -59,10 +59,10 @@ class EmployeeTrainingsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update employee training" do
-    patch employee_training_url(@employee_training), params: { 
-      employee_training: { status: "in_progress", progress: 50 } 
+    patch employee_training_url(@employee_training), params: {
+      employee_training: { status: "in_progress", progress: 50 }
     }, as: :json
-    
+
     assert_response :success
     json_response = JSON.parse(response.body)
     assert_equal "in_progress", json_response["status"]
@@ -70,17 +70,17 @@ class EmployeeTrainingsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should not update employee training with invalid attributes" do
-    patch employee_training_url(@employee_training), params: { 
-      employee_training: { training_type: "invalid_type" } 
+    patch employee_training_url(@employee_training), params: {
+      employee_training: { training_type: "invalid_type" }
     }, as: :json
-    
+
     assert_response :unprocessable_entity
     json_response = JSON.parse(response.body)
     assert_includes json_response["errors"], "Training type is not included in the list"
   end
 
   test "should destroy employee training" do
-    assert_difference('EmployeeTraining.count', -1) do
+    assert_difference("EmployeeTraining.count", -1) do
       delete employee_training_url(@employee_training), as: :json
     end
 
@@ -93,8 +93,8 @@ class EmployeeTrainingsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should return 404 when updating non-existent employee training" do
-    patch employee_training_url(99999), params: { 
-      employee_training: { status: "in_progress" } 
+    patch employee_training_url(99999), params: {
+      employee_training: { status: "in_progress" }
     }, as: :json
     assert_response :not_found
   end
@@ -107,10 +107,10 @@ class EmployeeTrainingsControllerTest < ActionDispatch::IntegrationTest
   test "should handle employee training with all required fields" do
     get employee_training_url(@employee_training), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     required_fields = %w[id employee_id name training_type provider start_date status progress cost created_at updated_at]
-    
+
     required_fields.each do |field|
       assert_includes json_response.keys, field, "Missing field: #{field}"
     end
@@ -128,10 +128,10 @@ class EmployeeTrainingsControllerTest < ActionDispatch::IntegrationTest
       progress: 0,
       cost: 100.00
     }
-    
+
     post employee_trainings_url, params: { employee_training: minimal_attributes }, as: :json
     assert_response :created
-    
+
     json_response = JSON.parse(response.body)
     assert_equal minimal_attributes[:name], json_response["name"]
     assert_equal minimal_attributes[:training_type], json_response["training_type"]

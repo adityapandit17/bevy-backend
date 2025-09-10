@@ -15,13 +15,13 @@ class EmployeeTraining < ApplicationRecord
   scope :by_employee, ->(employee_id) { where(employee_id: employee_id) }
   scope :by_type, ->(type) { where(training_type: type) }
   scope :by_status, ->(status) { where(status: status) }
-  scope :completed, -> { where(status: 'completed') }
-  scope :in_progress, -> { where(status: 'in_progress') }
-  scope :not_started, -> { where(status: 'not_started') }
+  scope :completed, -> { where(status: "completed") }
+  scope :in_progress, -> { where(status: "in_progress") }
+  scope :not_started, -> { where(status: "not_started") }
   scope :by_provider, ->(provider) { where(provider: provider) }
-  scope :current, -> { where('start_date <= ? AND end_date >= ?', Date.current, Date.current) }
-  scope :upcoming, -> { where('start_date > ?', Date.current) }
-  scope :past, -> { where('end_date < ?', Date.current) }
+  scope :current, -> { where("start_date <= ? AND end_date >= ?", Date.current, Date.current) }
+  scope :upcoming, -> { where("start_date > ?", Date.current) }
+  scope :past, -> { where("end_date < ?", Date.current) }
   scope :recent, -> { order(start_date: :desc) }
 
   # Callbacks
@@ -30,23 +30,23 @@ class EmployeeTraining < ApplicationRecord
 
   # Helper methods
   def not_started?
-    status == 'not_started'
+    status == "not_started"
   end
 
   def in_progress?
-    status == 'in_progress'
+    status == "in_progress"
   end
 
   def completed?
-    status == 'completed'
+    status == "completed"
   end
 
   def cancelled?
-    status == 'cancelled'
+    status == "cancelled"
   end
 
   def failed?
-    status == 'failed'
+    status == "failed"
   end
 
   def is_current?
@@ -96,42 +96,42 @@ class EmployeeTraining < ApplicationRecord
   end
 
   def formatted_start_date
-    start_date.strftime('%B %d, %Y')
+    start_date.strftime("%B %d, %Y")
   end
 
   def formatted_end_date
-    end_date.strftime('%B %d, %Y')
+    end_date.strftime("%B %d, %Y")
   end
 
   def status_color
     case status
-    when 'completed'
-      'green'
-    when 'in_progress'
-      'blue'
-    when 'not_started'
-      'gray'
-    when 'cancelled'
-      'gray'
-    when 'failed'
-      'red'
+    when "completed"
+      "green"
+    when "in_progress"
+      "blue"
+    when "not_started"
+      "gray"
+    when "cancelled"
+      "gray"
+    when "failed"
+      "red"
     else
-      'gray'
+      "gray"
     end
   end
 
   def status_label
     case status
-    when 'not_started'
-      'Not Started'
-    when 'in_progress'
-      'In Progress'
-    when 'completed'
-      'Completed'
-    when 'cancelled'
-      'Cancelled'
-    when 'failed'
-      'Failed'
+    when "not_started"
+      "Not Started"
+    when "in_progress"
+      "In Progress"
+    when "completed"
+      "Completed"
+    when "cancelled"
+      "Cancelled"
+    when "failed"
+      "Failed"
     else
       status.titleize
     end
@@ -139,13 +139,13 @@ class EmployeeTraining < ApplicationRecord
 
   def progress_color
     if progress >= 80
-      'green'
+      "green"
     elsif progress >= 60
-      'blue'
+      "blue"
     elsif progress >= 40
-      'yellow'
+      "yellow"
     else
-      'red'
+      "red"
     end
   end
 
@@ -154,7 +154,7 @@ class EmployeeTraining < ApplicationRecord
   end
 
   def skills_list
-    skills&.split(',')&.map(&:strip) || []
+    skills&.split(",")&.map(&:strip) || []
   end
 
   def has_certificate?
@@ -203,15 +203,15 @@ class EmployeeTraining < ApplicationRecord
 
   def update_status_based_on_progress
     if progress == 100 && in_progress?
-      self.status = 'completed'
+      self.status = "completed"
     elsif progress > 0 && not_started?
-      self.status = 'in_progress'
+      self.status = "in_progress"
     end
   end
 
   def check_completion_status
     if end_date < Date.current && in_progress? && progress < 100
-      self.status = 'failed'
+      self.status = "failed"
     end
   end
 end

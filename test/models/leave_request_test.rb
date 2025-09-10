@@ -103,7 +103,7 @@ class LeaveRequestTest < ActiveSupport::TestCase
   test "approved scope should return approved leave requests" do
     @leave_request.status = "approved"
     @leave_request.save!
-    
+
     pending_request = LeaveRequest.create!(
       employee: @employee,
       leave_type: "sick",
@@ -112,14 +112,14 @@ class LeaveRequestTest < ActiveSupport::TestCase
       reason: "Sick leave",
       status: "pending"
     )
-    
+
     assert_includes LeaveRequest.approved, @leave_request
     assert_not_includes LeaveRequest.approved, pending_request
   end
 
   test "pending scope should return pending leave requests" do
     @leave_request.save!
-    
+
     approved_request = LeaveRequest.create!(
       employee: @employee,
       leave_type: "sick",
@@ -128,7 +128,7 @@ class LeaveRequestTest < ActiveSupport::TestCase
       reason: "Sick leave",
       status: "approved"
     )
-    
+
     assert_includes LeaveRequest.pending, @leave_request
     assert_not_includes LeaveRequest.pending, approved_request
   end
@@ -136,13 +136,13 @@ class LeaveRequestTest < ActiveSupport::TestCase
   test "rejected scope should return rejected leave requests" do
     @leave_request.status = "rejected"
     @leave_request.save!
-    
+
     assert_includes LeaveRequest.rejected, @leave_request
   end
 
   test "by_type scope should filter by leave type" do
     @leave_request.save!
-    
+
     sick_request = LeaveRequest.create!(
       employee: @employee,
       leave_type: "sick",
@@ -151,7 +151,7 @@ class LeaveRequestTest < ActiveSupport::TestCase
       reason: "Sick leave",
       status: "pending"
     )
-    
+
     assert_includes LeaveRequest.by_type("annual"), @leave_request
     assert_not_includes LeaveRequest.by_type("annual"), sick_request
   end
@@ -159,7 +159,7 @@ class LeaveRequestTest < ActiveSupport::TestCase
   test "by_employee scope should filter by employee" do
     @leave_request.save!
     other_employee = employees(:two)
-    
+
     other_request = LeaveRequest.create!(
       employee: other_employee,
       leave_type: "annual",
@@ -168,7 +168,7 @@ class LeaveRequestTest < ActiveSupport::TestCase
       reason: "Vacation",
       status: "pending"
     )
-    
+
     assert_includes LeaveRequest.by_employee(@employee.id), @leave_request
     assert_not_includes LeaveRequest.by_employee(@employee.id), other_request
   end
@@ -176,7 +176,7 @@ class LeaveRequestTest < ActiveSupport::TestCase
   test "current_year scope should return requests from current year" do
     @leave_request.start_date = Date.current.beginning_of_year + 1.month
     @leave_request.save!
-    
+
     old_request = LeaveRequest.create!(
       employee: @employee,
       leave_type: "annual",
@@ -185,14 +185,14 @@ class LeaveRequestTest < ActiveSupport::TestCase
       reason: "Old vacation",
       status: "approved"
     )
-    
+
     assert_includes LeaveRequest.current_year, @leave_request
     assert_not_includes LeaveRequest.current_year, old_request
   end
 
   test "upcoming scope should return future requests" do
     @leave_request.save!
-    
+
     past_request = LeaveRequest.create!(
       employee: @employee,
       leave_type: "annual",
@@ -201,7 +201,7 @@ class LeaveRequestTest < ActiveSupport::TestCase
       reason: "Past vacation",
       status: "approved"
     )
-    
+
     assert_includes LeaveRequest.upcoming, @leave_request
     assert_not_includes LeaveRequest.upcoming, past_request
   end
@@ -210,7 +210,7 @@ class LeaveRequestTest < ActiveSupport::TestCase
     @leave_request.start_date = 2.weeks.ago
     @leave_request.end_date = 1.week.ago
     @leave_request.save!
-    
+
     future_request = LeaveRequest.create!(
       employee: @employee,
       leave_type: "annual",
@@ -219,7 +219,7 @@ class LeaveRequestTest < ActiveSupport::TestCase
       reason: "Future vacation",
       status: "pending"
     )
-    
+
     assert_includes LeaveRequest.past, @leave_request
     assert_not_includes LeaveRequest.past, future_request
   end
@@ -332,13 +332,13 @@ class LeaveRequestTest < ActiveSupport::TestCase
   test "status_color should return appropriate color" do
     @leave_request.status = "approved"
     assert_equal "green", @leave_request.status_color
-    
+
     @leave_request.status = "pending"
     assert_equal "yellow", @leave_request.status_color
-    
+
     @leave_request.status = "rejected"
     assert_equal "red", @leave_request.status_color
-    
+
     @leave_request.status = "cancelled"
     assert_equal "gray", @leave_request.status_color
   end
@@ -353,7 +353,7 @@ class LeaveRequestTest < ActiveSupport::TestCase
     @leave_request.start_date = Date.new(2023, 6, 1)
     @leave_request.end_date = Date.new(2023, 6, 5)
     @leave_request.save!
-    
+
     assert_equal 5, @leave_request.days
   end
 
@@ -369,14 +369,14 @@ class LeaveRequestTest < ActiveSupport::TestCase
       # status not set, should default to pending
     )
     new_leave_request.save!
-    
+
     assert_equal "pending", new_leave_request.status
   end
 
   test "should not override existing status on create" do
     @leave_request.status = "approved"
     @leave_request.save!
-    
+
     assert_equal "approved", @leave_request.status
   end
 

@@ -1,5 +1,5 @@
 class EmployeeBenefitsController < ApplicationController
-  before_action :set_employee_benefit, only: [:show, :update, :destroy]
+  before_action :set_employee_benefit, only: [ :show, :update, :destroy ]
 
   def index
     @employee_benefits = EmployeeBenefit.all

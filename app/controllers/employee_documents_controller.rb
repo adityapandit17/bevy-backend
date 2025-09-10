@@ -1,5 +1,5 @@
 class EmployeeDocumentsController < ApplicationController
-  before_action :set_employee_document, only: [:show, :update, :destroy]
+  before_action :set_employee_document, only: [ :show, :update, :destroy ]
 
   def index
     @employee_documents = EmployeeDocument.all

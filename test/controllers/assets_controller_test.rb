@@ -29,7 +29,7 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
   test "should get index with filters" do
     get assets_url, params: { asset_type: "laptop", department: "Engineering" }, as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(@response.body)
     assert_not_nil json_response["assets"]
     assert_not_nil json_response["total_count"]
@@ -39,15 +39,15 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
   test "should get index with search" do
     get assets_url, params: { search: "MacBook" }, as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(@response.body)
     assert_not_nil json_response["assets"]
   end
 
   test "should get index with multiple filters" do
-    get assets_url, params: { 
-      asset_type: "laptop", 
-      department: "Engineering", 
+    get assets_url, params: {
+      asset_type: "laptop",
+      department: "Engineering",
       condition: "excellent",
       status: "available"
     }, as: :json
@@ -57,7 +57,7 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
   test "should get show" do
     get asset_url(@asset), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(@response.body)
     assert_not_nil json_response["asset"]
     assert_not_nil json_response["maintenance_history"]
@@ -65,7 +65,7 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should create asset with valid parameters" do
-    assert_difference('Asset.count') do
+    assert_difference("Asset.count") do
       post assets_url, params: { asset: @valid_attributes }, as: :json
     end
 
@@ -77,8 +77,8 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
 
   test "should not create asset with invalid parameters" do
     invalid_attributes = @valid_attributes.merge(serial_number: nil)
-    
-    assert_no_difference('Asset.count') do
+
+    assert_no_difference("Asset.count") do
       post assets_url, params: { asset: invalid_attributes }, as: :json
     end
 
@@ -92,9 +92,9 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
     # First create an asset
     post assets_url, params: { asset: @valid_attributes }, as: :json
     assert_response :created
-    
+
     # Try to create another with same serial number
-    assert_no_difference('Asset.count') do
+    assert_no_difference("Asset.count") do
       post assets_url, params: { asset: @valid_attributes }, as: :json
     end
 
@@ -105,8 +105,8 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
 
   test "should not create asset with invalid asset type" do
     invalid_attributes = @valid_attributes.merge(asset_type: "invalid_type")
-    
-    assert_no_difference('Asset.count') do
+
+    assert_no_difference("Asset.count") do
       post assets_url, params: { asset: invalid_attributes }, as: :json
     end
 
@@ -117,8 +117,8 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
 
   test "should not create asset with invalid status" do
     invalid_attributes = @valid_attributes.merge(status: "invalid_status")
-    
-    assert_no_difference('Asset.count') do
+
+    assert_no_difference("Asset.count") do
       post assets_url, params: { asset: invalid_attributes }, as: :json
     end
 
@@ -129,8 +129,8 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
 
   test "should not create asset with invalid condition" do
     invalid_attributes = @valid_attributes.merge(condition: "invalid_condition")
-    
-    assert_no_difference('Asset.count') do
+
+    assert_no_difference("Asset.count") do
       post assets_url, params: { asset: invalid_attributes }, as: :json
     end
 
@@ -141,8 +141,8 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
 
   test "should not create asset with negative purchase cost" do
     invalid_attributes = @valid_attributes.merge(purchase_cost: -100)
-    
-    assert_no_difference('Asset.count') do
+
+    assert_no_difference("Asset.count") do
       post assets_url, params: { asset: invalid_attributes }, as: :json
     end
 
@@ -153,8 +153,8 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
 
   test "should not create asset with negative current value" do
     invalid_attributes = @valid_attributes.merge(current_value: -100)
-    
-    assert_no_difference('Asset.count') do
+
+    assert_no_difference("Asset.count") do
       post assets_url, params: { asset: invalid_attributes }, as: :json
     end
 
@@ -166,7 +166,7 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
   test "should update asset with valid parameters" do
     patch asset_url(@asset), params: { asset: { name: "Updated MacBook Pro" } }, as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(@response.body)
     assert_equal "Asset updated successfully", json_response["message"]
     assert_equal "Updated MacBook Pro", json_response["asset"]["name"]
@@ -175,7 +175,7 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
   test "should not update asset with invalid parameters" do
     patch asset_url(@asset), params: { asset: { serial_number: nil } }, as: :json
     assert_response :unprocessable_entity
-    
+
     json_response = JSON.parse(@response.body)
     assert_equal "Failed to update asset", json_response["message"]
     assert_includes json_response["errors"], "Serial number can't be blank"
@@ -184,17 +184,17 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
   test "should not update asset with duplicate serial number" do
     # Create another asset first
     other_asset = Asset.create!(@valid_attributes.merge(serial_number: "OTHER123456789"))
-    
+
     # Try to update first asset with second asset's serial number
     patch asset_url(@asset), params: { asset: { serial_number: other_asset.serial_number } }, as: :json
     assert_response :unprocessable_entity
-    
+
     json_response = JSON.parse(@response.body)
     assert_includes json_response["errors"], "Serial number has already been taken"
   end
 
   test "should destroy asset" do
-    assert_difference('Asset.count', -1) do
+    assert_difference("Asset.count", -1) do
       delete asset_url(@asset), as: :json
     end
 
@@ -206,7 +206,7 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
   test "should get stats" do
     get stats_assets_url, as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(@response.body)
     assert_not_nil json_response["overview"]
     assert_not_nil json_response["financial"]
@@ -217,7 +217,7 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
   test "should get allocations" do
     get allocations_assets_url, as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(@response.body)
     assert_not_nil json_response["allocations"]
     assert_not_nil json_response["total_active_allocations"]
@@ -226,7 +226,7 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
   test "should get maintenance" do
     get maintenance_assets_url, as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(@response.body)
     assert_not_nil json_response["recent_maintenance"]
     assert_not_nil json_response["overdue_maintenance"]
@@ -237,7 +237,7 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
   test "should handle show with invalid asset" do
     get asset_url(999999), as: :json
     assert_response :not_found
-    
+
     json_response = JSON.parse(@response.body)
     assert_equal "Asset not found", json_response["message"]
   end
@@ -264,17 +264,17 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create asset with all valid asset types" do
     valid_types = %w[laptop desktop mobile printer server network other]
-    
+
     valid_types.each do |type|
       attributes = @valid_attributes.merge(
         serial_number: "#{type.upcase}123456789",
         asset_type: type
       )
-      
-      assert_difference('Asset.count') do
+
+      assert_difference("Asset.count") do
         post assets_url, params: { asset: attributes }, as: :json
       end
-      
+
       assert_response :created
       json_response = JSON.parse(@response.body)
       assert_equal type, json_response["asset"]["asset_type"]
@@ -283,17 +283,17 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create asset with all valid statuses" do
     valid_statuses = %w[available assigned maintenance retired lost]
-    
+
     valid_statuses.each do |status|
       attributes = @valid_attributes.merge(
         serial_number: "#{status.upcase}123456789",
         status: status
       )
-      
-      assert_difference('Asset.count') do
+
+      assert_difference("Asset.count") do
         post assets_url, params: { asset: attributes }, as: :json
       end
-      
+
       assert_response :created
       json_response = JSON.parse(@response.body)
       assert_equal status, json_response["asset"]["status"]
@@ -302,17 +302,17 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create asset with all valid conditions" do
     valid_conditions = %w[excellent good fair poor]
-    
+
     valid_conditions.each do |condition|
       attributes = @valid_attributes.merge(
         serial_number: "#{condition.upcase}123456789",
         condition: condition
       )
-      
-      assert_difference('Asset.count') do
+
+      assert_difference("Asset.count") do
         post assets_url, params: { asset: attributes }, as: :json
       end
-      
+
       assert_response :created
       json_response = JSON.parse(@response.body)
       assert_equal condition, json_response["asset"]["condition"]
@@ -326,10 +326,10 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
       purchase_cost: 1000.00,
       asset_type: "laptop" # 25% depreciation per year
     )
-    
+
     post assets_url, params: { asset: attributes }, as: :json
     assert_response :created
-    
+
     json_response = JSON.parse(@response.body)
     # After 2 years: 1000 * (1 - 0.25)^2 = 562.50
     assert_equal 562.50, json_response["asset"]["current_value"]
@@ -341,10 +341,10 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
       status: "available",
       employee_id: @employee.id
     )
-    
+
     post assets_url, params: { asset: attributes }, as: :json
     assert_response :created
-    
+
     json_response = JSON.parse(@response.body)
     assert_equal "assigned", json_response["asset"]["status"]
   end
@@ -367,7 +367,7 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
   test "should handle empty search results" do
     get assets_url, params: { search: "nonexistent" }, as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(@response.body)
     assert_equal 0, json_response["total_count"]
   end
@@ -380,10 +380,10 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
         name: "Asset #{i}"
       ))
     end
-    
+
     get assets_url, as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(@response.body)
     assert json_response["total_count"] >= 10
   end
@@ -391,7 +391,7 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
   test "should handle concurrent asset creation" do
     threads = []
     results = []
-    
+
     5.times do |i|
       threads << Thread.new do
         attributes = @valid_attributes.merge(
@@ -401,9 +401,9 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
         results << response
       end
     end
-    
+
     threads.each(&:join)
-    
+
     # All should succeed
     results.each do |result|
       assert_equal 201, result
@@ -411,16 +411,16 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should handle malformed JSON" do
-    post assets_url, 
-         params: "invalid json", 
-         headers: { 'CONTENT_TYPE' => 'application/json' }
+    post assets_url,
+         params: "invalid json",
+         headers: { "CONTENT_TYPE" => "application/json" }
     assert_response :bad_request
   end
 
   test "should handle empty JSON body" do
-    post assets_url, 
-         params: "{}", 
-         headers: { 'CONTENT_TYPE' => 'application/json' }
+    post assets_url,
+         params: "{}",
+         headers: { "CONTENT_TYPE" => "application/json" }
     assert_response :bad_request
   end
 
@@ -430,10 +430,10 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
       purchase_cost: 1234.56,
       current_value: 987.65
     )
-    
+
     post assets_url, params: { asset: attributes }, as: :json
     assert_response :created
-    
+
     json_response = JSON.parse(@response.body)
     assert_equal 1234.56, json_response["asset"]["purchase_cost"]
     assert_equal 987.65, json_response["asset"]["current_value"]
@@ -446,10 +446,10 @@ class AssetsControllerTest < ActionDispatch::IntegrationTest
       last_maintenance: 6.months.ago,
       next_maintenance: 6.months.from_now
     )
-    
+
     post assets_url, params: { asset: attributes }, as: :json
     assert_response :created
-    
+
     json_response = JSON.parse(@response.body)
     assert_not_nil json_response["asset"]["warranty_expiry"]
     assert_not_nil json_response["asset"]["last_maintenance"]

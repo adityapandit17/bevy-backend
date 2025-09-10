@@ -11,7 +11,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
       last_name: "User",
       status: "active"
     )
-    
+
     # Create a role and assign it to the user
     @role = Role.create!(name: "Test Role", description: "Test role for testing")
     @user.roles << @role
@@ -19,7 +19,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
 
   test "should login with valid credentials" do
     post sessions_url, params: { email: @user.email, password: "password123" }, as: :json
-    
+
     assert_response :success
     json_response = JSON.parse(response.body)
     assert_equal "Login successful", json_response["message"]
@@ -29,7 +29,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
 
   test "should not login with invalid credentials" do
     post sessions_url, params: { email: @user.email, password: "wrongpassword" }, as: :json
-    
+
     assert_response :unauthorized
     json_response = JSON.parse(response.body)
     assert_equal "Invalid email or password", json_response["error"]
@@ -39,7 +39,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     # First login
     post sessions_url, params: { email: @user.email, password: "password123" }, as: :json
     assert_response :success
-    
+
     # Then logout
     delete sessions_url, as: :json
     assert_response :success
@@ -51,7 +51,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     # Login first
     post sessions_url, params: { email: @user.email, password: "password123" }, as: :json
     assert_response :success
-    
+
     # Get current user
     get current_sessions_url, as: :json
     assert_response :success

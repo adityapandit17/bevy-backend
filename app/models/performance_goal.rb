@@ -12,10 +12,10 @@ class PerformanceGoal < ApplicationRecord
   # Scopes
   scope :by_employee, ->(employee_id) { where(employee_id: employee_id) }
   scope :by_status, ->(status) { where(status: status) }
-  scope :completed, -> { where(status: 'completed') }
-  scope :in_progress, -> { where(status: 'in_progress') }
-  scope :overdue, -> { where('due_date < ? AND status != ?', Date.current, 'completed') }
-  scope :due_soon, -> { where('due_date BETWEEN ? AND ? AND status != ?', Date.current, Date.current + 7.days, 'completed') }
+  scope :completed, -> { where(status: "completed") }
+  scope :in_progress, -> { where(status: "in_progress") }
+  scope :overdue, -> { where("due_date < ? AND status != ?", Date.current, "completed") }
+  scope :due_soon, -> { where("due_date BETWEEN ? AND ? AND status != ?", Date.current, Date.current + 7.days, "completed") }
   scope :recent, -> { order(created_at: :desc) }
 
   # Callbacks
@@ -24,23 +24,23 @@ class PerformanceGoal < ApplicationRecord
 
   # Helper methods
   def not_started?
-    status == 'not_started'
+    status == "not_started"
   end
 
   def in_progress?
-    status == 'in_progress'
+    status == "in_progress"
   end
 
   def completed?
-    status == 'completed'
+    status == "completed"
   end
 
   def overdue?
-    status == 'overdue'
+    status == "overdue"
   end
 
   def cancelled?
-    status == 'cancelled'
+    status == "cancelled"
   end
 
   def is_overdue?
@@ -74,50 +74,50 @@ class PerformanceGoal < ApplicationRecord
   end
 
   def formatted_due_date
-    due_date.strftime('%B %d, %Y')
+    due_date.strftime("%B %d, %Y")
   end
 
   def status_color
     case status
-    when 'completed'
-      'green'
-    when 'in_progress'
-      'blue'
-    when 'overdue'
-      'red'
-    when 'not_started'
-      'gray'
-    when 'cancelled'
-      'gray'
+    when "completed"
+      "green"
+    when "in_progress"
+      "blue"
+    when "overdue"
+      "red"
+    when "not_started"
+      "gray"
+    when "cancelled"
+      "gray"
     else
-      'gray'
+      "gray"
     end
   end
 
   def progress_color
     if progress >= 80
-      'green'
+      "green"
     elsif progress >= 60
-      'blue'
+      "blue"
     elsif progress >= 40
-      'yellow'
+      "yellow"
     else
-      'red'
+      "red"
     end
   end
 
   def status_label
     case status
-    when 'not_started'
-      'Not Started'
-    when 'in_progress'
-      'In Progress'
-    when 'completed'
-      'Completed'
-    when 'overdue'
-      'Overdue'
-    when 'cancelled'
-      'Cancelled'
+    when "not_started"
+      "Not Started"
+    when "in_progress"
+      "In Progress"
+    when "completed"
+      "Completed"
+    when "overdue"
+      "Overdue"
+    when "cancelled"
+      "Cancelled"
     else
       status.titleize
     end
@@ -125,7 +125,7 @@ class PerformanceGoal < ApplicationRecord
 
   def completion_status
     if completed?
-      'Completed'
+      "Completed"
     elsif is_overdue?
       "#{days_overdue} days overdue"
     elsif is_due_soon?
@@ -139,15 +139,15 @@ class PerformanceGoal < ApplicationRecord
 
   def update_status_based_on_progress
     if progress == 100
-      self.status = 'completed'
+      self.status = "completed"
     elsif progress > 0
-      self.status = 'in_progress'
+      self.status = "in_progress"
     end
   end
 
   def check_overdue_status
-    if due_date < Date.current && !completed? && status != 'cancelled'
-      self.status = 'overdue'
+    if due_date < Date.current && !completed? && status != "cancelled"
+      self.status = "overdue"
     end
   end
 end

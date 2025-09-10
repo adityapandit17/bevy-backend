@@ -10,28 +10,28 @@ class EmployeeDocument < ApplicationRecord
   validates :uploaded_by, presence: true
 
   # Scopes
-  scope :active, -> { where(status: 'active') }
-  scope :expired, -> { where(status: 'expired') }
-  scope :pending_review, -> { where(status: 'pending_review') }
+  scope :active, -> { where(status: "active") }
+  scope :expired, -> { where(status: "expired") }
+  scope :pending_review, -> { where(status: "pending_review") }
   scope :by_type, ->(type) { where(document_type: type) }
   scope :by_employee, ->(employee_id) { where(employee_id: employee_id) }
-  scope :expiring_soon, -> { where('expiry_date BETWEEN ? AND ?', Date.current, Date.current + 30.days) }
-  scope :expired_documents, -> { where('expiry_date < ?', Date.current) }
+  scope :expiring_soon, -> { where("expiry_date BETWEEN ? AND ?", Date.current, Date.current + 30.days) }
+  scope :expired_documents, -> { where("expiry_date < ?", Date.current) }
 
   # Callbacks
   before_save :check_expiry_status
 
   # Helper methods
   def active?
-    status == 'active'
+    status == "active"
   end
 
   def expired?
-    status == 'expired'
+    status == "expired"
   end
 
   def pending_review?
-    status == 'pending_review'
+    status == "pending_review"
   end
 
   def is_expired?
@@ -60,23 +60,23 @@ class EmployeeDocument < ApplicationRecord
   end
 
   def formatted_upload_date
-    upload_date.strftime('%B %d, %Y')
+    upload_date.strftime("%B %d, %Y")
   end
 
   def formatted_expiry_date
-    expiry_date&.strftime('%B %d, %Y') || 'No expiry'
+    expiry_date&.strftime("%B %d, %Y") || "No expiry"
   end
 
   def status_color
     case status
-    when 'active'
-      'green'
-    when 'expired'
-      'red'
-    when 'pending_review'
-      'yellow'
+    when "active"
+      "green"
+    when "expired"
+      "red"
+    when "pending_review"
+      "yellow"
     else
-      'gray'
+      "gray"
     end
   end
 
@@ -96,9 +96,9 @@ class EmployeeDocument < ApplicationRecord
 
   def check_expiry_status
     if expiry_date.present? && expiry_date < Date.current
-      self.status = 'expired'
-    elsif status == 'expired' && expiry_date.present? && expiry_date >= Date.current
-      self.status = 'active'
+      self.status = "expired"
+    elsif status == "expired" && expiry_date.present? && expiry_date >= Date.current
+      self.status = "active"
     end
   end
 end

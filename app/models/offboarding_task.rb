@@ -12,13 +12,13 @@ class OffboardingTask < ApplicationRecord
   # Scopes
   scope :completed, -> { where(is_completed: true) }
   scope :pending, -> { where(is_completed: false) }
-  scope :overdue, -> { where('due_date < ? AND is_completed = ?', Date.current, false) }
-  scope :due_soon, -> { where('due_date BETWEEN ? AND ? AND is_completed = ?', Date.current, 3.days.from_now, false) }
+  scope :overdue, -> { where("due_date < ? AND is_completed = ?", Date.current, false) }
+  scope :due_soon, -> { where("due_date BETWEEN ? AND ? AND is_completed = ?", Date.current, 3.days.from_now, false) }
   scope :by_category, ->(category) { where(category: category) }
   scope :by_priority, ->(priority) { where(priority: priority) }
-  scope :high_priority, -> { where(priority: 'high') }
-  scope :medium_priority, -> { where(priority: 'medium') }
-  scope :low_priority, -> { where(priority: 'low') }
+  scope :high_priority, -> { where(priority: "high") }
+  scope :medium_priority, -> { where(priority: "medium") }
+  scope :low_priority, -> { where(priority: "low") }
 
   # Callbacks
   before_save :set_completed_date
@@ -48,65 +48,65 @@ class OffboardingTask < ApplicationRecord
 
   def priority_color
     case priority
-    when 'high'
-      'red'
-    when 'medium'
-      'yellow'
-    when 'low'
-      'green'
+    when "high"
+      "red"
+    when "medium"
+      "yellow"
+    when "low"
+      "green"
     else
-      'gray'
+      "gray"
     end
   end
 
   def category_icon
     case category.downcase
-    when 'equipment'
-      'laptop'
-    when 'hr'
-      'users'
-    when 'knowledge transfer'
-      'file-text'
-    when 'benefits'
-      'shield'
-    when 'access'
-      'key'
-    when 'documentation'
-      'file-text'
+    when "equipment"
+      "laptop"
+    when "hr"
+      "users"
+    when "knowledge transfer"
+      "file-text"
+    when "benefits"
+      "shield"
+    when "access"
+      "key"
+    when "documentation"
+      "file-text"
     else
-      'check-square'
+      "check-square"
     end
   end
 
   def due_date_formatted
-    due_date.strftime('%B %d, %Y')
+    due_date.strftime("%B %d, %Y")
   end
 
   def completed_date_formatted
-    completed_date&.strftime('%B %d, %Y')
+    completed_date&.strftime("%B %d, %Y")
   end
 
   def status_label
     if is_completed?
-      'Completed'
+      "Completed"
     elsif overdue?
-      'Overdue'
+      "Overdue"
     elsif due_soon?
-      'Due Soon'
+      "Due Soon"
     else
-      'Pending'
+      "Pending"
     end
   end
 
   def status_color
     if is_completed?
-      'green'
+      "green"
     elsif overdue?
-      'red'
+      "red"
     elsif due_soon?
-      'yellow'
+      "yellow"
     else
-      'gray'
+      "gray"
     end
   end
 
@@ -128,4 +128,4 @@ class OffboardingTask < ApplicationRecord
     offboarding_employee.calculate_progress
     offboarding_employee.save
   end
-end 
+end

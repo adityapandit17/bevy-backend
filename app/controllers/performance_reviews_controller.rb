@@ -1,5 +1,5 @@
 class PerformanceReviewsController < ApplicationController
-  before_action :set_performance_review, only: [:show, :update, :destroy]
+  before_action :set_performance_review, only: [ :show, :update, :destroy ]
 
   def index
     @performance_reviews = PerformanceReview.all

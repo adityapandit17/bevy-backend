@@ -1,4 +1,16 @@
 Rails.application.routes.draw do
+  # API Routes
+  namespace :api do
+    namespace :v1 do
+      # JWT Authentication routes
+      post "auth/login", to: "auth#login"
+      post "auth/logout", to: "auth#logout"
+      post "auth/refresh", to: "auth#refresh"
+      get "auth/me", to: "auth#me"
+      post "auth/validate", to: "auth#validate"
+    end
+  end
+
   get "super_admin/dashboard"
   get "super_admin/system_logs"
   get "super_admin/audit_trails"
@@ -10,16 +22,16 @@ Rails.application.routes.draw do
   get "super_admin/system_configuration"
   get "super_admin/maintenance_mode"
   # Custom session routes
-  post '/sessions', to: 'sessions#create'
-  delete '/sessions', to: 'sessions#destroy'
-  get '/sessions/current', to: 'sessions#current'
+  post "/sessions", to: "sessions#create"
+  delete "/sessions", to: "sessions#destroy"
+  get "/sessions/current", to: "sessions#current"
 
   # Dashboard route
-  get '/dashboard', to: 'dashboard#index'
+  get "/dashboard", to: "dashboard#index"
 
-  
+
   # Test route
-  get '/test/auth', to: 'test#auth_test'
+  get "/test/auth", to: "test#auth_test"
 
   resources :users do
     member do
@@ -53,7 +65,7 @@ Rails.application.routes.draw do
     post :toggle_maintenance_mode
   end
   # Employee Profile System
-  resources :employee_profiles, only: [:show] do
+  resources :employee_profiles, only: [ :show ] do
     member do
       get :overview
       get :job_details
@@ -141,7 +153,7 @@ Rails.application.routes.draw do
   resources :salary_structures
   resources :payrolls
   resources :attendance_records
-  resource :company, only: [:show, :update]
+  resource :company, only: [ :show, :update ]
 
   # Onboarding System
   resources :onboarding_employees do

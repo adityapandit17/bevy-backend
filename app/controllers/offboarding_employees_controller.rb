@@ -1,18 +1,18 @@
 class OffboardingEmployeesController < ApplicationController
-  before_action :set_offboarding_employee, only: [:show, :update, :destroy, :update_status]
+  before_action :set_offboarding_employee, only: [ :show, :update, :destroy, :update_status ]
 
   def index
     @offboarding_employees = OffboardingEmployee.includes(:employee, :offboarding_tasks)
-    
+
     # Apply filters
     @offboarding_employees = @offboarding_employees.where(status: params[:status]) if params[:status].present?
     @offboarding_employees = @offboarding_employees.by_department(params[:department_id]) if params[:department_id].present?
-    
+
     # Apply search
     if params[:search].present?
       search_term = "%#{params[:search]}%"
       @offboarding_employees = @offboarding_employees.joins(:employee)
-        .where("employees.first_name ILIKE ? OR employees.last_name ILIKE ? OR employees.email ILIKE ?", 
+        .where("employees.first_name ILIKE ? OR employees.last_name ILIKE ? OR employees.email ILIKE ?",
                search_term, search_term, search_term)
     end
 
@@ -66,7 +66,7 @@ class OffboardingEmployeesController < ApplicationController
 
     # Calculate average duration
     completed_offboardings = OffboardingEmployee.completed
-    avg_duration = completed_offboardings.any? ? 
+    avg_duration = completed_offboardings.any? ?
       (completed_offboardings.sum(&:duration_days).to_f / completed_offboardings.count).round : 0
 
     # Task category breakdown
@@ -92,10 +92,10 @@ class OffboardingEmployeesController < ApplicationController
 
   def offboarding_employee_params
     params.require(:offboarding_employee).permit(
-      :employee_id, 
-      :last_working_day, 
-      :status, 
-      :assigned_to, 
+      :employee_id,
+      :last_working_day,
+      :status,
+      :assigned_to,
       :notes,
       :progress
     )
@@ -209,7 +209,7 @@ class OffboardingEmployeesController < ApplicationController
 
   def get_recent_activity
     recent_tasks = OffboardingTask.includes(:offboarding_employee)
-      .where('completed_date >= ?', 7.days.ago)
+      .where("completed_date >= ?", 7.days.ago)
       .order(completed_date: :desc)
       .limit(5)
 
@@ -223,4 +223,4 @@ class OffboardingEmployeesController < ApplicationController
       }
     end
   end
-end 
+end

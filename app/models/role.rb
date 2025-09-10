@@ -15,20 +15,20 @@ class Role < ApplicationRecord
   def self.create_default_roles
     roles_data = [
       {
-        name: 'Super Admin',
-        description: 'Full system access with all permissions'
+        name: "Super Admin",
+        description: "Full system access with all permissions"
       },
       {
-        name: 'HR Manager',
-        description: 'Employee management, payroll, reports access'
+        name: "HR Manager",
+        description: "Employee management, payroll, reports access"
       },
       {
-        name: 'Department Head',
-        description: 'Team management, attendance approval access'
+        name: "Department Head",
+        description: "Team management, attendance approval access"
       },
       {
-        name: 'Employee',
-        description: 'Self-service portal access'
+        name: "Employee",
+        description: "Self-service portal access"
       }
     ]
 

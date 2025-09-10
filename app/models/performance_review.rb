@@ -13,8 +13,8 @@ class PerformanceReview < ApplicationRecord
   scope :by_period, ->(period) { where(period: period) }
   scope :by_reviewer, ->(reviewer) { where(reviewer: reviewer) }
   scope :recent, -> { order(review_date: :desc) }
-  scope :this_year, -> { where('review_date >= ?', Date.current.beginning_of_year) }
-  scope :last_year, -> { where('review_date >= ? AND review_date < ?', 1.year.ago.beginning_of_year, Date.current.beginning_of_year) }
+  scope :this_year, -> { where("review_date >= ?", Date.current.beginning_of_year) }
+  scope :last_year, -> { where("review_date >= ? AND review_date < ?", 1.year.ago.beginning_of_year, Date.current.beginning_of_year) }
 
   # Callbacks
   before_save :set_default_review_date
@@ -33,7 +33,7 @@ class PerformanceReview < ApplicationRecord
   end
 
   def formatted_review_date
-    review_date.strftime('%B %d, %Y')
+    review_date.strftime("%B %d, %Y")
   end
 
   def rating_stars
@@ -47,37 +47,37 @@ class PerformanceReview < ApplicationRecord
   def rating_description
     case rating
     when 4.5..5.0
-      'Outstanding'
+      "Outstanding"
     when 4.0..4.4
-      'Excellent'
+      "Excellent"
     when 3.5..3.9
-      'Good'
+      "Good"
     when 3.0..3.4
-      'Satisfactory'
+      "Satisfactory"
     when 2.5..2.9
-      'Needs Improvement'
+      "Needs Improvement"
     else
-      'Unsatisfactory'
+      "Unsatisfactory"
     end
   end
 
   def rating_color
     case rating
     when 4.5..5.0
-      'green'
+      "green"
     when 4.0..4.4
-      'blue'
+      "blue"
     when 3.5..3.9
-      'yellow'
+      "yellow"
     when 3.0..3.4
-      'orange'
+      "orange"
     else
-      'red'
+      "red"
     end
   end
 
   def goals_completed_count
-    performance_goals.where(status: 'completed').count
+    performance_goals.where(status: "completed").count
   end
 
   def goals_total_count
@@ -90,15 +90,15 @@ class PerformanceReview < ApplicationRecord
   end
 
   def achievements_list
-    achievements&.split(',')&.map(&:strip) || []
+    achievements&.split(",")&.map(&:strip) || []
   end
 
   def areas_for_improvement_list
-    areas_for_improvement&.split(',')&.map(&:strip) || []
+    areas_for_improvement&.split(",")&.map(&:strip) || []
   end
 
   def goals_list
-    goals&.split(',')&.map(&:strip) || []
+    goals&.split(",")&.map(&:strip) || []
   end
 
   def is_recent?
@@ -107,7 +107,7 @@ class PerformanceReview < ApplicationRecord
 
   def is_overdue?
     # Assuming reviews should be done quarterly
-    last_review = employee.performance_reviews.where('review_date < ?', review_date).order(review_date: :desc).first
+    last_review = employee.performance_reviews.where("review_date < ?", review_date).order(review_date: :desc).first
     return false unless last_review
     review_date - last_review.review_date > 4.months
   end

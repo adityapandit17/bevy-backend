@@ -62,7 +62,7 @@ class EmployeeProfilesController < ApplicationController
   def set_employee
     @employee = Employee.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render json: { error: 'Employee not found' }, status: :not_found
+    render json: { error: "Employee not found" }, status: :not_found
   end
 
   def format_employee_data
@@ -308,7 +308,7 @@ class EmployeeProfilesController < ApplicationController
           status_color: asset.status_color,
           condition: asset.condition,
           location: asset.location,
-          purchase_date: asset.purchase_date&.strftime('%B %d, %Y'),
+          purchase_date: asset.purchase_date&.strftime("%B %d, %Y"),
           current_value: asset.current_value
         }
       end,
@@ -316,8 +316,8 @@ class EmployeeProfilesController < ApplicationController
         {
           id: allocation.id,
           asset_name: allocation.asset_name,
-          assigned_date: allocation.assigned_date&.strftime('%B %d, %Y'),
-          return_date: allocation.return_date&.strftime('%B %d, %Y'),
+          assigned_date: allocation.assigned_date&.strftime("%B %d, %Y"),
+          return_date: allocation.return_date&.strftime("%B %d, %Y"),
           status: allocation.status,
           notes: allocation.notes
         }
@@ -327,11 +327,11 @@ class EmployeeProfilesController < ApplicationController
 
   def get_recent_activities
     activities = []
-    
+
     # Add recent leave requests
     @employee.leave_requests.recent.limit(5).each do |request|
       activities << {
-        type: 'leave_request',
+        type: "leave_request",
         date: request.created_at,
         description: "Requested #{request.leave_type_label} leave",
         status: request.status
@@ -341,7 +341,7 @@ class EmployeeProfilesController < ApplicationController
     # Add recent timesheets
     @employee.timesheets.recent.limit(5).each do |timesheet|
       activities << {
-        type: 'timesheet',
+        type: "timesheet",
         date: timesheet.created_at,
         description: "Logged #{timesheet.hours} hours for #{timesheet.project}",
         status: timesheet.status
@@ -351,7 +351,7 @@ class EmployeeProfilesController < ApplicationController
     # Add recent performance reviews
     @employee.performance_reviews.recent.limit(3).each do |review|
       activities << {
-        type: 'performance_review',
+        type: "performance_review",
         date: review.review_date,
         description: "Performance review for #{review.period}",
         rating: review.rating
@@ -365,13 +365,13 @@ class EmployeeProfilesController < ApplicationController
   def get_employment_history
     # For now, return basic employment info
     # This could be expanded to include promotions, transfers, etc.
-    [{
+    [ {
       position: @employee.position,
       department: @employee.department_name,
       start_date: @employee.formatted_hire_date,
       end_date: nil,
       status: @employee.status
-    }]
+    } ]
   end
 
   def calculate_leave_balance

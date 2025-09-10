@@ -18,17 +18,17 @@ class Asset < ApplicationRecord
   validates :condition, presence: true, inclusion: { in: %w[excellent good fair poor] }
 
   # Scopes
-  scope :available, -> { where(status: 'available') }
-  scope :assigned, -> { where(status: 'assigned') }
-  scope :maintenance, -> { where(status: 'maintenance') }
-  scope :retired, -> { where(status: 'retired') }
-  scope :lost, -> { where(status: 'lost') }
+  scope :available, -> { where(status: "available") }
+  scope :assigned, -> { where(status: "assigned") }
+  scope :maintenance, -> { where(status: "maintenance") }
+  scope :retired, -> { where(status: "retired") }
+  scope :lost, -> { where(status: "lost") }
   scope :by_type, ->(type) { where(asset_type: type) }
   scope :by_department, ->(dept) { where(department: dept) }
   scope :by_condition, ->(cond) { where(condition: cond) }
-  scope :overdue_maintenance, -> { where('next_maintenance < ?', Date.current) }
-  scope :due_maintenance_soon, -> { where('next_maintenance BETWEEN ? AND ?', Date.current, Date.current + 30.days) }
-  scope :warranty_expiring_soon, -> { where('warranty_expiry BETWEEN ? AND ?', Date.current, Date.current + 90.days) }
+  scope :overdue_maintenance, -> { where("next_maintenance < ?", Date.current) }
+  scope :due_maintenance_soon, -> { where("next_maintenance BETWEEN ? AND ?", Date.current, Date.current + 30.days) }
+  scope :warranty_expiring_soon, -> { where("warranty_expiry BETWEEN ? AND ?", Date.current, Date.current + 90.days) }
 
   # Callbacks
   before_save :calculate_depreciation
@@ -36,23 +36,23 @@ class Asset < ApplicationRecord
 
   # Helper methods
   def assigned?
-    status == 'assigned' && employee.present?
+    status == "assigned" && employee.present?
   end
 
   def available?
-    status == 'available'
+    status == "available"
   end
 
   def under_maintenance?
-    status == 'maintenance'
+    status == "maintenance"
   end
 
   def retired?
-    status == 'retired'
+    status == "retired"
   end
 
   def lost?
-    status == 'lost'
+    status == "lost"
   end
 
   def overdue_maintenance?
@@ -78,13 +78,13 @@ class Asset < ApplicationRecord
 
   def depreciation_rate
     case asset_type
-    when 'laptop', 'desktop'
+    when "laptop", "desktop"
       0.25 # 25% per year
-    when 'mobile'
+    when "mobile"
       0.40 # 40% per year
-    when 'printer'
+    when "printer"
       0.20 # 20% per year
-    when 'server', 'network'
+    when "server", "network"
       0.15 # 15% per year
     else
       0.20 # 20% per year default
@@ -100,7 +100,7 @@ class Asset < ApplicationRecord
   end
 
   def current_allocation
-    asset_allocations.where(status: 'active').first
+    asset_allocations.where(status: "active").first
   end
 
   def allocation_history
@@ -108,7 +108,7 @@ class Asset < ApplicationRecord
   end
 
   def employee_name
-    employee&.name || 'Not assigned'
+    employee&.name || "Not assigned"
   end
 
   def employee_email
@@ -125,33 +125,33 @@ class Asset < ApplicationRecord
 
   def status_color
     case status
-    when 'available'
-      'green'
-    when 'assigned'
-      'blue'
-    when 'maintenance'
-      'orange'
-    when 'retired'
-      'gray'
-    when 'lost'
-      'red'
+    when "available"
+      "green"
+    when "assigned"
+      "blue"
+    when "maintenance"
+      "orange"
+    when "retired"
+      "gray"
+    when "lost"
+      "red"
     else
-      'gray'
+      "gray"
     end
   end
 
   def condition_color
     case condition
-    when 'excellent'
-      'green'
-    when 'good'
-      'blue'
-    when 'fair'
-      'yellow'
-    when 'poor'
-      'red'
+    when "excellent"
+      "green"
+    when "good"
+      "blue"
+    when "fair"
+      "yellow"
+    when "poor"
+      "red"
     else
-      'gray'
+      "gray"
     end
   end
 
@@ -159,7 +159,7 @@ class Asset < ApplicationRecord
 
   def calculate_depreciation
     return unless purchase_date && purchase_cost
-    
+
     years_old = age_in_years
     depreciation_factor = (1 - depreciation_rate) ** years_old
     self.current_value = (purchase_cost * depreciation_factor).round(2)
@@ -167,9 +167,9 @@ class Asset < ApplicationRecord
 
   def update_status_based_on_allocation
     if employee.present?
-      self.status = 'assigned'
-    elsif status == 'assigned'
-      self.status = 'available'
+      self.status = "assigned"
+    elsif status == "assigned"
+      self.status = "available"
     end
   end
 end

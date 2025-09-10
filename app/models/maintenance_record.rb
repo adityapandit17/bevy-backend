@@ -11,10 +11,10 @@ class MaintenanceRecord < ApplicationRecord
   # Scopes
   scope :by_type, ->(type) { where(maintenance_type: type) }
   scope :recent, -> { order(maintenance_date: :desc) }
-  scope :expensive, -> { where('cost > ?', 1000) }
+  scope :expensive, -> { where("cost > ?", 1000) }
   scope :by_performer, ->(performer) { where(performed_by: performer) }
-  scope :this_year, -> { where('maintenance_date >= ?', Date.current.beginning_of_year) }
-  scope :last_year, -> { where('maintenance_date >= ? AND maintenance_date < ?', 1.year.ago.beginning_of_year, Date.current.beginning_of_year) }
+  scope :this_year, -> { where("maintenance_date >= ?", Date.current.beginning_of_year) }
+  scope :last_year, -> { where("maintenance_date >= ? AND maintenance_date < ?", 1.year.ago.beginning_of_year, Date.current.beginning_of_year) }
 
   # Callbacks
   before_save :set_next_maintenance
@@ -22,23 +22,23 @@ class MaintenanceRecord < ApplicationRecord
 
   # Helper methods
   def routine?
-    maintenance_type == 'routine'
+    maintenance_type == "routine"
   end
 
   def repair?
-    maintenance_type == 'repair'
+    maintenance_type == "repair"
   end
 
   def upgrade?
-    maintenance_type == 'upgrade'
+    maintenance_type == "upgrade"
   end
 
   def replacement?
-    maintenance_type == 'replacement'
+    maintenance_type == "replacement"
   end
 
   def inspection?
-    maintenance_type == 'inspection'
+    maintenance_type == "inspection"
   end
 
   def expensive?
@@ -70,11 +70,11 @@ class MaintenanceRecord < ApplicationRecord
   end
 
   def formatted_date
-    maintenance_date.strftime('%B %d, %Y')
+    maintenance_date.strftime("%B %d, %Y")
   end
 
   def formatted_next_maintenance
-    next_maintenance&.strftime('%B %d, %Y') || 'Not scheduled'
+    next_maintenance&.strftime("%B %d, %Y") || "Not scheduled"
   end
 
   def maintenance_type_label
@@ -83,31 +83,31 @@ class MaintenanceRecord < ApplicationRecord
 
   def type_color
     case maintenance_type
-    when 'routine'
-      'green'
-    when 'repair'
-      'orange'
-    when 'upgrade'
-      'blue'
-    when 'replacement'
-      'red'
-    when 'inspection'
-      'purple'
+    when "routine"
+      "green"
+    when "repair"
+      "orange"
+    when "upgrade"
+      "blue"
+    when "replacement"
+      "red"
+    when "inspection"
+      "purple"
     else
-      'gray'
+      "gray"
     end
   end
 
   def cost_category
     case cost
     when 0..100
-      'Low'
+      "Low"
     when 101..500
-      'Medium'
+      "Medium"
     when 501..1000
-      'High'
+      "High"
     else
-      'Very High'
+      "Very High"
     end
   end
 
@@ -115,17 +115,17 @@ class MaintenanceRecord < ApplicationRecord
 
   def set_next_maintenance
     return if next_maintenance.present?
-    
+
     case maintenance_type
-    when 'routine'
+    when "routine"
       self.next_maintenance = maintenance_date + 6.months
-    when 'repair'
+    when "repair"
       self.next_maintenance = maintenance_date + 3.months
-    when 'upgrade'
+    when "upgrade"
       self.next_maintenance = maintenance_date + 1.year
-    when 'replacement'
+    when "replacement"
       self.next_maintenance = maintenance_date + 2.years
-    when 'inspection'
+    when "inspection"
       self.next_maintenance = maintenance_date + 1.month
     end
   end

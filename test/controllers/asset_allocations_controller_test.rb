@@ -18,7 +18,7 @@ class AssetAllocationsControllerTest < ActionDispatch::IntegrationTest
   test "should get index" do
     get asset_allocations_url, as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_kind_of Array, json_response
   end
@@ -26,13 +26,13 @@ class AssetAllocationsControllerTest < ActionDispatch::IntegrationTest
   test "should show asset allocation" do
     get asset_allocation_url(@asset_allocation), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_equal @asset_allocation.id, json_response["id"]
   end
 
   test "should create asset allocation" do
-    assert_difference('AssetAllocation.count') do
+    assert_difference("AssetAllocation.count") do
       post asset_allocations_url, params: { asset_allocation: @valid_attributes }, as: :json
     end
 
@@ -44,8 +44,8 @@ class AssetAllocationsControllerTest < ActionDispatch::IntegrationTest
 
   test "should not create asset allocation with invalid attributes" do
     invalid_attributes = @valid_attributes.merge(asset_id: 99999)
-    
-    assert_no_difference('AssetAllocation.count') do
+
+    assert_no_difference("AssetAllocation.count") do
       post asset_allocations_url, params: { asset_allocation: invalid_attributes }, as: :json
     end
 
@@ -55,10 +55,10 @@ class AssetAllocationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update asset allocation" do
-    patch asset_allocation_url(@asset_allocation), params: { 
-      asset_allocation: { status: "returned", return_date: Date.current } 
+    patch asset_allocation_url(@asset_allocation), params: {
+      asset_allocation: { status: "returned", return_date: Date.current }
     }, as: :json
-    
+
     assert_response :success
     json_response = JSON.parse(response.body)
     assert_equal "returned", json_response["status"]
@@ -66,17 +66,17 @@ class AssetAllocationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should not update asset allocation with invalid attributes" do
-    patch asset_allocation_url(@asset_allocation), params: { 
-      asset_allocation: { employee_id: 99999 } 
+    patch asset_allocation_url(@asset_allocation), params: {
+      asset_allocation: { employee_id: 99999 }
     }, as: :json
-    
+
     assert_response :unprocessable_entity
     json_response = JSON.parse(response.body)
     assert_includes json_response["errors"], "Employee must exist"
   end
 
   test "should destroy asset allocation" do
-    assert_difference('AssetAllocation.count', -1) do
+    assert_difference("AssetAllocation.count", -1) do
       delete asset_allocation_url(@asset_allocation), as: :json
     end
 
@@ -89,8 +89,8 @@ class AssetAllocationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should return 404 when updating non-existent asset allocation" do
-    patch asset_allocation_url(99999), params: { 
-      asset_allocation: { status: "returned" } 
+    patch asset_allocation_url(99999), params: {
+      asset_allocation: { status: "returned" }
     }, as: :json
     assert_response :not_found
   end
@@ -103,10 +103,10 @@ class AssetAllocationsControllerTest < ActionDispatch::IntegrationTest
   test "should handle asset allocation with all required fields" do
     get asset_allocation_url(@asset_allocation), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     required_fields = %w[id asset_id employee_id assigned_date status created_at updated_at]
-    
+
     required_fields.each do |field|
       assert_includes json_response.keys, field, "Missing field: #{field}"
     end
@@ -119,10 +119,10 @@ class AssetAllocationsControllerTest < ActionDispatch::IntegrationTest
       assigned_date: Date.current,
       status: "active"
     }
-    
+
     post asset_allocations_url, params: { asset_allocation: minimal_attributes }, as: :json
     assert_response :created
-    
+
     json_response = JSON.parse(response.body)
     assert_equal minimal_attributes[:asset_id], json_response["asset_id"]
     assert_equal minimal_attributes[:employee_id], json_response["employee_id"]

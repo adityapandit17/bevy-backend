@@ -19,7 +19,7 @@ end
 hr_manager = Role.find_by(name: 'HR Manager')
 if hr_manager
   hr_permissions = Permission.where(
-    resource: ['employees', 'payrolls', 'reports', 'users', 'roles', 'permissions', 'settings']
+    resource: [ 'employees', 'payrolls', 'reports', 'users', 'roles', 'permissions', 'settings' ]
   )
   hr_manager.permission_ids = hr_permissions.pluck(:id)
   puts "✓ HR Manager permissions assigned"
@@ -29,7 +29,7 @@ end
 dept_head = Role.find_by(name: 'Department Head')
 if dept_head
   dept_permissions = Permission.where(
-    resource: ['employees', 'attendance_records', 'leave_requests', 'performance_reviews', 'performance_goals']
+    resource: [ 'employees', 'attendance_records', 'leave_requests', 'performance_reviews', 'performance_goals' ]
   ).where.not(action: 'destroy')
   dept_head.permission_ids = dept_permissions.pluck(:id)
   puts "✓ Department Head permissions assigned"
@@ -39,8 +39,8 @@ end
 employee_role = Role.find_by(name: 'Employee')
 if employee_role
   employee_permissions = Permission.where(
-    resource: ['employees', 'attendance_records', 'leave_requests', 'performance_reviews', 'performance_goals', 'timesheets', 'employee_benefits', 'employee_trainings']
-  ).where(action: ['index', 'show'])
+    resource: [ 'employees', 'attendance_records', 'leave_requests', 'performance_reviews', 'performance_goals', 'timesheets', 'employee_benefits', 'employee_trainings' ]
+  ).where(action: [ 'index', 'show' ])
   employee_role.permission_ids = employee_permissions.pluck(:id)
   puts "✓ Employee permissions assigned"
 end

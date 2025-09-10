@@ -68,3 +68,6 @@ end
 gem "rack-cors", "~> 3.0"
 
 gem "pry-nav"
+
+# JWT Authentication
+gem "jwt"

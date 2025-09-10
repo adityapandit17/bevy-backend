@@ -5,11 +5,11 @@ class AssetAllocation < ApplicationRecord
   # Validations
   validates :assigned_date, presence: true
   validates :status, presence: true, inclusion: { in: %w[active returned] }
-  validates :asset_id, uniqueness: { scope: :status, conditions: -> { where(status: 'active') } }
+  validates :asset_id, uniqueness: { scope: :status, conditions: -> { where(status: "active") } }
 
   # Scopes
-  scope :active, -> { where(status: 'active') }
-  scope :returned, -> { where(status: 'returned') }
+  scope :active, -> { where(status: "active") }
+  scope :returned, -> { where(status: "returned") }
   scope :by_employee, ->(employee_id) { where(employee_id: employee_id) }
   scope :by_asset, ->(asset_id) { where(asset_id: asset_id) }
   scope :recent, -> { order(assigned_date: :desc) }
@@ -21,11 +21,11 @@ class AssetAllocation < ApplicationRecord
 
   # Helper methods
   def active?
-    status == 'active'
+    status == "active"
   end
 
   def returned?
-    status == 'returned'
+    status == "returned"
   end
 
   def duration_days
@@ -62,13 +62,13 @@ class AssetAllocation < ApplicationRecord
     update(
       return_date: return_date,
       notes: notes,
-      status: 'returned'
+      status: "returned"
     )
   end
 
   def extend_allocation(new_date, notes = nil)
     return false unless active?
-    
+
     update(
       notes: notes.present? ? "#{self.notes}\nExtended to: #{new_date}" : "Extended to: #{new_date}"
     )
@@ -81,12 +81,12 @@ class AssetAllocation < ApplicationRecord
   end
 
   def update_asset_status
-    asset.update(status: 'assigned', employee: employee)
+    asset.update(status: "assigned", employee: employee)
   end
 
   def update_asset_status_on_return
-    if status == 'returned'
-      asset.update(status: 'available', employee: nil)
+    if status == "returned"
+      asset.update(status: "available", employee: nil)
     end
   end
 end

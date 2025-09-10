@@ -16,7 +16,7 @@ class AttendanceRecordsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should create attendance record" do
-    post attendance_records_url, params: { 
+    post attendance_records_url, params: {
       attendance_record: {
         employee_id: @attendance_record.employee_id,
         date: Date.current,
@@ -29,7 +29,7 @@ class AttendanceRecordsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update attendance record" do
-    patch attendance_record_url(@attendance_record), params: { 
+    patch attendance_record_url(@attendance_record), params: {
       attendance_record: { status: "late" }
     }, as: :json
     assert_response :success

@@ -1,20 +1,20 @@
 class PayrollsController < ApplicationController
-  before_action :set_payroll, only: [:show, :update, :destroy]
+  before_action :set_payroll, only: [ :show, :update, :destroy ]
   before_action :authorize_payroll_access!
 
   def index
-    authorize!('payrolls', 'index')
+    authorize!("payrolls", "index")
     @payrolls = Payroll.all
     render json: @payrolls
   end
 
   def show
-    authorize!('payrolls', 'show')
+    authorize!("payrolls", "show")
     render json: @payroll
   end
 
   def create
-    authorize!('payrolls', 'create')
+    authorize!("payrolls", "create")
     @payroll = Payroll.new(payroll_params)
     if @payroll.save
       render json: @payroll, status: :created
@@ -24,7 +24,7 @@ class PayrollsController < ApplicationController
   end
 
   def update
-    authorize!('payrolls', 'update')
+    authorize!("payrolls", "update")
     if @payroll.update(payroll_params)
       render json: @payroll
     else
@@ -33,7 +33,7 @@ class PayrollsController < ApplicationController
   end
 
   def destroy
-    authorize!('payrolls', 'destroy')
+    authorize!("payrolls", "destroy")
     @payroll.destroy
     head :no_content
   end
@@ -48,14 +48,14 @@ class PayrollsController < ApplicationController
 
   def authorize_payroll_access!
     case action_name
-    when 'index', 'show'
-      authorize!('payrolls', 'index')
-    when 'create'
-      authorize!('payrolls', 'create')
-    when 'update'
-      authorize!('payrolls', 'update')
-    when 'destroy'
-      authorize!('payrolls', 'destroy')
+    when "index", "show"
+      authorize!("payrolls", "index")
+    when "create"
+      authorize!("payrolls", "create")
+    when "update"
+      authorize!("payrolls", "update")
+    when "destroy"
+      authorize!("payrolls", "destroy")
     end
   end
 

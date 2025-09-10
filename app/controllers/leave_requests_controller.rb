@@ -1,5 +1,5 @@
 class LeaveRequestsController < ApplicationController
-  before_action :set_leave_request, only: [:show, :update, :destroy]
+  before_action :set_leave_request, only: [ :show, :update, :destroy ]
 
   def index
     @leave_requests = LeaveRequest.all

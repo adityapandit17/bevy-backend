@@ -25,7 +25,7 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
   test "should get index" do
     get job_openings_url, as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_kind_of Array, json_response
     assert_not_empty json_response
@@ -34,7 +34,7 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
   test "should show job opening" do
     get job_opening_url(@job_opening), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     assert_equal @job_opening.id, json_response["id"]
     assert_equal @job_opening.title, json_response["title"]
@@ -42,7 +42,7 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should create job opening" do
-    assert_difference('JobOpening.count') do
+    assert_difference("JobOpening.count") do
       post job_openings_url, params: { job_opening: @valid_attributes }, as: :json
     end
 
@@ -67,8 +67,8 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
       skills: "JavaScript",
       posted: Date.current
     }
-    
-    assert_difference('JobOpening.count') do
+
+    assert_difference("JobOpening.count") do
       post job_openings_url, params: { job_opening: minimal_attributes }, as: :json
     end
 
@@ -80,8 +80,8 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
 
   test "should not create job opening with invalid attributes" do
     invalid_attributes = @valid_attributes.merge(title: "Dev")
-    
-    assert_no_difference('JobOpening.count') do
+
+    assert_no_difference("JobOpening.count") do
       post job_openings_url, params: { job_opening: invalid_attributes }, as: :json
     end
 
@@ -92,8 +92,8 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
 
   test "should not create job opening with invalid department" do
     invalid_attributes = @valid_attributes.merge(department_id: 99999)
-    
-    assert_no_difference('JobOpening.count') do
+
+    assert_no_difference("JobOpening.count") do
       post job_openings_url, params: { job_opening: invalid_attributes }, as: :json
     end
 
@@ -104,8 +104,8 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
 
   test "should not create job opening with invalid status" do
     invalid_attributes = @valid_attributes.merge(status: "invalid_status")
-    
-    assert_no_difference('JobOpening.count') do
+
+    assert_no_difference("JobOpening.count") do
       post job_openings_url, params: { job_opening: invalid_attributes }, as: :json
     end
 
@@ -116,8 +116,8 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
 
   test "should not create job opening with invalid job type" do
     invalid_attributes = @valid_attributes.merge(job_type: "invalid_type")
-    
-    assert_no_difference('JobOpening.count') do
+
+    assert_no_difference("JobOpening.count") do
       post job_openings_url, params: { job_opening: invalid_attributes }, as: :json
     end
 
@@ -128,8 +128,8 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
 
   test "should not create job opening with invalid salary range" do
     invalid_attributes = @valid_attributes.merge(salary_min: 120000, salary_max: 80000)
-    
-    assert_no_difference('JobOpening.count') do
+
+    assert_no_difference("JobOpening.count") do
       post job_openings_url, params: { job_opening: invalid_attributes }, as: :json
     end
 
@@ -140,8 +140,8 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
 
   test "should not create job opening with invalid vacancies" do
     invalid_attributes = @valid_attributes.merge(vacancies: 0)
-    
-    assert_no_difference('JobOpening.count') do
+
+    assert_no_difference("JobOpening.count") do
       post job_openings_url, params: { job_opening: invalid_attributes }, as: :json
     end
 
@@ -151,9 +151,9 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update job opening" do
-    patch job_opening_url(@job_opening), params: { 
-      job_opening: { 
-        title: "Updated Title", 
+    patch job_opening_url(@job_opening), params: {
+      job_opening: {
+        title: "Updated Title",
         status: "closed",
         description: "Updated description that meets the minimum length requirement.",
         requirements: "Updated requirements",
@@ -163,9 +163,9 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
         experience: "Updated experience",
         skills: "Updated skills",
         posted: Date.current
-      } 
+      }
     }, as: :json
-    
+
     assert_response :success
     json_response = JSON.parse(response.body)
     assert_equal "Updated Title", json_response["title"]
@@ -173,8 +173,8 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should not update job opening with invalid attributes" do
-    patch job_opening_url(@job_opening), params: { 
-      job_opening: { 
+    patch job_opening_url(@job_opening), params: {
+      job_opening: {
         title: "Dev",
         description: "Updated description that meets the minimum length requirement.",
         requirements: "Updated requirements",
@@ -184,17 +184,17 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
         experience: "Updated experience",
         skills: "Updated skills",
         posted: Date.current
-      } 
+      }
     }, as: :json
-    
+
     assert_response :unprocessable_entity
     json_response = JSON.parse(response.body)
     assert_includes json_response["errors"], "Title is too short (minimum is 5 characters)"
   end
 
   test "should destroy job opening by setting status to inactive" do
-    patch job_opening_url(@job_opening), params: { 
-      job_opening: { 
+    patch job_opening_url(@job_opening), params: {
+      job_opening: {
         status: "closed",
         description: "Updated description that meets the minimum length requirement.",
         requirements: "Updated requirements",
@@ -204,9 +204,9 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
         experience: "Updated experience",
         skills: "Updated skills",
         posted: Date.current
-      } 
+      }
     }, as: :json
-    
+
     assert_response :success
     json_response = JSON.parse(response.body)
     assert_equal "closed", json_response["status"]
@@ -218,22 +218,22 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should return 404 when updating non-existent job opening" do
-    patch job_opening_url(99999), params: { 
-      job_opening: { title: "Updated Title" } 
+    patch job_opening_url(99999), params: {
+      job_opening: { title: "Updated Title" }
     }, as: :json
     assert_response :not_found
   end
 
   test "should return 404 when destroying non-existent job opening" do
-    patch job_opening_url(99999), params: { 
-      job_opening: { status: "Inactive" } 
+    patch job_opening_url(99999), params: {
+      job_opening: { status: "Inactive" }
     }, as: :json
     assert_response :not_found
   end
 
   test "should handle job opening with all valid statuses" do
     valid_statuses = %w[open closed draft filled]
-    
+
     valid_statuses.each do |status|
       attributes = @valid_attributes.merge(status: status)
       post job_openings_url, params: { job_opening: attributes }, as: :json
@@ -243,7 +243,7 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
 
   test "should handle job opening with all valid job types" do
     valid_job_types = %w[full-time part-time contract internship]
-    
+
     valid_job_types.each do |job_type|
       attributes = @valid_attributes.merge(job_type: job_type)
       post job_openings_url, params: { job_opening: attributes }, as: :json
@@ -256,10 +256,10 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
       salary_min: 60000,
       salary_max: 90000
     )
-    
+
     post job_openings_url, params: { job_opening: attributes }, as: :json
     assert_response :created
-    
+
     json_response = JSON.parse(response.body)
     assert_equal 60000, json_response["salary_min"]
     assert_equal 90000, json_response["salary_max"]
@@ -267,10 +267,10 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
 
   test "should handle job opening without salary range" do
     attributes = @valid_attributes.except(:salary_min, :salary_max)
-    
+
     post job_openings_url, params: { job_opening: attributes }, as: :json
     assert_response :created
-    
+
     json_response = JSON.parse(response.body)
     assert_nil json_response["salary_min"]
     assert_nil json_response["salary_max"]
@@ -278,18 +278,18 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
 
   test "should handle job opening with applications count" do
     attributes = @valid_attributes.merge(applications: 5)
-    
+
     post job_openings_url, params: { job_opening: attributes }, as: :json
     assert_response :created
-    
+
     json_response = JSON.parse(response.body)
     assert_equal 5, json_response["applications"]
   end
 
   test "should handle job opening with negative applications count" do
     attributes = @valid_attributes.merge(applications: -1)
-    
-    assert_no_difference('JobOpening.count') do
+
+    assert_no_difference("JobOpening.count") do
       post job_openings_url, params: { job_opening: attributes }, as: :json
     end
 
@@ -301,10 +301,10 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
   test "should return job opening with all required fields" do
     get job_opening_url(@job_opening), as: :json
     assert_response :success
-    
+
     json_response = JSON.parse(response.body)
     required_fields = %w[id title department_id description requirements status location job_type vacancies salary_min salary_max experience skills posted applications created_at updated_at]
-    
+
     required_fields.each do |field|
       assert_includes json_response.keys, field, "Missing field: #{field}"
     end
@@ -324,10 +324,10 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
       skills: "JavaScript",
       posted: Date.current
     }
-    
+
     post job_openings_url, params: { job_opening: minimal_attributes }, as: :json
     assert_response :created
-    
+
     json_response = JSON.parse(response.body)
     assert_equal minimal_attributes[:title], json_response["title"]
     assert_equal minimal_attributes[:department_id], json_response["department_id"]
@@ -339,8 +339,8 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
 
   test "should handle description that is too short" do
     invalid_attributes = @valid_attributes.merge(description: "Short")
-    
-    assert_no_difference('JobOpening.count') do
+
+    assert_no_difference("JobOpening.count") do
       post job_openings_url, params: { job_opening: invalid_attributes }, as: :json
     end
 
@@ -355,8 +355,8 @@ class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
       department_id: @department.id
       # Missing description, requirements, status, location, job_type, vacancies, experience, skills, posted
     }
-    
-    assert_no_difference('JobOpening.count') do
+
+    assert_no_difference("JobOpening.count") do
       post job_openings_url, params: { job_opening: missing_required_attributes }, as: :json
     end
 

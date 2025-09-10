@@ -11,7 +11,7 @@ class Candidate < ApplicationRecord
 
   scope :active, -> { where.not(status: %w[hired rejected]) }
   scope :by_status, ->(status) { where(status: status) }
-  scope :recent, -> { where('applied_date >= ?', 30.days.ago) }
+  scope :recent, -> { where("applied_date >= ?", 30.days.ago) }
   scope :by_department, ->(dept) { where(department: dept) }
 
   def full_name
@@ -20,15 +20,15 @@ class Candidate < ApplicationRecord
 
   def skills_list
     return [] if skills.blank?
-    skills.split(',').map(&:strip)
+    skills.split(",").map(&:strip)
   end
 
   def skills_list=(skill_list)
-    self.skills = skill_list.is_a?(Array) ? skill_list.join(', ') : skill_list
+    self.skills = skill_list.is_a?(Array) ? skill_list.join(", ") : skill_list
   end
 
   def next_interview
-    interviews.where('scheduled_date >= ?', Date.current).order(:scheduled_date, :scheduled_time).first
+    interviews.where("scheduled_date >= ?", Date.current).order(:scheduled_date, :scheduled_time).first
   end
 
   def last_interview

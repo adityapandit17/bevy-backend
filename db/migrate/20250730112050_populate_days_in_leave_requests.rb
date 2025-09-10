@@ -4,7 +4,7 @@ class PopulateDaysInLeaveRequests < ActiveRecord::Migration[8.0]
     unless column_exists?(:employee_trainings, :hours)
       add_column :employee_trainings, :hours, :integer, default: 0
     end
-    
+
     # Populate days for existing leave requests
     LeaveRequest.find_each do |leave_request|
       if leave_request.start_date && leave_request.end_date
@@ -12,7 +12,7 @@ class PopulateDaysInLeaveRequests < ActiveRecord::Migration[8.0]
         leave_request.update_column(:days, days)
       end
     end
-    
+
     # Populate hours for existing employee trainings
     EmployeeTraining.find_each do |training|
       if training.start_date && training.end_date

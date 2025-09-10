@@ -91,7 +91,7 @@ class AssetTest < ActiveSupport::TestCase
     @asset.purchase_cost = 0
     assert_not @asset.valid?
     assert_includes @asset.errors[:purchase_cost], "must be greater than 0"
-    
+
     @asset.purchase_cost = -100
     assert_not @asset.valid?
     assert_includes @asset.errors[:purchase_cost], "must be greater than 0"
@@ -165,7 +165,7 @@ class AssetTest < ActiveSupport::TestCase
   test "should belong to employee optionally" do
     @asset.employee = nil
     assert @asset.valid?
-    
+
     @asset.employee = @employee
     assert @asset.valid?
   end
@@ -196,7 +196,7 @@ class AssetTest < ActiveSupport::TestCase
       condition: "good",
       employee: @employee
     )
-    
+
     assert_includes Asset.available, @asset
     assert_not_includes Asset.available, assigned_asset
   end
@@ -205,28 +205,28 @@ class AssetTest < ActiveSupport::TestCase
     @asset.status = "assigned"
     @asset.employee = @employee
     @asset.save!
-    
+
     assert_includes Asset.assigned, @asset
   end
 
   test "maintenance scope should return maintenance assets" do
     @asset.status = "maintenance"
     @asset.save!
-    
+
     assert_includes Asset.maintenance, @asset
   end
 
   test "retired scope should return retired assets" do
     @asset.status = "retired"
     @asset.save!
-    
+
     assert_includes Asset.retired, @asset
   end
 
   test "lost scope should return lost assets" do
     @asset.status = "lost"
     @asset.save!
-    
+
     assert_includes Asset.lost, @asset
   end
 
@@ -246,7 +246,7 @@ class AssetTest < ActiveSupport::TestCase
       department: "IT",
       condition: "good"
     )
-    
+
     assert_includes Asset.by_type("laptop"), @asset
     assert_not_includes Asset.by_type("laptop"), desktop_asset
   end
@@ -267,7 +267,7 @@ class AssetTest < ActiveSupport::TestCase
       department: "Sales",
       condition: "good"
     )
-    
+
     assert_includes Asset.by_department("Engineering"), @asset
     assert_not_includes Asset.by_department("Engineering"), sales_asset
   end
@@ -288,7 +288,7 @@ class AssetTest < ActiveSupport::TestCase
       department: "Marketing",
       condition: "fair"
     )
-    
+
     assert_includes Asset.by_condition("excellent"), @asset
     assert_not_includes Asset.by_condition("excellent"), fair_asset
   end
@@ -296,21 +296,21 @@ class AssetTest < ActiveSupport::TestCase
   test "overdue_maintenance scope should return assets with overdue maintenance" do
     @asset.next_maintenance = 1.day.ago
     @asset.save!
-    
+
     assert_includes Asset.overdue_maintenance, @asset
   end
 
   test "due_maintenance_soon scope should return assets due for maintenance soon" do
     @asset.next_maintenance = 15.days.from_now
     @asset.save!
-    
+
     assert_includes Asset.due_maintenance_soon, @asset
   end
 
   test "warranty_expiring_soon scope should return assets with expiring warranty" do
     @asset.warranty_expiry = 45.days.from_now
     @asset.save!
-    
+
     assert_includes Asset.warranty_expiring_soon, @asset
   end
 
@@ -413,7 +413,7 @@ class AssetTest < ActiveSupport::TestCase
       cost: 300.00,
       performed_by: "Apple Service"
     )
-    
+
     assert_equal 400.00, @asset.total_maintenance_cost
   end
 
@@ -433,7 +433,7 @@ class AssetTest < ActiveSupport::TestCase
       cost: 150.00,
       performed_by: "Apple Service"
     )
-    
+
     assert_equal recent_maintenance, @asset.last_maintenance_record
   end
 
@@ -444,7 +444,7 @@ class AssetTest < ActiveSupport::TestCase
       assigned_date: Date.current,
       status: "active"
     )
-    
+
     assert_equal allocation, @asset.current_allocation
   end
 
@@ -485,16 +485,16 @@ class AssetTest < ActiveSupport::TestCase
   test "status_color should return appropriate color" do
     @asset.status = "available"
     assert_equal "green", @asset.status_color
-    
+
     @asset.status = "assigned"
     assert_equal "blue", @asset.status_color
-    
+
     @asset.status = "maintenance"
     assert_equal "orange", @asset.status_color
-    
+
     @asset.status = "retired"
     assert_equal "gray", @asset.status_color
-    
+
     @asset.status = "lost"
     assert_equal "red", @asset.status_color
   end
@@ -502,13 +502,13 @@ class AssetTest < ActiveSupport::TestCase
   test "condition_color should return appropriate color" do
     @asset.condition = "excellent"
     assert_equal "green", @asset.condition_color
-    
+
     @asset.condition = "good"
     assert_equal "blue", @asset.condition_color
-    
+
     @asset.condition = "fair"
     assert_equal "yellow", @asset.condition_color
-    
+
     @asset.condition = "poor"
     assert_equal "red", @asset.condition_color
   end
@@ -519,7 +519,7 @@ class AssetTest < ActiveSupport::TestCase
     @asset.purchase_cost = 1000.00
     @asset.asset_type = "laptop" # 25% depreciation per year
     @asset.save!
-    
+
     # After 2 years: 1000 * (1 - 0.25)^2 = 1000 * 0.5625 = 562.50
     assert_equal 562.50, @asset.current_value
   end
@@ -528,7 +528,7 @@ class AssetTest < ActiveSupport::TestCase
     @asset.status = "available"
     @asset.employee = @employee
     @asset.save!
-    
+
     assert_equal "assigned", @asset.status
   end
 
@@ -536,10 +536,10 @@ class AssetTest < ActiveSupport::TestCase
     @asset.status = "assigned"
     @asset.employee = @employee
     @asset.save!
-    
+
     @asset.employee = nil
     @asset.save!
-    
+
     assert_equal "available", @asset.status
   end
 end
