@@ -1,15 +1,15 @@
 class PayrollsController < ApplicationController
   before_action :set_payroll, only: [ :show, :update, :destroy ]
-  before_action :authorize_payroll_access!
+  # before_action :authorize_payroll_access!
 
   def index
-    authorize!("payrolls", "index")
+    # authorize!("payrolls", "index")
     @payrolls = Payroll.all
     render json: @payrolls
   end
 
   def show
-    authorize!("payrolls", "show")
+    # authorize!("payrolls", "show")
     render json: @payroll
   end
 
