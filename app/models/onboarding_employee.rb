@@ -5,6 +5,9 @@ class OnboardingEmployee < ApplicationRecord
   validates :start_date, presence: true
   validates :status, presence: true, inclusion: { in: %w[pending in_progress completed] }
   validates :progress, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
+  validates :employee_id, uniqueness: { 
+    message: "has already been in onboarding process and cannot be added again"
+  }
 
   before_save :calculate_progress
 
@@ -45,5 +48,21 @@ class OnboardingEmployee < ApplicationRecord
 
   def email
     employee.email
+  end
+
+  def self.employee_onboarded?(employee_id)
+    exists?(employee_id: employee_id, status: 'completed')
+  end
+
+  def self.employee_in_onboarding?(employee_id)
+    exists?(employee_id: employee_id, status: %w[pending in_progress])
+  end
+
+  def self.employee_ever_onboarded?(employee_id)
+    exists?(employee_id: employee_id)
+  end
+
+  def self.available_for_onboarding?(employee_id)
+    !employee_ever_onboarded?(employee_id)
   end
 end

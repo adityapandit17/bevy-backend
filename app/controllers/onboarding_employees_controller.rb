@@ -51,11 +51,39 @@ class OnboardingEmployeesController < ApplicationController
     stats = {
       active_onboarding: OnboardingEmployee.active.count,
       completed_this_month: OnboardingEmployee.completed.where("updated_at >= ?", 1.month.ago).count,
+      completed_this_week: OnboardingEmployee.completed.where("updated_at >= ?", 1.week.ago).count,
+      total_onboarding: OnboardingEmployee.count,
+      pending_status: OnboardingEmployee.pending.count,
+      in_progress_status: OnboardingEmployee.in_progress.count,
+      completed_total: OnboardingEmployee.completed.count,
       pending_tasks: OnboardingTask.pending.count,
-      documents_pending: OnboardingTask.where("documents IS NOT NULL AND documents != ''").pending.count
+      completed_tasks: OnboardingTask.where(is_completed: true).count,
+      total_tasks: OnboardingTask.count,
+      documents_pending: OnboardingTask.where("documents IS NOT NULL AND documents != ''").pending.count,
+      overdue_tasks: OnboardingTask.where("due_date < ? AND is_completed = ?", Date.current, false).count,
+      due_soon_tasks: OnboardingTask.where("due_date BETWEEN ? AND ? AND is_completed = ?", Date.current, 3.days.from_now, false).count
     }
 
     render json: stats
+  end
+
+  # GET /onboarding_employees/check_employee/:employee_id
+  def check_employee
+    employee_id = params[:employee_id]
+    
+    if employee_id.blank?
+      render json: { error: "Employee ID is required" }, status: :bad_request
+      return
+    end
+
+    onboarding_status = {
+      employee_id: employee_id,
+      is_onboarded: OnboardingEmployee.employee_onboarded?(employee_id),
+      is_in_onboarding: OnboardingEmployee.employee_in_onboarding?(employee_id),
+      available_for_onboarding: OnboardingEmployee.available_for_onboarding?(employee_id)
+    }
+
+    render json: onboarding_status
   end
 
   private
