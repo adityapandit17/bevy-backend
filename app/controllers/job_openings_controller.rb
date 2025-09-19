@@ -2,13 +2,14 @@
 
 # app/controllers/job_openings_controller.rb
 class JobOpeningsController < ApplicationController
+  before_action :set_job_opening, only: [ :show, :update, :destroy ]
+
   def index
     @job_openings = JobOpening.all
     render json: @job_openings
   end
 
   def show
-    @job_opening = JobOpening.find(params[:id])
     render json: @job_opening
   end
 
@@ -17,31 +18,43 @@ class JobOpeningsController < ApplicationController
     if @job_opening.save
       render json: @job_opening, status: :created
     else
-      render json: { errors: @job_opening.errors.full_messages }, status: :unprocessable_entity
+      render_error(@job_opening.errors.full_messages)
     end
   end
 
   def update
-    @job_opening = JobOpening.find(params[:id])
     if @job_opening.update(job_opening_params)
       render json: @job_opening
     else
-      render json: { errors: @job_opening.errors.full_messages }, status: :unprocessable_entity
+      render_error(@job_opening.errors.full_messages)
     end
   end
 
   def destroy
-    @job_opening = JobOpening.find(params[:id])
     if @job_opening.update(status: "closed")
       render json: @job_opening
     else
-      render json: { errors: @job_opening.errors.full_messages }, status: :unprocessable_entity
+      render_error(@job_opening.errors.full_messages)
     end
   end
 
   private
 
+  def render_error(message, status = :unprocessable_entity)
+    render json: { error: message }, status: status
+  end
+
+  def set_job_opening
+    @job_opening = JobOpening.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Job opening not found" }, status: :not_found
+  end
+
   def job_opening_params
-    params.require(:job_opening).permit(:title, :department_id, :description, :requirements, :status, :location, :job_type, :vacancies, :salary_min, :salary_max, :experience, :skills, :posted, :applications)
+    params.require(:job_opening)
+          .permit(:title, :department_id, :description,
+                  :requirements, :status, :location, :job_type,
+                  :vacancies, :salary_min, :salary_max, :experience,
+                  :skills, :posted, :applications)
   end
 end
