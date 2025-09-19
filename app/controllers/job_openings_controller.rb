@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# app/controllers/job_openings_controller.rb
 class JobOpeningsController < ApplicationController
   def index
     @job_openings = JobOpening.all
@@ -37,7 +40,8 @@ class JobOpeningsController < ApplicationController
   end
 
   private
-    def job_opening_params
-      params.require(:job_opening).permit(:title, :department_id, :description, :requirements, :status, :location, :job_type, :vacancies, :salary_min, :salary_max, :experience, :skills, :posted, :applications)
-    end
+
+  def job_opening_params
+    params.require(:job_opening).permit(:title, :department_id, :description, :requirements, :status, :location, :job_type, :vacancies, :salary_min, :salary_max, :experience, :skills, :posted, :applications)
+  end
 end

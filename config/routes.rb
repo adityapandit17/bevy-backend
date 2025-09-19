@@ -162,7 +162,7 @@ Rails.application.routes.draw do
     end
     collection do
       get :stats
-      get :check_employee, path: 'check_employee/:employee_id'
+      get :check_employee, path: "check_employee/:employee_id"
     end
   end
 

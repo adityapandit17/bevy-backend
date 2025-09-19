@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# app/controllers/interviews_controller.rb
 class InterviewsController < ApplicationController
   before_action :set_interview, only: [ :show, :update, :destroy ]
 

@@ -70,7 +70,7 @@ class OnboardingEmployeesController < ApplicationController
   # GET /onboarding_employees/check_employee/:employee_id
   def check_employee
     employee_id = params[:employee_id]
-    
+
     if employee_id.blank?
       render json: { error: "Employee ID is required" }, status: :bad_request
       return
