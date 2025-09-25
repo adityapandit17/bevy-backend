@@ -1,18 +1,22 @@
 class LeaveRequest < ApplicationRecord
   belongs_to :employee
+  belongs_to :manager_approved_by, class_name: "User", optional: true
+  belongs_to :hr_approved_by, class_name: "User", optional: true
+  belongs_to :rejected_by, class_name: "User", optional: true
 
   # Validations
   validates :leave_type, presence: true, inclusion: { in: %w[annual sick personal maternity paternity unpaid other] }
   validates :start_date, presence: true
   validates :end_date, presence: true
   validates :reason, presence: true
-  validates :status, presence: true, inclusion: { in: %w[pending approved rejected cancelled] }
+  validates :status, presence: true, inclusion: { in: %w[pending manager_approved approved rejected cancelled] }
   validate :end_date_after_start_date
 
   # Scopes
   scope :approved, -> { where(status: "approved") }
   scope :pending, -> { where(status: "pending") }
   scope :rejected, -> { where(status: "rejected") }
+  scope :cancelled, -> { where(status: "cancelled") }
   scope :by_type, ->(type) { where(leave_type: type) }
   scope :by_employee, ->(employee_id) { where(employee_id: employee_id) }
   scope :current_year, -> { where("start_date >= ?", Date.current.beginning_of_year) }
@@ -22,6 +26,15 @@ class LeaveRequest < ApplicationRecord
   # Callbacks
   before_save :calculate_days
   before_create :set_default_status
+
+  # Approval helpers
+  def manager_approved?
+    status == "manager_approved" || approved?
+  end
+
+  def hr_approved?
+    approved?
+  end
 
   # Helper methods
   def approved?
@@ -42,7 +55,30 @@ class LeaveRequest < ApplicationRecord
 
   def duration_days
     return 0 unless start_date && end_date
-    (end_date - start_date).to_i + 1
+    if half_day?
+      0.5
+    else
+      (end_date - start_date).to_i + 1
+    end
+  end
+
+  def half_day?
+    half_day == true
+  end
+
+  def full_day?
+    !half_day?
+  end
+
+  def half_day_period_label
+    case half_day_period
+    when 'morning'
+      'Morning'
+    when 'afternoon'
+      'Afternoon'
+    else
+      'Half Day'
+    end
   end
 
   def is_current?
@@ -81,10 +117,10 @@ class LeaveRequest < ApplicationRecord
     case status
     when "approved"
       "green"
-    when "pending"
-      "yellow"
     when "rejected"
       "red"
+    when "pending"
+      "yellow"
     when "cancelled"
       "gray"
     else
@@ -92,8 +128,117 @@ class LeaveRequest < ApplicationRecord
     end
   end
 
+  def status_label
+    status.humanize
+  end
+
   def leave_type_label
-    leave_type.titleize
+    case leave_type
+    when "annual"
+      "Annual Leave"
+    when "sick"
+      "Sick Leave"
+    when "personal"
+      "Personal Leave"
+    when "maternity"
+      "Maternity Leave"
+    when "paternity"
+      "Paternity Leave"
+    when "unpaid"
+      "Unpaid Leave"
+    when "other"
+      "Other"
+    else
+      leave_type.humanize
+    end
+  end
+
+  def can_be_cancelled?
+    pending? && start_date > Date.current
+  end
+
+  def can_be_modified?
+    pending? && start_date > Date.current
+  end
+
+  def overlaps_with?(other_request)
+    return false if other_request.id == id
+    start_date <= other_request.end_date && end_date >= other_request.start_date
+  end
+
+  def self.employee_leave_balance(employee_id, leave_type, year = Date.current.year)
+    start_of_year = Date.new(year, 1, 1)
+    end_of_year = Date.new(year, 12, 31)
+    
+    approved_requests = where(
+      employee_id: employee_id,
+      leave_type: leave_type,
+      status: "approved",
+      start_date: start_of_year..end_of_year
+    )
+    
+    total_days = approved_requests.sum(:days)
+    
+    # Default leave balances (can be made configurable)
+    leave_limits = {
+      "annual" => 21,
+      "sick" => 12,
+      "personal" => 5,
+      "maternity" => 90,
+      "paternity" => 15,
+      "unpaid" => 30,
+      "other" => 5
+    }
+    
+    limit = leave_limits[leave_type] || 0
+    remaining = [limit - total_days, 0].max
+    
+    {
+      total: limit,
+      used: total_days,
+      remaining: remaining
+    }
+  end
+
+  def self.employee_leave_summary(employee_id, year = Date.current.year)
+    leave_types = %w[annual sick personal maternity paternity unpaid other]
+    
+    leave_types.map do |type|
+      balance = employee_leave_balance(employee_id, type, year)
+      {
+        leave_type: type,
+        leave_type_label: type.humanize,
+        total: balance[:total],
+        used: balance[:used],
+        remaining: balance[:remaining]
+      }
+    end
+  end
+
+  def self.team_leave_calendar(team_employee_ids, start_date, end_date)
+    where(
+      employee_id: team_employee_ids,
+      start_date: start_date..end_date,
+      status: "approved"
+    ).includes(:employee).order(:start_date)
+  end
+
+  def self.department_leave_stats(department_id, year = Date.current.year)
+    start_of_year = Date.new(year, 1, 1)
+    end_of_year = Date.new(year, 12, 31)
+    
+    requests = joins(:employee)
+              .where(employees: { department_id: department_id })
+              .where(start_date: start_of_year..end_of_year)
+    
+    {
+      total_requests: requests.count,
+      approved_requests: requests.approved.count,
+      pending_requests: requests.pending.count,
+      rejected_requests: requests.rejected.count,
+      total_days_taken: requests.approved.sum(:days),
+      by_leave_type: requests.approved.group(:leave_type).sum(:days)
+    }
   end
 
   private

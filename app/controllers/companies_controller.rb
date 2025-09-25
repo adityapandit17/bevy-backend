@@ -17,7 +17,14 @@ class CompaniesController < ApplicationController
   private
 
   def set_company
-    @company = Company.first || Company.create!(name: "Default Company")
+    @company = Company.first || Company.create!(
+      name: "Default Company",
+      code: "DEF",
+      industry: "General",
+      employee_count: "0",
+      timezone: "UTC",
+      currency: "USD"
+    )
   end
 
   def company_params

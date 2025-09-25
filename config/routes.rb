@@ -149,10 +149,32 @@ Rails.application.routes.draw do
   resources :employees
   resources :departments
   resources :job_openings
-  resources :leave_requests
+  resources :leave_requests do
+    member do
+      patch :approve
+      patch :reject
+      patch :cancel
+    end
+    collection do
+      get :balance
+      get :calendar
+      get :stats
+      get :approvers
+    end
+  end
   resources :salary_structures
   resources :payrolls
-  resources :attendance_records
+  resources :attendance_records do
+    member do
+      patch :check_in
+      patch :check_out
+    end
+    collection do
+      get :today
+      get :stats
+      get :calendar
+    end
+  end
   resource :company, only: [ :show, :update ]
 
   # Onboarding System

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_08_122726) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_23_090000) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.integer "employee_id", null: false
@@ -215,7 +215,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_08_122726) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "days"
+    t.boolean "half_day"
+    t.string "half_day_period"
+    t.string "emergency_contact"
+    t.text "handover_notes"
+    t.integer "manager_approved_by_id"
+    t.datetime "manager_approved_at"
+    t.integer "hr_approved_by_id"
+    t.datetime "hr_approved_at"
+    t.integer "rejected_by_id"
+    t.text "rejected_reason"
+    t.datetime "rejected_at"
     t.index ["employee_id"], name: "index_leave_requests_on_employee_id"
+    t.index ["hr_approved_by_id"], name: "index_leave_requests_on_hr_approved_by_id"
+    t.index ["manager_approved_by_id"], name: "index_leave_requests_on_manager_approved_by_id"
+    t.index ["rejected_by_id"], name: "index_leave_requests_on_rejected_by_id"
   end
 
   create_table "maintenance_records", force: :cascade do |t|
@@ -421,6 +435,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_08_122726) do
   add_foreign_key "interviews", "candidates"
   add_foreign_key "job_openings", "departments"
   add_foreign_key "leave_requests", "employees"
+  add_foreign_key "leave_requests", "users", column: "hr_approved_by_id"
+  add_foreign_key "leave_requests", "users", column: "manager_approved_by_id"
+  add_foreign_key "leave_requests", "users", column: "rejected_by_id"
   add_foreign_key "maintenance_records", "assets"
   add_foreign_key "offboarding_employees", "employees"
   add_foreign_key "offboarding_tasks", "offboarding_employees"

@@ -9,6 +9,7 @@ class CreateEmployees < ActiveRecord::Migration[8.0]
       t.string :designation
       t.date :date_of_joining
       t.string :status
+      t.references :manager, foreign_key: { to_table: :employees }
 
       t.timestamps
     end
