@@ -13,7 +13,7 @@ demo_permissions = [
   { name: "payrolls.update", resource: "payrolls", action: "update", description: "Update payroll records" },
   { name: "payrolls.destroy", resource: "payrolls", action: "destroy", description: "Delete payroll records" },
   # Needed for accessing RolesController
-  { name: "roles.index", resource: "roles", action: "index", description: "View roles list" },
+  { name: "roles.index", resource: "roles", action: "index", description: "View roles list" }
 ]
 
 demo_permissions.each do |attrs|

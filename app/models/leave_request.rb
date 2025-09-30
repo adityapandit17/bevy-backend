@@ -72,12 +72,12 @@ class LeaveRequest < ApplicationRecord
 
   def half_day_period_label
     case half_day_period
-    when 'morning'
-      'Morning'
-    when 'afternoon'
-      'Afternoon'
+    when "morning"
+      "Morning"
+    when "afternoon"
+      "Afternoon"
     else
-      'Half Day'
+      "Half Day"
     end
   end
 
@@ -169,16 +169,16 @@ class LeaveRequest < ApplicationRecord
   def self.employee_leave_balance(employee_id, leave_type, year = Date.current.year)
     start_of_year = Date.new(year, 1, 1)
     end_of_year = Date.new(year, 12, 31)
-    
+
     approved_requests = where(
       employee_id: employee_id,
       leave_type: leave_type,
       status: "approved",
       start_date: start_of_year..end_of_year
     )
-    
+
     total_days = approved_requests.sum(:days)
-    
+
     # Default leave balances (can be made configurable)
     leave_limits = {
       "annual" => 21,
@@ -189,10 +189,10 @@ class LeaveRequest < ApplicationRecord
       "unpaid" => 30,
       "other" => 5
     }
-    
+
     limit = leave_limits[leave_type] || 0
-    remaining = [limit - total_days, 0].max
-    
+    remaining = [ limit - total_days, 0 ].max
+
     {
       total: limit,
       used: total_days,
@@ -202,7 +202,7 @@ class LeaveRequest < ApplicationRecord
 
   def self.employee_leave_summary(employee_id, year = Date.current.year)
     leave_types = %w[annual sick personal maternity paternity unpaid other]
-    
+
     leave_types.map do |type|
       balance = employee_leave_balance(employee_id, type, year)
       {
@@ -226,11 +226,11 @@ class LeaveRequest < ApplicationRecord
   def self.department_leave_stats(department_id, year = Date.current.year)
     start_of_year = Date.new(year, 1, 1)
     end_of_year = Date.new(year, 12, 31)
-    
+
     requests = joins(:employee)
               .where(employees: { department_id: department_id })
               .where(start_date: start_of_year..end_of_year)
-    
+
     {
       total_requests: requests.count,
       approved_requests: requests.approved.count,

@@ -123,7 +123,7 @@ class AttendanceRecord < ApplicationRecord
 
   def determine_status
     return if status.present? && status != "present"
-    
+
     if check_in.blank? && check_out.blank?
       self.status = "absent"
     elsif check_in.present? && check_out.blank?

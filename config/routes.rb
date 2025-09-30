@@ -269,9 +269,9 @@ Rails.application.routes.draw do
   end
 
   # File Upload System
-  resources :uploads, only: [:create] do
+  resources :uploads, only: [ :create ] do
     collection do
-      get ':filename', to: 'uploads#show', as: :file
+      get ":filename", to: "uploads#show", as: :file
     end
   end
 

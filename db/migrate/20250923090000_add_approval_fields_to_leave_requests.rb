@@ -9,5 +9,3 @@ class AddApprovalFieldsToLeaveRequests < ActiveRecord::Migration[8.0]
     add_column :leave_requests, :rejected_at, :datetime
   end
 end
-
-

@@ -3,19 +3,19 @@ class AttendanceRecordsController < ApplicationController
 
   def index
     @attendance_records = AttendanceRecord.includes(:employee)
-    
+
     # Apply filters
     @attendance_records = @attendance_records.by_employee(params[:employee_id]) if params[:employee_id].present?
     @attendance_records = @attendance_records.by_date(params[:date]) if params[:date].present?
     @attendance_records = @attendance_records.where(status: params[:status]) if params[:status].present?
     @attendance_records = @attendance_records.current_month if params[:current_month] == "true"
     @attendance_records = @attendance_records.current_year if params[:current_year] == "true"
-    
+
     # Apply date range filter
     if params[:start_date].present? && params[:end_date].present?
       @attendance_records = @attendance_records.where(date: params[:start_date]..params[:end_date])
     end
-    
+
     # Apply search
     if params[:search].present?
       search_term = "%#{params[:search]}%"
@@ -33,7 +33,7 @@ class AttendanceRecordsController < ApplicationController
 
   def create
     @attendance_record = AttendanceRecord.new(attendance_record_params)
-    
+
     if @attendance_record.save
       render json: format_attendance_record(@attendance_record), status: :created
     else
@@ -63,7 +63,7 @@ class AttendanceRecordsController < ApplicationController
 
     @attendance_record.check_in = Time.current
     @attendance_record.status = "present"
-    
+
     if @attendance_record.save
       render json: format_attendance_record(@attendance_record)
     else
@@ -84,7 +84,7 @@ class AttendanceRecordsController < ApplicationController
     end
 
     @attendance_record.check_out = Time.current
-    
+
     if @attendance_record.save
       render json: format_attendance_record(@attendance_record)
     else
@@ -96,9 +96,9 @@ class AttendanceRecordsController < ApplicationController
   def today
     employee_id = params[:employee_id]
     today = Date.current
-    
+
     @attendance_record = AttendanceRecord.find_by(employee_id: employee_id, date: today)
-    
+
     if @attendance_record
       render json: format_attendance_record(@attendance_record)
     else
@@ -117,9 +117,9 @@ class AttendanceRecordsController < ApplicationController
     employee_id = params[:employee_id]
     start_date = params[:start_date] || Date.current.beginning_of_month
     end_date = params[:end_date] || Date.current.end_of_month
-    
+
     records = AttendanceRecord.where(employee_id: employee_id, date: start_date..end_date)
-    
+
     stats = {
       total_days: records.count,
       present_days: records.present.count,
@@ -131,7 +131,7 @@ class AttendanceRecordsController < ApplicationController
       average_working_hours: records.average(:working_hours)&.round(2) || 0,
       attendance_percentage: records.count > 0 ? ((records.present.count.to_f / records.count) * 100).round(2) : 0
     }
-    
+
     render json: stats
   end
 
@@ -140,9 +140,9 @@ class AttendanceRecordsController < ApplicationController
     employee_id = params[:employee_id]
     start_date = params[:start_date] || Date.current.beginning_of_month
     end_date = params[:end_date] || Date.current.end_of_month
-    
+
     records = AttendanceRecord.where(employee_id: employee_id, date: start_date..end_date)
-    
+
     calendar_data = records.map do |record|
       {
         date: record.date,
@@ -155,7 +155,7 @@ class AttendanceRecordsController < ApplicationController
         status_label: record.status_label
       }
     end
-    
+
     render json: calendar_data
   end
 
@@ -166,7 +166,7 @@ class AttendanceRecordsController < ApplicationController
       employee_id = params[:employee_id]
       today = Date.current
       @attendance_record = AttendanceRecord.find_by(employee_id: employee_id, date: today)
-      
+
       unless @attendance_record
         @attendance_record = AttendanceRecord.create!(
           employee_id: employee_id,

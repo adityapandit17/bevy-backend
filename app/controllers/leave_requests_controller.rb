@@ -42,7 +42,7 @@ class LeaveRequestsController < ApplicationController
 
     # Check for overlapping leave requests
     if overlapping_requests_exist?
-      render json: { errors: ["You already have a leave request for this period"] }, status: :unprocessable_entity
+      render json: { errors: [ "You already have a leave request for this period" ] }, status: :unprocessable_entity
       return
     end
 
@@ -61,7 +61,7 @@ class LeaveRequestsController < ApplicationController
         render json: { errors: @leave_request.errors.full_messages }, status: :unprocessable_entity
       end
     else
-      render json: { errors: ["This leave request cannot be modified"] }, status: :unprocessable_entity
+      render json: { errors: [ "This leave request cannot be modified" ] }, status: :unprocessable_entity
     end
   end
 
@@ -70,7 +70,7 @@ class LeaveRequestsController < ApplicationController
       @leave_request.destroy
       head :no_content
     else
-      render json: { errors: ["This leave request cannot be cancelled"] }, status: :unprocessable_entity
+      render json: { errors: [ "This leave request cannot be cancelled" ] }, status: :unprocessable_entity
     end
   end
 
@@ -85,7 +85,7 @@ class LeaveRequestsController < ApplicationController
         )
         render json: format_leave_request(@leave_request)
       else
-        render json: { errors: ["Manager approval required before HR approval"] }, status: :unprocessable_entity
+        render json: { errors: [ "Manager approval required before HR approval" ] }, status: :unprocessable_entity
       end
     else
       # Treat non-HR approvers with permission as manager-level
@@ -97,7 +97,7 @@ class LeaveRequestsController < ApplicationController
         )
         render json: format_leave_request(@leave_request)
       else
-        render json: { errors: ["Only pending requests can be manager-approved"] }, status: :unprocessable_entity
+        render json: { errors: [ "Only pending requests can be manager-approved" ] }, status: :unprocessable_entity
       end
     end
   end
@@ -113,7 +113,7 @@ class LeaveRequestsController < ApplicationController
       )
       render json: format_leave_request(@leave_request)
     else
-      render json: { errors: ["Only pending or manager-approved requests can be rejected"] }, status: :unprocessable_entity
+      render json: { errors: [ "Only pending or manager-approved requests can be rejected" ] }, status: :unprocessable_entity
     end
   end
 
@@ -123,7 +123,7 @@ class LeaveRequestsController < ApplicationController
       @leave_request.update!(status: "cancelled")
       render json: format_leave_request(@leave_request)
     else
-      render json: { errors: ["This leave request cannot be cancelled"] }, status: :unprocessable_entity
+      render json: { errors: [ "This leave request cannot be cancelled" ] }, status: :unprocessable_entity
     end
   end
 
@@ -138,7 +138,7 @@ class LeaveRequestsController < ApplicationController
 
   # Get leave calendar for team/department
   def calendar
-    employee_ids = params[:employee_ids]&.split(',') || []
+    employee_ids = params[:employee_ids]&.split(",") || []
     start_date = params[:start_date] || Date.current.beginning_of_month
     end_date = params[:end_date] || Date.current.end_of_month
 
@@ -217,7 +217,7 @@ class LeaveRequestsController < ApplicationController
 
     existing_requests = LeaveRequest.where(employee_id: @leave_request.employee_id)
                                   .where.not(id: @leave_request.id)
-                                  .where(status: ["pending", "approved"])
+                                  .where(status: [ "pending", "approved" ])
 
     existing_requests.any? { |request| @leave_request.overlaps_with?(request) }
   end

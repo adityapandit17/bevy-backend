@@ -109,7 +109,7 @@ class RolesController < ApplicationController
       role: {
         id: role.id,
         name: role.name,
-        description: role.description,
+        description: role.description
       },
       permissions: serialized,
       grouped_permissions: serialized.group_by { |p| p[:resource] }
