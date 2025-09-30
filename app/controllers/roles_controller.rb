@@ -91,8 +91,9 @@ class RolesController < ApplicationController
   # GET /roles/:id/permissions_matrix
   # Returns all permissions with granted flag for this role, grouped by resource
   def permissions_matrix
-    role = Role.find(params[:id])
+    role = Role.includes(:role_permissions).find(params[:id])
     permissions = Permission.all
+    granted_id_set = role.role_permissions.pluck(:permission_id).to_set
 
     serialized = permissions.map do |p|
       {
@@ -101,7 +102,7 @@ class RolesController < ApplicationController
         resource: p.resource,
         action: p.action,
         description: p.description,
-        granted: role.permissions.exists?(id: p.id)
+        granted: granted_id_set.include?(p.id)
       }
     end
 
