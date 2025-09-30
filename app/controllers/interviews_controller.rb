@@ -33,7 +33,7 @@ class InterviewsController < ApplicationController
     @interview = Interview.new(interview_params)
     @interview.status ||= "scheduled"
 
-    if @interview.save
+    if @interview.save!
       # Update candidate's last contact date
       @interview.candidate.update(last_contact: Date.current)
 

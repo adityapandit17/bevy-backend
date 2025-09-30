@@ -36,7 +36,7 @@ class Candidate < ApplicationRecord
   end
 
   def interview_count
-    interviews.count
+    interviews.size
   end
 
   def days_since_applied
