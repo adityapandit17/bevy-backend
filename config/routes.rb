@@ -42,6 +42,10 @@ Rails.application.routes.draw do
   resources :roles do
     member do
       patch :update_permissions
+      get :permissions_matrix
+      patch :toggle_permission
+      post :add_default_module_permissions
+      post :add_permission
     end
   end
 

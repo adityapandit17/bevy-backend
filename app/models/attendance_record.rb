@@ -3,7 +3,7 @@ class AttendanceRecord < ApplicationRecord
 
   # Validations
   validates :date, presence: true
-  validates :status, presence: true, inclusion: { in: %w[present absent late half_day work_from_home] }
+  validates :status, presence: true, inclusion: { in: %w[present absent late half_day work_from_home early_departure] }
   validates :employee_id, uniqueness: { scope: :date, message: "already has attendance record for this date" }
   validate :check_out_after_check_in
   validate :date_not_in_future

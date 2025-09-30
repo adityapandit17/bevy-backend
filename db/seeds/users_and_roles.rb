@@ -2,8 +2,27 @@
 puts "Creating default roles..."
 Role.create_default_roles
 
-puts "Creating comprehensive permissions for all HRMS modules..."
-Permission.create_default_permissions
+puts "Creating default demo permissions (8 total)..."
+demo_permissions = [
+  { name: "employees.index", resource: "employees", action: "index", description: "View employees list" },
+  { name: "employees.create", resource: "employees", action: "create", description: "Create new employees" },
+  { name: "employees.update", resource: "employees", action: "update", description: "Update employee information" },
+  { name: "employees.destroy", resource: "employees", action: "destroy", description: "Delete employees" },
+  { name: "payrolls.index", resource: "payrolls", action: "index", description: "View payroll list" },
+  { name: "payrolls.create", resource: "payrolls", action: "create", description: "Create payroll records" },
+  { name: "payrolls.update", resource: "payrolls", action: "update", description: "Update payroll records" },
+  { name: "payrolls.destroy", resource: "payrolls", action: "destroy", description: "Delete payroll records" },
+  # Needed for accessing RolesController
+  { name: "roles.index", resource: "roles", action: "index", description: "View roles list" },
+]
+
+demo_permissions.each do |attrs|
+  Permission.find_or_create_by!(name: attrs[:name]) do |p|
+    p.resource = attrs[:resource]
+    p.action = attrs[:action]
+    p.description = attrs[:description]
+  end
+end
 
 # Assign permissions to roles
 puts "Assigning permissions to roles..."
@@ -18,9 +37,12 @@ end
 # HR Manager - Employee, Payroll, Reports, User Management permissions
 hr_manager = Role.find_by(name: 'HR Manager')
 if hr_manager
-  hr_permissions = Permission.where(
-    resource: [ 'employees', 'payrolls', 'reports', 'users', 'roles', 'permissions', 'settings' ]
-  )
+  # 5 of 8 permissions (employees: index/create/update, payrolls: index/create)
+  hr_permission_names = [
+    'employees.index', 'employees.create', 'employees.update',
+    'payrolls.index', 'payrolls.create'
+  ]
+  hr_permissions = Permission.where(name: hr_permission_names)
   hr_manager.permission_ids = hr_permissions.pluck(:id)
   puts "✓ HR Manager permissions assigned"
 end
@@ -28,9 +50,9 @@ end
 # Department Head - Team management, attendance approval
 dept_head = Role.find_by(name: 'Department Head')
 if dept_head
-  dept_permissions = Permission.where(
-    resource: [ 'employees', 'attendance_records', 'leave_requests', 'performance_reviews', 'performance_goals' ]
-  ).where.not(action: 'destroy')
+  # 2 of 8 permissions (employees.index, payrolls.index)
+  dept_permission_names = [ 'employees.index', 'payrolls.index' ]
+  dept_permissions = Permission.where(name: dept_permission_names)
   dept_head.permission_ids = dept_permissions.pluck(:id)
   puts "✓ Department Head permissions assigned"
 end
@@ -38,10 +60,8 @@ end
 # Employee - Self-service portal access
 employee_role = Role.find_by(name: 'Employee')
 if employee_role
-  employee_permissions = Permission.where(
-    resource: [ 'employees', 'attendance_records', 'leave_requests', 'performance_reviews', 'performance_goals', 'timesheets', 'employee_benefits', 'employee_trainings' ]
-  ).where(action: [ 'index', 'show' ])
-  employee_role.permission_ids = employee_permissions.pluck(:id)
+  # 0 permissions by default
+  employee_role.permission_ids = []
   puts "✓ Employee permissions assigned"
 end
 
