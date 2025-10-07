@@ -20,8 +20,8 @@ class OnboardingEmployee < ApplicationRecord
   def calculate_progress
     return if onboarding_tasks.empty?
 
-    completed_tasks = onboarding_tasks.where(is_completed: true).count
-    total_tasks = onboarding_tasks.count
+    completed_tasks = onboarding_tasks.where(is_completed: true).size
+    total_tasks = onboarding_tasks.size
     self.progress = total_tasks > 0 ? ((completed_tasks.to_f / total_tasks) * 100).round : 0
 
     # Update status based on progress

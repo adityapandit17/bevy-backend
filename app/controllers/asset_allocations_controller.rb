@@ -14,9 +14,9 @@ class AssetAllocationsController < ApplicationController
 
     render json: {
       allocations: @allocations.map { |allocation| format_allocation(allocation) },
-      total_count: @allocations.count,
-      active_count: @allocations.active.count,
-      returned_count: @allocations.returned.count
+      total_count: @allocations.size,
+      active_count: @allocations.active.size,
+      returned_count: @allocations.returned.size
     }
   end
 

@@ -219,8 +219,8 @@ class EmployeeProfilesController < ApplicationController
     {
       summary: {
         weekly_hours: @employee.weekly_hours_this_month,
-        total_entries: @employee.timesheets.count,
-        approved_entries: @employee.timesheets.approved.count
+        total_entries: @employee.timesheets.size,
+        approved_entries: @employee.timesheets.approved.size
       },
       timesheets: @employee.timesheets.recent.limit(20).map do |timesheet|
         {
@@ -241,8 +241,8 @@ class EmployeeProfilesController < ApplicationController
   def get_benefits_data
     {
       summary: {
-        total_benefits: @employee.employee_benefits.count,
-        active_benefits: @employee.employee_benefits.active.count,
+        total_benefits: @employee.employee_benefits.size,
+        active_benefits: @employee.employee_benefits.active.size,
         total_cost: @employee.total_benefits_cost
       },
       benefits: @employee.employee_benefits.map do |benefit|
@@ -266,8 +266,8 @@ class EmployeeProfilesController < ApplicationController
   def get_training_data
     {
       summary: {
-        total_trainings: @employee.employee_trainings.count,
-        completed_trainings: @employee.employee_trainings.completed.count,
+        total_trainings: @employee.employee_trainings.size,
+        completed_trainings: @employee.employee_trainings.completed.size,
         active_trainings: @employee.active_trainings,
         total_hours: @employee.total_training_hours
       },

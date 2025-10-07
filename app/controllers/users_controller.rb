@@ -23,7 +23,7 @@ class UsersController < ApplicationController
 
     render json: {
       users: @users.map { |user| format_user(user) },
-      total_count: @users.count,
+      total_count: @users.size,
       roles: Role.all.map { |role| { id: role.id, name: role.name, description: role.description } }
     }
   end

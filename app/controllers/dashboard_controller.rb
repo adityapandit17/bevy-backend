@@ -5,7 +5,7 @@ class DashboardController < ApplicationController
   def index
     begin
       @stats = {
-        total_employees: Employee.active.count,
+        total_employees: Employee.active.size,
         present_today: attendance_stats[:present],
         on_leave: attendance_stats[:on_leave],
         monthly_payroll: payroll_stats[:total_amount]
@@ -39,13 +39,13 @@ class DashboardController < ApplicationController
     present_count = AttendanceRecord.joins(:employee)
                                    .where(date: today, status: "present")
                                    .where(employees: { status: "active" })
-                                   .count
+                                   .size
 
     on_leave_count = LeaveRequest.joins(:employee)
                                  .where("start_date <= ? AND end_date >= ?", today, today)
                                  .where(status: "approved")
                                  .where(employees: { status: "active" })
-                                 .count
+                                 .size
 
     {
       present: present_count,
@@ -188,7 +188,7 @@ class DashboardController < ApplicationController
     pending_leaves = LeaveRequest.joins(:employee)
                                 .where(leave_requests: { status: "pending" })
                                 .where(employees: { status: "active" })
-                                .count
+                                .size
     if pending_leaves > 0
       tasks << {
         id: 1,
@@ -203,7 +203,7 @@ class DashboardController < ApplicationController
     pending_timesheets = Timesheet.joins(:employee)
                                  .where(timesheets: { status: "pending" })
                                  .where(employees: { status: "active" })
-                                 .count
+                                 .size
     if pending_timesheets > 0
       tasks << {
         id: 2,
@@ -218,7 +218,7 @@ class DashboardController < ApplicationController
     pending_reviews = PerformanceReview.joins(:employee)
                                       .where("performance_reviews.review_date <= ?", Date.current)
                                       .where(employees: { status: "active" })
-                                      .count
+                                      .size
     if pending_reviews > 0
       tasks << {
         id: 3,

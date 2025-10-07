@@ -95,23 +95,23 @@ class InterviewsController < ApplicationController
   def stats
     stats = {
       total_interviews: Interview.count,
-      scheduled_interviews: Interview.scheduled.count,
-      completed_interviews: Interview.completed.count,
-      interviews_today: Interview.today.count,
-      interviews_this_week: Interview.this_week.count,
-      overdue_interviews: Interview.where("scheduled_date < ? AND status = ?", Date.current, "scheduled").count
+      scheduled_interviews: Interview.scheduled.size,
+      completed_interviews: Interview.completed.size,
+      interviews_today: Interview.today.size,
+      interviews_this_week: Interview.this_week.size,
+      overdue_interviews: Interview.where("scheduled_date < ? AND status = ?", Date.current, "scheduled").size
     }
 
     # Interview type breakdown
     type_breakdown = {}
-    Interview.group(:interview_type).count.each do |type, count|
+    Interview.group(:interview_type).size.each do |type, count|
       type_breakdown[type] = count
     end
     stats[:type_breakdown] = type_breakdown
 
     # Status breakdown
     status_breakdown = {}
-    Interview.group(:status).count.each do |status, count|
+    Interview.group(:status).size.each do |status, count|
       status_breakdown[status] = count
     end
     stats[:status_breakdown] = status_breakdown

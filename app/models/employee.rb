@@ -136,27 +136,27 @@ class Employee < ApplicationRecord
   end
 
   def pending_leave_requests
-    leave_requests.pending.count
+    leave_requests.pending.size
   end
 
   def total_assets
-    assets.count
+    assets.size
   end
 
   def assigned_assets
-    assets.assigned.count
+    assets.assigned.size
   end
 
   def total_documents
-    employee_documents.count
+    employee_documents.size
   end
 
   def active_documents
-    employee_documents.active.count
+    employee_documents.active.size
   end
 
   def expiring_documents
-    employee_documents.expiring_soon.count
+    employee_documents.expiring_soon.size
   end
 
   def latest_performance_review
@@ -174,7 +174,7 @@ class Employee < ApplicationRecord
   end
 
   def active_trainings
-    employee_trainings.in_progress.count
+    employee_trainings.in_progress.size
   end
 
   def total_benefits_cost
@@ -188,8 +188,8 @@ class Employee < ApplicationRecord
   def profile_completion_percentage
     # Calculate profile completion based on filled fields
     fields = [ first_name, last_name, email, phone, designation, date_of_joining, department_id ]
-    filled_fields = fields.compact.count
-    (filled_fields.to_f / fields.count * 100).round(1)
+    filled_fields = fields.compact.size
+    (filled_fields.to_f / fields.size * 100).round(1)
   end
 
   # Alias methods for compatibility

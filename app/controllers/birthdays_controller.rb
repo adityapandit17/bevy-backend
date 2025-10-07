@@ -42,7 +42,7 @@ class BirthdaysController < ApplicationController
 
     render json: {
       upcoming_birthdays: upcoming_birthdays,
-      total_count: upcoming_birthdays.sum { |day| day[:employees].count }
+      total_count: upcoming_birthdays.sum { |day| day[:employees].size }
     }
   end
 
@@ -51,7 +51,7 @@ class BirthdaysController < ApplicationController
   def format_birthdays(employees, period)
     {
       period: period,
-      count: employees.count,
+      count: employees.size,
       employees: format_birthday_employees(employees)
     }
   end

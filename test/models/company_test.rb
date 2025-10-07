@@ -159,7 +159,6 @@ class CompanyTest < ActiveSupport::TestCase
   end
 
   test "should be able to update company" do
-    @company.save!
     @company.name = "Updated TechCorp"
     @company.save!
     assert_equal "Updated TechCorp", @company.reload.name

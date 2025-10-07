@@ -69,16 +69,16 @@ class OffboardingTasksController < ApplicationController
 
   def stats
     total_tasks = OffboardingTask.count
-    completed_tasks = OffboardingTask.completed.count
-    pending_tasks = OffboardingTask.pending.count
-    overdue_tasks = OffboardingTask.overdue.count
-    due_soon_tasks = OffboardingTask.due_soon.count
+    completed_tasks = OffboardingTask.completed.size
+    pending_tasks = OffboardingTask.pending.size
+    overdue_tasks = OffboardingTask.overdue.size
+    due_soon_tasks = OffboardingTask.due_soon.size
 
     # Category breakdown
-    category_stats = OffboardingTask.group(:category).count
+    category_stats = OffboardingTask.group(:category).size
 
     # Priority breakdown
-    priority_stats = OffboardingTask.group(:priority).count
+    priority_stats = OffboardingTask.group(:priority).size
 
     # Completion rate
     completion_rate = total_tasks > 0 ? ((completed_tasks.to_f / total_tasks) * 100).round(1) : 0

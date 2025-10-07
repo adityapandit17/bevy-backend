@@ -6,11 +6,11 @@ class SuperAdminController < ApplicationController
   def dashboard
     @stats = {
       total_users: User.count,
-      active_users: User.active.count,
-      total_employees: Employee.count,
-      total_roles: Role.count,
-      total_permissions: Permission.count,
-      recent_logins: User.where("last_login_at > ?", 24.hours.ago).count,
+      active_users: User.active.size,
+      total_employees: Employee.size,
+      total_roles: Role.size,
+      total_permissions: Permission.size,
+      recent_logins: User.where("last_login_at > ?", 24.hours.ago).size,
       system_uptime: system_uptime,
       database_size: database_size,
       last_backup: last_backup_time
@@ -32,7 +32,7 @@ class SuperAdminController < ApplicationController
 
     render json: {
       logs: @logs,
-      total_count: @logs.count,
+      total_count: @logs.size,
       available_levels: %w[DEBUG INFO WARN ERROR FATAL],
       date_range: available_date_range
     }
@@ -44,7 +44,7 @@ class SuperAdminController < ApplicationController
 
     render json: {
       audit_trails: @audit_trails,
-      total_count: @audit_trails.count,
+      total_count: @audit_trails.size,
       available_actions: available_audit_actions,
       available_resources: available_audit_resources
     }
@@ -230,7 +230,7 @@ class SuperAdminController < ApplicationController
     alerts = []
 
     # Check for various system issues
-    if User.where("last_login_at < ?", 30.days.ago).count > 0
+    if User.where("last_login_at < ?", 30.days.ago).size > 0
       alerts << { type: "warning", message: "Some users have not logged in for 30+ days" }
     end
 
@@ -374,14 +374,14 @@ class SuperAdminController < ApplicationController
   end
 
   def active_users_today
-    User.where("last_login_at > ?", 1.day.ago).count
+    User.where("last_login_at > ?", 1.day.ago).size
   end
 
   def login_statistics
     {
-      today: User.where("last_login_at > ?", 1.day.ago).count,
-      this_week: User.where("last_login_at > ?", 1.week.ago).count,
-      this_month: User.where("last_login_at > ?", 1.month.ago).count
+      today: User.where("last_login_at > ?", 1.day.ago).size,
+      this_week: User.where("last_login_at > ?", 1.week.ago).size,
+      this_month: User.where("last_login_at > ?", 1.month.ago).size
     }
   end
 

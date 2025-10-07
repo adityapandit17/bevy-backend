@@ -63,15 +63,15 @@ class CandidatesController < ApplicationController
   def stats
     stats = {
       total_applications: Candidate.count,
-      active_candidates: Candidate.active.count,
-      interviews_this_week: Interview.this_week.count,
-      offers_extended: Candidate.where(status: "offered").count,
-      hired_this_month: Candidate.where(status: "hired", applied_date: 1.month.ago..Date.current).count
+      active_candidates: Candidate.active.size,
+      interviews_this_week: Interview.this_week.size,
+      offers_extended: Candidate.where(status: "offered").size,
+      hired_this_month: Candidate.where(status: "hired", applied_date: 1.month.ago..Date.current).size
     }
 
     # Pipeline breakdown
     pipeline = {}
-    Candidate.group(:status).count.each do |status, count|
+    Candidate.group(:status).size.each do |status, count|
       pipeline[status] = count
     end
     stats[:pipeline] = pipeline
@@ -86,7 +86,7 @@ class CandidatesController < ApplicationController
     %w[applied screening interview technical final offered hired rejected].each do |status|
       candidates = Candidate.by_status(status).includes(:interviews)
       pipeline_data[status] = {
-        count: candidates.count,
+        count: candidates.size,
         candidates: candidates.map { |c| format_candidate(c) }
       }
     end

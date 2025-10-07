@@ -12,7 +12,7 @@ class PermissionsController < ApplicationController
     render json: {
       permissions: @permissions.map { |permission| format_permission(permission) },
       grouped_permissions: grouped_permissions.transform_values { |perms| perms.map { |p| format_permission(p) } },
-      total_count: @permissions.count
+      total_count: @permissions.size
     }
   end
 

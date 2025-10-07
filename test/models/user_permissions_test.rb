@@ -153,13 +153,13 @@ class UserPermissionsTest < ActiveSupport::TestCase
 
   test "permissions method returns all user permissions" do
     super_admin_permissions = @super_admin.permissions
-    assert_equal 10, super_admin_permissions.count # All permissions
+    assert_equal 10, super_admin_permissions.size # All permissions
 
     hr_manager_permissions = @hr_manager.permissions
-    assert_equal 8, hr_manager_permissions.count # Employee + Payroll permissions
+    assert_equal 8, hr_manager_permissions.size # Employee + Payroll permissions
 
     employee_permissions = @employee.permissions
-    assert_equal 2, employee_permissions.count # Only index and show
+    assert_equal 2, employee_permissions.size # Only index and show
   end
 
   test "can_access_module? works correctly" do
@@ -376,7 +376,7 @@ class UserPermissionsTest < ActiveSupport::TestCase
 
     assert_not user_without_roles.has_permission?("employees", "index")
     assert_not user_without_roles.has_permission?("payrolls", "create")
-    assert_equal 0, user_without_roles.permissions.count
+    assert_equal 0, user_without_roles.permissions.size
   end
 
   test "permission inheritance through multiple roles" do
@@ -406,7 +406,7 @@ class UserPermissionsTest < ActiveSupport::TestCase
     assert overlapping_user.has_permission?("employees", "index")
     assert overlapping_user.has_permission?("employees", "show")
     assert overlapping_user.has_permission?("employees", "create")
-    assert_equal 3, overlapping_user.permissions.count # Should be unique
+    assert_equal 3, overlapping_user.permissions.size # Should be unique
   end
 
   test "permission checking performance with many roles" do

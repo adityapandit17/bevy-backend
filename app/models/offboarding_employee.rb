@@ -100,8 +100,8 @@ class OffboardingEmployee < ApplicationRecord
   def calculate_progress
     return if offboarding_tasks.empty?
 
-    completed_tasks = offboarding_tasks.where(is_completed: true).count
-    total_tasks = offboarding_tasks.count
+    completed_tasks = offboarding_tasks.where(is_completed: true).size
+    total_tasks = offboarding_tasks.size
     self.progress = total_tasks > 0 ? ((completed_tasks.to_f / total_tasks) * 100).round : 0
   end
 

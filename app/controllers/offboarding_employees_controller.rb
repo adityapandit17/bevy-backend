@@ -59,18 +59,18 @@ class OffboardingEmployeesController < ApplicationController
 
   def stats
     total_offboarding = OffboardingEmployee.count
-    active_offboarding = OffboardingEmployee.active.count
-    completed_offboarding = OffboardingEmployee.completed.count
-    pending_offboarding = OffboardingEmployee.pending.count
-    cancelled_offboarding = OffboardingEmployee.cancelled.count
+    active_offboarding = OffboardingEmployee.active.size
+    completed_offboarding = OffboardingEmployee.completed.size
+    pending_offboarding = OffboardingEmployee.pending.size
+    cancelled_offboarding = OffboardingEmployee.cancelled.size
 
     # Calculate average duration
     completed_offboardings = OffboardingEmployee.completed
     avg_duration = completed_offboardings.any? ?
-      (completed_offboardings.sum(&:duration_days).to_f / completed_offboardings.count).round : 0
+      (completed_offboardings.sum(&:duration_days).to_f / completed_offboardings.size).round : 0
 
     # Task category breakdown
-    task_categories = OffboardingTask.group(:category).count
+    task_categories = OffboardingTask.group(:category).size
 
     render json: {
       total_offboarding: total_offboarding,

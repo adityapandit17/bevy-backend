@@ -121,15 +121,15 @@ class AttendanceRecordsController < ApplicationController
     records = AttendanceRecord.where(employee_id: employee_id, date: start_date..end_date)
 
     stats = {
-      total_days: records.count,
-      present_days: records.present.count,
-      absent_days: records.absent.count,
-      late_days: records.late.count,
-      half_days: records.half_day.count,
-      work_from_home_days: records.work_from_home.count,
+      total_days: records.size,
+      present_days: records.present.size,
+      absent_days: records.absent.size,
+      late_days: records.late.size,
+      half_days: records.half_day.size,
+      work_from_home_days: records.work_from_home.size,
       total_working_hours: records.sum(:working_hours),
       average_working_hours: records.average(:working_hours)&.round(2) || 0,
-      attendance_percentage: records.count > 0 ? ((records.present.count.to_f / records.count) * 100).round(2) : 0
+      attendance_percentage: records.size > 0 ? ((records.present.size.to_f / records.size) * 100).round(2) : 0
     }
 
     render json: stats

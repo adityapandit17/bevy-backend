@@ -165,13 +165,13 @@ class LeaveRequestsController < ApplicationController
       requests = LeaveRequest.where(start_date: start_of_year..end_of_year)
 
       stats = {
-        total_requests: requests.count,
-        approved_requests: requests.approved.count,
-        pending_requests: requests.pending.count,
-        rejected_requests: requests.rejected.count,
+        total_requests: requests.size,
+        approved_requests: requests.approved.size,
+        pending_requests: requests.pending.size,
+        rejected_requests: requests.rejected.size,
         total_days_taken: requests.approved.sum(:days),
         by_leave_type: requests.approved.group(:leave_type).sum(:days),
-        by_status: requests.group(:status).count
+        by_status: requests.group(:status).size
       }
     end
 

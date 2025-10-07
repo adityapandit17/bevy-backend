@@ -24,7 +24,7 @@ class AssetsController < ApplicationController
 
     render json: {
       assets: @assets.map { |asset| format_asset(asset) },
-      total_count: @assets.count,
+      total_count: @assets.size,
       filters: {
         asset_types: Asset.distinct.pluck(:asset_type),
         departments: Asset.distinct.pluck(:department),
@@ -84,20 +84,20 @@ class AssetsController < ApplicationController
   # GET /assets/stats
   def stats
     total_assets = Asset.count
-    assigned_assets = Asset.assigned.count
-    available_assets = Asset.available.count
-    maintenance_assets = Asset.maintenance.count
+    assigned_assets = Asset.assigned.size
+    available_assets = Asset.available.size
+    maintenance_assets = Asset.maintenance.size
     total_value = Asset.sum(:current_value)
     purchase_value = Asset.sum(:purchase_cost)
 
-    asset_types = Asset.group(:asset_type).count
-    status_distribution = Asset.group(:status).count
-    condition_distribution = Asset.group(:condition).count
-    department_distribution = Asset.group(:department).count
+    asset_types = Asset.group(:asset_type).size
+    status_distribution = Asset.group(:status).size
+    condition_distribution = Asset.group(:condition).size
+    department_distribution = Asset.group(:department).size
 
-    overdue_maintenance = Asset.overdue_maintenance.count
-    due_maintenance_soon = Asset.due_maintenance_soon.count
-    warranty_expiring_soon = Asset.warranty_expiring_soon.count
+    overdue_maintenance = Asset.overdue_maintenance.size
+    due_maintenance_soon = Asset.due_maintenance_soon.size
+    warranty_expiring_soon = Asset.warranty_expiring_soon.size
 
     render json: {
       overview: {
@@ -133,7 +133,7 @@ class AssetsController < ApplicationController
 
     render json: {
       allocations: @allocations.map { |allocation| format_allocation(allocation) },
-      total_active_allocations: @allocations.count
+      total_active_allocations: @allocations.size
     }
   end
 
@@ -149,7 +149,7 @@ class AssetsController < ApplicationController
       due_maintenance_soon: @due_soon_assets.map { |asset| format_asset(asset) },
       maintenance_stats: {
         total_maintenance_cost: MaintenanceRecord.sum(:cost),
-        maintenance_count_this_year: MaintenanceRecord.this_year.count,
+        maintenance_count_this_year: MaintenanceRecord.this_year.size,
         average_maintenance_cost: MaintenanceRecord.average(:cost)&.round(2) || 0
       }
     }

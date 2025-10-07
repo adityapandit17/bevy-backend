@@ -77,11 +77,11 @@ class PerformanceReview < ApplicationRecord
   end
 
   def goals_completed_count
-    performance_goals.where(status: "completed").count
+    performance_goals.where(status: "completed").size
   end
 
   def goals_total_count
-    performance_goals.count
+    performance_goals.size
   end
 
   def goals_completion_rate

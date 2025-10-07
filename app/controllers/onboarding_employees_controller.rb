@@ -49,19 +49,19 @@ class OnboardingEmployeesController < ApplicationController
   # GET /onboarding_employees/stats
   def stats
     stats = {
-      active_onboarding: OnboardingEmployee.active.count,
-      completed_this_month: OnboardingEmployee.completed.where("updated_at >= ?", 1.month.ago).count,
-      completed_this_week: OnboardingEmployee.completed.where("updated_at >= ?", 1.week.ago).count,
+      active_onboarding: OnboardingEmployee.active.size,
+      completed_this_month: OnboardingEmployee.completed.where("updated_at >= ?", 1.month.ago).size,
+      completed_this_week: OnboardingEmployee.completed.where("updated_at >= ?", 1.week.ago).size,
       total_onboarding: OnboardingEmployee.count,
-      pending_status: OnboardingEmployee.pending.count,
-      in_progress_status: OnboardingEmployee.in_progress.count,
-      completed_total: OnboardingEmployee.completed.count,
-      pending_tasks: OnboardingTask.pending.count,
-      completed_tasks: OnboardingTask.where(is_completed: true).count,
+      pending_status: OnboardingEmployee.pending.size,
+      in_progress_status: OnboardingEmployee.in_progress.size,
+      completed_total: OnboardingEmployee.completed.size,
+      pending_tasks: OnboardingTask.pending.size,
+      completed_tasks: OnboardingTask.where(is_completed: true).size,
       total_tasks: OnboardingTask.count,
-      documents_pending: OnboardingTask.where("documents IS NOT NULL AND documents != ''").pending.count,
-      overdue_tasks: OnboardingTask.where("due_date < ? AND is_completed = ?", Date.current, false).count,
-      due_soon_tasks: OnboardingTask.where("due_date BETWEEN ? AND ? AND is_completed = ?", Date.current, 3.days.from_now, false).count
+      documents_pending: OnboardingTask.where("documents IS NOT NULL AND documents != ''").pending.size,
+      overdue_tasks: OnboardingTask.where("due_date < ? AND is_completed = ?", Date.current, false).size,
+      due_soon_tasks: OnboardingTask.where("due_date BETWEEN ? AND ? AND is_completed = ?", Date.current, 3.days.from_now, false).size
     }
 
     render json: stats

@@ -7,7 +7,7 @@ class RolesController < ApplicationController
 
     render json: {
       roles: @roles.map { |role| format_role(role) },
-      total_count: @roles.count
+      total_count: @roles.size
     }
   end
 
@@ -231,8 +231,8 @@ class RolesController < ApplicationController
       id: role.id,
       name: role.name,
       description: role.description,
-      user_count: role.users.count,
-      permission_count: role.permissions.count,
+      user_count: role.users.size,
+      permission_count: role.permissions.size,
       created_at: role.created_at,
       updated_at: role.updated_at
     }
