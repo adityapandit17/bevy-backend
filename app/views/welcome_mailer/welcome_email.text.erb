@@ -1,0 +1,30 @@
+Welcome to HRMS Pro!
+
+Hello <%= @employee.first_name %> <%= @employee.last_name %>,
+
+Welcome to our organization! We're excited to have you join our team. To get started with your new role, please complete your account setup.
+
+Your Information:
+- Name: <%= @employee.first_name %> <%= @employee.last_name %>
+- Email: <%= @employee.email %>
+- Position: <%= @employee.designation %>
+- Start Date: <%= @employee.date_of_joining&.strftime("%B %d, %Y") %>
+
+Complete your account setup by visiting this link:
+<%= @invitation_url %>
+
+This link will allow you to:
+- Set up your secure password
+- Access your employee dashboard
+- View your onboarding checklist
+- Access company resources and tools
+
+Security Note: This invitation link is unique to you and will expire in 2 weeks. Please keep it secure and don't share it with others.
+
+If you have any questions or need assistance, please don't hesitate to contact our HR team.
+
+Once again, welcome to the team!
+
+---
+HRMS Pro - Human Resource Management System
+If you didn't expect this email, please contact your HR department.

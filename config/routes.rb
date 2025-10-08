@@ -36,6 +36,18 @@ Rails.application.routes.draw do
   resources :users do
     member do
       patch :update_roles
+      post :invite
+      patch :resend_invitation
+    end
+    collection do
+      get :invitations
+    end
+  end
+
+  # Invitation management
+  resources :invitations, only: [:index, :create, :destroy] do
+    member do
+      patch :resend
     end
   end
 
@@ -185,6 +197,7 @@ Rails.application.routes.draw do
   resources :onboarding_employees do
     member do
       patch :update_status
+      post :send_welcome_email
     end
     collection do
       get :stats

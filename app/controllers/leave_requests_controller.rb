@@ -1,6 +1,6 @@
 class LeaveRequestsController < ApplicationController
   before_action :set_leave_request, only: [ :show, :update, :destroy, :approve, :reject, :cancel ]
-  before_action :authenticate_user!
+  # before_action :authenticate_user!
 
   def index
     @leave_requests = LeaveRequest.includes(:employee)

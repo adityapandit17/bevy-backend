@@ -86,6 +86,37 @@ class OnboardingEmployeesController < ApplicationController
     render json: onboarding_status
   end
 
+  # POST /onboarding_employees/:id/send_welcome_email
+  def send_welcome_email
+    @onboarding_employee = OnboardingEmployee.find(params[:id])
+    employee = @onboarding_employee.employee
+
+    # Check if user already exists
+    existing_user = User.find_by(email: employee.email)
+    if existing_user
+      render json: { 
+        success: false, 
+        message: "User account already exists for this employee" 
+      }, status: :unprocessable_entity
+      return
+    end
+
+    # Queue the background job
+    job = SendWelcomeEmailJob.perform_later(employee.id, current_user&.id)
+    
+    render json: { 
+      success: true, 
+      message: "Welcome email job queued successfully",
+      job_id: job.job_id
+    }
+  rescue => e
+    Rails.logger.error "Failed to queue welcome email job: #{e.message}"
+    render json: { 
+      success: false, 
+      message: "Failed to queue welcome email: #{e.message}" 
+    }, status: :internal_server_error
+  end
+
   private
 
   def set_onboarding_employee
