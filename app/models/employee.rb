@@ -31,13 +31,22 @@ class Employee < ApplicationRecord
   validates :designation, presence: true
   validates :date_of_joining, presence: true
   # validates :date_of_birth, presence: true
-  # validates :status, presence: true, inclusion: { in: %w[active inactive terminated probation] }
+  validates :status, presence: true, inclusion: { in: %w[active inactive terminated probation onboarding] }
+
+  enum :status, {
+    active: "active",
+    inactive: "inactive",
+    terminated: "terminated",
+    probation: "probation",
+    onboarding: "onboarding"
+  }, default: "onboarding"
 
   # Scopes
   scope :active, -> { where(status: "active") }
   scope :inactive, -> { where(status: "inactive") }
   scope :terminated, -> { where(status: "terminated") }
   scope :probation, -> { where(status: "probation") }
+  scope :onboarding_pending, -> { where(status: "onboarding") }
   scope :by_department, ->(department_id) { where(department_id: department_id) }
   scope :by_designation, ->(designation) { where(designation: designation) }
   scope :recent_hires, -> { where("date_of_joining >= ?", 3.months.ago) }
@@ -68,6 +77,10 @@ class Employee < ApplicationRecord
 
   def probation?
     status == "probation"
+  end
+
+  def onboarding_pending?
+    status == "onboarding"
   end
 
   def name

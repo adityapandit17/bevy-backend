@@ -31,6 +31,7 @@ class SendWelcomeEmailJob < ApplicationJob
       employee_role = Role.find_by(name: "Employee")
       if employee_role
         user.roles << employee_role
+        employee.update(status: "active")
         Rails.logger.info "Assigned Employee role to user #{user.id}"
       else
         Rails.logger.warn "Employee role not found - user created without role"
