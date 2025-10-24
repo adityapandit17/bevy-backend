@@ -81,4 +81,8 @@ Rails.application.configure do
     port: 1025,
     domain: "localhost"
   }
+
+  # Use Solid Queue in Development.
+  config.active_job.queue_adapter = :solid_queue
+  config.solid_queue.connects_to = { database: { writing: :queue } }
 end
