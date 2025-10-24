@@ -22,7 +22,9 @@ class SendWelcomeEmailJob < ApplicationJob
         status: "active"
       },
       invited_by
-    )
+    ) do |u|
+      u.skip_invitation = true
+    end
 
     if user.persisted?
       # Assign default Employee role
@@ -36,7 +38,7 @@ class SendWelcomeEmailJob < ApplicationJob
 
       # Send welcome email
       begin
-        WelcomeMailer.welcome_email(employee, user.invitation_token).deliver_now
+        # WelcomeMailer.welcome_email(employee, user.invitation_token).deliver_now
         Rails.logger.info "Welcome email sent to #{employee.email}"
 
         {
