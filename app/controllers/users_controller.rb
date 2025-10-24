@@ -110,7 +110,7 @@ class UsersController < ApplicationController
   # POST /users/:id/invite
   def invite
     @user = User.find(params[:id])
-    
+
     if @user.invited_to_sign_up?
       render json: { error: "User has already been invited" }, status: :unprocessable_entity
       return
@@ -132,7 +132,7 @@ class UsersController < ApplicationController
   # PATCH /users/:id/resend_invitation
   def resend_invitation
     @user = User.find(params[:id])
-    
+
     unless @user.invited_to_sign_up?
       render json: { error: "User has not been invited yet" }, status: :unprocessable_entity
       return
@@ -154,7 +154,7 @@ class UsersController < ApplicationController
   # GET /users/invitations
   def invitations
     @invited_users = User.invitation_not_accepted.includes(:roles, :invited_by)
-    
+
     render json: {
       invitations: @invited_users.map { |user| format_invitation(user) },
       total_count: @invited_users.count

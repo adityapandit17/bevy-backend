@@ -45,7 +45,7 @@ Rails.application.routes.draw do
   end
 
   # Invitation management
-  resources :invitations, only: [:index, :create, :destroy] do
+  resources :invitations, only: [ :index, :create, :destroy ] do
     member do
       patch :resend
     end

@@ -5,7 +5,7 @@ class InvitationsController < ApplicationController
   # GET /invitations
   def index
     @invited_users = User.invitation_not_accepted.includes(:roles, :invited_by)
-    
+
     render json: {
       invitations: @invited_users.map { |user| format_invitation(user) },
       total_count: @invited_users.count
@@ -16,7 +16,7 @@ class InvitationsController < ApplicationController
   def create
     email = params[:email]&.downcase
     role_ids = params[:role_ids] || []
-    
+
     if email.blank?
       render json: { error: "Email is required" }, status: :bad_request
       return
@@ -35,7 +35,7 @@ class InvitationsController < ApplicationController
 
     # Create invited user
     @user = User.invite!(
-      { 
+      {
         email: email,
         first_name: params[:first_name] || "Invited",
         last_name: params[:last_name] || "User",
@@ -65,7 +65,7 @@ class InvitationsController < ApplicationController
   # PATCH /invitations/:id/resend
   def resend
     @user = User.find(params[:id])
-    
+
     unless @user.invited_to_sign_up?
       render json: { error: "User has not been invited yet" }, status: :unprocessable_entity
       return
@@ -87,7 +87,7 @@ class InvitationsController < ApplicationController
   # DELETE /invitations/:id
   def destroy
     @user = User.find(params[:id])
-    
+
     unless @user.invited_to_sign_up?
       render json: { error: "User has not been invited yet" }, status: :unprocessable_entity
       return

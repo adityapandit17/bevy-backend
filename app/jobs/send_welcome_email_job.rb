@@ -4,10 +4,10 @@ class SendWelcomeEmailJob < ApplicationJob
   def perform(employee_id, invited_by_user_id)
     employee = Employee.find(employee_id)
     invited_by = User.find_by(id: invited_by_user_id)
-    
+
     # Check if user already exists
     existing_user = User.find_by(email: employee.email)
-    
+
     if existing_user
       Rails.logger.info "User already exists for employee #{employee.id}: #{employee.email}"
       return { success: false, message: "User already exists for this email" }
@@ -38,34 +38,34 @@ class SendWelcomeEmailJob < ApplicationJob
       begin
         WelcomeMailer.welcome_email(employee, user.invitation_token).deliver_now
         Rails.logger.info "Welcome email sent to #{employee.email}"
-        
-        return { 
-          success: true, 
+
+        {
+          success: true,
           message: "Welcome email sent successfully",
           user_id: user.id,
           invitation_token: user.invitation_token
         }
       rescue => e
         Rails.logger.error "Failed to send welcome email: #{e.message}"
-        return { 
-          success: false, 
+        {
+          success: false,
           message: "User created but email failed to send: #{e.message}",
           user_id: user.id
         }
       end
     else
       Rails.logger.error "Failed to create user for employee #{employee.id}: #{user.errors.full_messages.join(', ')}"
-      return { 
-        success: false, 
-        message: "Failed to create user: #{user.errors.full_messages.join(', ')}" 
+      {
+        success: false,
+        message: "Failed to create user: #{user.errors.full_messages.join(', ')}"
       }
     end
   rescue => e
     Rails.logger.error "SendWelcomeEmailJob failed: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
-    return { 
-      success: false, 
-      message: "Job failed: #{e.message}" 
+    {
+      success: false,
+      message: "Job failed: #{e.message}"
     }
   end
 end
