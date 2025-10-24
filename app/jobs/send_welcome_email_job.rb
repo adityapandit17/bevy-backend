@@ -19,7 +19,8 @@ class SendWelcomeEmailJob < ApplicationJob
         email: employee.email,
         first_name: employee.first_name,
         last_name: employee.last_name,
-        status: "active"
+        status: "active",
+        employee_id: employee.id
       },
       invited_by
     ) do |u|

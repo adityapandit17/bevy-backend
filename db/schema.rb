@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_24_075440) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_24_114231) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.integer "employee_id", null: false
@@ -429,7 +429,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_24_075440) do
     t.string "invited_by_type"
     t.integer "invited_by_id"
     t.integer "invitations_count", default: 0
+    t.integer "employee_id"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["employee_id"], name: "index_users_on_employee_id"
     t.index ["invitation_token"], name: "index_users_on_invitation_token", unique: true
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
     t.index ["invited_by_type", "invited_by_id"], name: "index_users_on_invited_by"
@@ -465,4 +467,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_24_075440) do
   add_foreign_key "timesheets", "employees"
   add_foreign_key "user_roles", "roles"
   add_foreign_key "user_roles", "users"
+  add_foreign_key "users", "employees"
 end
