@@ -286,7 +286,8 @@ Rails.application.routes.draw do
   # File Upload System
   resources :uploads, only: [ :create ] do
     collection do
-      get ":filename", to: "uploads#show", as: :file
+      get ":filename", to: "uploads#show", as: :file, constraints: { filename: /.*/ }
+      options ":filename", to: "uploads#options", constraints: { filename: /.*/ }
     end
   end
 
