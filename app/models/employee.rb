@@ -2,7 +2,7 @@ class Employee < ApplicationRecord
   belongs_to :department
 
   # Manager hierarchy
-  belongs_to :manager, class_name: "Employee", optional: true
+  belongs_to :manager, class_name: "Employee", foreign_key: :manager_id, optional: true
   has_many :direct_reports, class_name: "Employee", foreign_key: :manager_id, dependent: :nullify
 
   # Existing associations

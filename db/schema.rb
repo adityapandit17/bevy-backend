@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_08_112419) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_24_075440) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.integer "employee_id", null: false
@@ -159,6 +159,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_08_112419) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.date "date_of_birth"
+    t.integer "manager_id"
     t.index ["department_id"], name: "index_employees_on_department_id"
     t.index ["email"], name: "index_employees_on_email", unique: true
   end
