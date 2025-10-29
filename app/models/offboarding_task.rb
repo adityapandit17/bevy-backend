@@ -39,6 +39,7 @@ class OffboardingTask < ApplicationRecord
 
   def days_until_due
     return 0 if is_completed?
+
     (due_date - Date.current).to_i
   end
 

@@ -86,6 +86,7 @@ class PerformanceReview < ApplicationRecord
 
   def goals_completion_rate
     return 0 if goals_total_count == 0
+
     (goals_completed_count.to_f / goals_total_count * 100).round(1)
   end
 
@@ -109,6 +110,7 @@ class PerformanceReview < ApplicationRecord
     # Assuming reviews should be done quarterly
     last_review = employee.performance_reviews.where("review_date < ?", review_date).order(review_date: :desc).first
     return false unless last_review
+
     review_date - last_review.review_date > 4.months
   end
 

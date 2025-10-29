@@ -11,6 +11,7 @@ class SendWelcomeEmailJob < ApplicationJob
     if existing_user
       Rails.logger.info "User already exists for employee #{employee.id}: #{employee.email}"
       return { success: false, message: "User already exists for this email" }
+
     end
 
     # Create user invitation with default role

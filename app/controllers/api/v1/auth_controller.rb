@@ -11,6 +11,7 @@ class Api::V1::AuthController < ApplicationController
     # Validate required parameters
     if email.blank? || password.blank?
       return render_error("Email and password are required", :bad_request)
+
     end
 
     # Find user by email
@@ -98,6 +99,7 @@ class Api::V1::AuthController < ApplicationController
 
     if token.blank?
       return render_error("Authorization token is required", :unauthorized)
+
     end
 
     user = JwtService.verify_token(token)

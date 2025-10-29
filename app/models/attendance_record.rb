@@ -47,16 +47,19 @@ class AttendanceRecord < ApplicationRecord
 
   def working_hours
     return 0 unless check_in && check_out
+
     ((check_out - check_in) / 1.hour).round(2)
   end
 
   def overtime_hours
     return 0 unless working_hours > 8
+
     working_hours - 8
   end
 
   def is_late?
     return false unless check_in
+
     check_in > Time.parse("09:00")
   end
 
@@ -118,6 +121,7 @@ class AttendanceRecord < ApplicationRecord
 
   def calculate_working_hours
     return unless check_in && check_out
+
     self.working_hours = ((check_out - check_in) / 1.hour).round(2)
   end
 
@@ -141,11 +145,13 @@ class AttendanceRecord < ApplicationRecord
 
   def check_out_after_check_in
     return unless check_in && check_out
+
     errors.add(:check_out, "must be after check in time") if check_out <= check_in
   end
 
   def date_not_in_future
     return unless date
+
     errors.add(:date, "cannot be in the future") if date > Date.current
   end
 end

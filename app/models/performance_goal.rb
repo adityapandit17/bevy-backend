@@ -53,11 +53,13 @@ class PerformanceGoal < ApplicationRecord
 
   def days_until_due
     return nil if completed?
+
     (due_date - Date.current).to_i
   end
 
   def days_overdue
     return 0 unless is_overdue?
+
     (Date.current - due_date).to_i
   end
 

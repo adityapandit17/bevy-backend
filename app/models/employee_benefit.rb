@@ -51,6 +51,7 @@ class EmployeeBenefit < ApplicationRecord
 
   def days_until_expiry
     return nil unless end_date
+
     (end_date - Date.current).to_i
   end
 

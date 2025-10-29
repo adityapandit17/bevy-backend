@@ -29,9 +29,12 @@ module Authorization
 
   def can_access_employee_data?(employee_id)
     return true if current_user.has_role?("Super Admin") || current_user.has_role?("HR Manager")
+
     return true if current_user.employee_id == employee_id.to_i
+
     return true if current_user.has_role?("Department Head") &&
                   current_user.employee&.department_id == Employee.find(employee_id).department_id
+
     false
   end
 end

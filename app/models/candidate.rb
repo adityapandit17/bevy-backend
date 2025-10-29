@@ -24,6 +24,7 @@ class Candidate < ApplicationRecord
 
   def skills_list
     return [] if skills.blank?
+
     skills.split(",").map(&:strip)
   end
 
@@ -45,6 +46,7 @@ class Candidate < ApplicationRecord
 
   def days_since_last_contact
     return nil unless last_contact
+
     (Date.current - last_contact).to_i
   end
 end

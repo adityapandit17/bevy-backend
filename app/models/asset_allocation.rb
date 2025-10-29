@@ -30,6 +30,7 @@ class AssetAllocation < ApplicationRecord
 
   def duration_days
     return 0 unless assigned_date
+
     end_date = return_date || Date.current
     (end_date - assigned_date).to_i
   end

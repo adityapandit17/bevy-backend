@@ -38,11 +38,13 @@ class JobOpening < ApplicationRecord
 
   def salary_range
     return "Not specified" unless salary_min.present? && salary_max.present?
+
     "$#{salary_min.to_s(:delimited)} - $#{salary_max.to_s(:delimited)}"
   end
 
   def average_salary
     return nil unless salary_min.present? && salary_max.present?
+
     (salary_min + salary_max) / 2
   end
 
@@ -64,21 +66,25 @@ class JobOpening < ApplicationRecord
 
   def days_since_posted
     return nil unless posted
+
     (Date.current - posted).to_i
   end
 
   def is_recent?
     return false unless posted
+
     posted >= 7.days.ago
   end
 
   def is_urgent?
     return false unless posted
+
     posted <= 3.days.ago && applications.to_i < 5
   end
 
   def skills_list
     return [] if skills.blank?
+
     skills.split(",").map(&:strip)
   end
 
@@ -88,6 +94,7 @@ class JobOpening < ApplicationRecord
 
   def formatted_posted_date
     return "Not posted" unless posted
+
     posted.strftime("%B %d, %Y")
   end
 

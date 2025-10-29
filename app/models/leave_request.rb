@@ -55,6 +55,7 @@ class LeaveRequest < ApplicationRecord
 
   def duration_days
     return 0 unless start_date && end_date
+
     if half_day?
       0.5
     else
@@ -163,6 +164,7 @@ class LeaveRequest < ApplicationRecord
 
   def overlaps_with?(other_request)
     return false if other_request.id == id
+
     start_date <= other_request.end_date && end_date >= other_request.start_date
   end
 
@@ -253,6 +255,7 @@ class LeaveRequest < ApplicationRecord
 
   def end_date_after_start_date
     return unless start_date && end_date
+
     if end_date < start_date
       errors.add(:end_date, "must be after start date")
     end

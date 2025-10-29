@@ -44,6 +44,7 @@ class EmployeeDocument < ApplicationRecord
 
   def days_until_expiry
     return nil unless expiry_date
+
     (expiry_date - Date.current).to_i
   end
 

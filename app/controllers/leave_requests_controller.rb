@@ -266,6 +266,7 @@ class LeaveRequestsController < ApplicationController
 
   def approvers_for(employee)
     return {} unless employee
+
     manager_user = employee.manager&.user
     hr_user = User.hr_managers.first
     {

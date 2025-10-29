@@ -67,11 +67,13 @@ class EmployeeTraining < ApplicationRecord
 
   def days_until_start
     return nil if is_past?
+
     (start_date - Date.current).to_i
   end
 
   def days_until_end
     return nil if is_past?
+
     (end_date - Date.current).to_i
   end
 

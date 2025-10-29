@@ -294,7 +294,9 @@ class SuperAdminController < ApplicationController
   def overall_health_status(health_status)
     statuses = health_status.values.map { |h| h[:status] }
     return "critical" if statuses.include?("critical")
+
     return "warning" if statuses.include?("warning")
+
     "healthy"
   end
 

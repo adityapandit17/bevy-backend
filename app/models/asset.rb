@@ -73,6 +73,7 @@ class Asset < ApplicationRecord
 
   def age_in_years
     return 0 unless purchase_date
+
     ((Date.current - purchase_date) / 365.25).to_i
   end
 

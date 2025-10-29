@@ -180,6 +180,7 @@ class Employee < ApplicationRecord
   def average_performance_rating
     reviews = performance_reviews.where.not(rating: nil)
     return 0 if reviews.empty?
+
     reviews.average(:rating).round(2)
   end
 
@@ -223,11 +224,13 @@ class Employee < ApplicationRecord
   # Birthday methods
   def birthday_today?
     return false unless date_of_birth
+
     date_of_birth.strftime("%m-%d") == Date.current.strftime("%m-%d")
   end
 
   def birthday_this_week?
     return false unless date_of_birth
+
     start_of_week = Date.current.beginning_of_week
     end_of_week = Date.current.end_of_week
     birthday_month_day = date_of_birth.strftime("%m-%d")
@@ -239,11 +242,13 @@ class Employee < ApplicationRecord
 
   def birthday_this_month?
     return false unless date_of_birth
+
     date_of_birth.strftime("%m") == Date.current.strftime("%m")
   end
 
   def age
     return nil unless date_of_birth
+
     today = Date.current
     age = today.year - date_of_birth.year
     age -= 1 if today < date_of_birth + age.years
@@ -252,6 +257,7 @@ class Employee < ApplicationRecord
 
   def next_birthday
     return nil unless date_of_birth
+
     today = Date.current
     this_year_birthday = Date.new(today.year, date_of_birth.month, date_of_birth.day)
 
@@ -264,11 +270,13 @@ class Employee < ApplicationRecord
 
   def days_until_birthday
     return nil unless next_birthday
+
     (next_birthday - Date.current).to_i
   end
 
   def birthday_formatted
     return "Not set" unless date_of_birth
+
     date_of_birth.strftime("%B %d")
   end
 end

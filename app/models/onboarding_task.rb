@@ -25,6 +25,7 @@ class OnboardingTask < ApplicationRecord
 
   def documents_list
     return [] if documents.blank?
+
     documents.split(",").map(&:strip)
   end
 

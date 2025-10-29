@@ -65,31 +65,37 @@
 
   def has_permission?(resource, action)
     return true if super_admin? # Super admin has all permissions
+
     roles.joins(:permissions).where(permissions: { resource: resource, action: action }).exists?
   end
 
   def permissions
     return Permission.all if super_admin?
+
     Permission.joins(role_permissions: :role).where(roles: { id: role_ids }).distinct
   end
 
   def can_access_module?(module_name)
     return true if super_admin?
+
     has_permission?(module_name, "index") || has_permission?(module_name, "show")
   end
 
   def can_manage_module?(module_name)
     return true if super_admin?
+
     has_permission?(module_name, "create") || has_permission?(module_name, "update") || has_permission?(module_name, "destroy")
   end
 
   def can_approve_in_module?(module_name)
     return true if super_admin?
+
     has_permission?(module_name, "approve") || has_permission?(module_name, "reject")
   end
 
   def can_export_from_module?(module_name)
     return true if super_admin?
+
     has_permission?(module_name, "export") || has_permission?(module_name, "download")
   end
 

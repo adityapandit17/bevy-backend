@@ -46,6 +46,7 @@ class OffboardingEmployee < ApplicationRecord
 
   def duration_days
     return 0 if start_date.nil?
+
     end_date = completed? ? updated_at.to_date : Date.current
     (end_date - start_date).to_i
   end
