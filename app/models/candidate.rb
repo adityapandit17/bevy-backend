@@ -1,5 +1,9 @@
 class Candidate < ApplicationRecord
   has_many :interviews, dependent: :destroy
+  has_one :next_interview, -> {
+    where("scheduled_date >= ?", Date.current)
+      .order(:scheduled_date, :scheduled_time)
+  }, class_name: "Interview"
 
   validates :name, presence: true
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
@@ -25,10 +29,6 @@ class Candidate < ApplicationRecord
 
   def skills_list=(skill_list)
     self.skills = skill_list.is_a?(Array) ? skill_list.join(", ") : skill_list
-  end
-
-  def next_interview
-    interviews.where("scheduled_date >= ?", Date.current).order(:scheduled_date, :scheduled_time).first
   end
 
   def last_interview

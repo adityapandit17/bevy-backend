@@ -3,7 +3,7 @@ class CandidatesController < ApplicationController
 
   # GET /candidates
   def index
-    @candidates = Candidate.includes(:interviews)
+    @candidates = Candidate.includes(:interviews, :next_interview)
 
     # Apply filters
     @candidates = @candidates.by_status(params[:status]) if params[:status].present?
