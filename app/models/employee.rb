@@ -1,7 +1,7 @@
 class Employee < ApplicationRecord
   belongs_to :department
   has_one :user, dependent: :destroy
-  
+
   # Manager hierarchy
   belongs_to :manager, class_name: "Employee", foreign_key: :manager_id, optional: true
   has_many :direct_reports, class_name: "Employee", foreign_key: :manager_id, dependent: :nullify

@@ -25,7 +25,7 @@ module HrmsBackend
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
-    
+
     # Allow iframe embedding for uploads controller
     config.force_ssl = false if Rails.env.development?
   end

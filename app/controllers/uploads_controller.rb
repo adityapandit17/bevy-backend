@@ -1,15 +1,15 @@
 class UploadsController < ApplicationController
   # Skip X-Frame-Options for this controller
   skip_before_action :verify_authenticity_token, if: -> { request.format.json? }
-  
+
   # Remove default X-Frame-Options header and set our own
-  before_action :set_frame_options_header, only: [:show]
-  
+  before_action :set_frame_options_header, only: [ :show ]
+
   # Handle CORS preflight requests
   def options
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Origin, Content-Type, Accept, Authorization'
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Origin, Content-Type, Accept, Authorization"
     head :ok
   end
 
@@ -23,7 +23,7 @@ class UploadsController < ApplicationController
 
     # Validate file type
     allowed_types = [ "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ]
-    
+
     # Handle both ActionController::Parameters and ActionDispatch::Http::UploadedFile
     if file.respond_to?(:content_type)
       content_type = file.content_type
@@ -32,7 +32,7 @@ class UploadsController < ApplicationController
     else
       content_type = nil
     end
-    
+
     unless content_type && allowed_types.include?(content_type)
       render json: { error: "Invalid file type. Only PDF and Word documents are allowed. Got: #{content_type}" }, status: :unprocessable_entity
       return
@@ -47,7 +47,7 @@ class UploadsController < ApplicationController
     else
       file_size = 0
     end
-    
+
     if file_size > 5.megabytes
       render json: { error: "File size too large. Maximum size is 5MB." }, status: :unprocessable_entity
       return
@@ -62,7 +62,7 @@ class UploadsController < ApplicationController
       else
         original_filename = "uploaded_file"
       end
-      
+
       filename = "#{SecureRandom.uuid}_#{original_filename}"
 
       # Create uploads directory if it doesn't exist
@@ -100,34 +100,34 @@ class UploadsController < ApplicationController
   def show
     filename = params[:filename]
     file_path = Rails.root.join("storage", "uploads", filename)
-    
+
     # Check if this is a download request (has download=true parameter)
-    is_download = params[:download] == 'true'
-    disposition = is_download ? 'attachment' : 'inline'
+    is_download = params[:download] == "true"
+    disposition = is_download ? "attachment" : "inline"
 
     if File.exist?(file_path)
       # Set proper MIME type based on file extension
       mime_type = case File.extname(filename).downcase
-                  when '.pdf'
-                    'application/pdf'
-                  when '.doc'
-                    'application/msword'
-                  when '.docx'
-                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                  else
-                    'application/octet-stream'
-                  end
+      when ".pdf"
+                    "application/pdf"
+      when ".doc"
+                    "application/msword"
+      when ".docx"
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      else
+                    "application/octet-stream"
+      end
 
       # Set CORS headers for cross-origin requests
-      response.headers['Access-Control-Allow-Origin'] = '*'
-      response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-      response.headers['Access-Control-Allow-Headers'] = 'Origin, Content-Type, Accept, Authorization'
-      response.headers['Content-Type'] = mime_type
-      response.headers['Content-Disposition'] = disposition
-      response.headers['Cache-Control'] = 'public, max-age=3600'
+      response.headers["Access-Control-Allow-Origin"] = "*"
+      response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+      response.headers["Access-Control-Allow-Headers"] = "Origin, Content-Type, Accept, Authorization"
+      response.headers["Content-Type"] = mime_type
+      response.headers["Content-Disposition"] = disposition
+      response.headers["Cache-Control"] = "public, max-age=3600"
 
-      send_file file_path, 
-                type: mime_type, 
+      send_file file_path,
+                type: mime_type,
                 disposition: disposition,
                 filename: filename
     else
@@ -139,9 +139,9 @@ class UploadsController < ApplicationController
 
   def set_frame_options_header
     # Remove any existing X-Frame-Options header
-    response.headers.delete('X-Frame-Options')
+    response.headers.delete("X-Frame-Options")
     # Set our own header to allow iframe embedding
-    response.headers['X-Frame-Options'] = 'ALLOWALL'
-    response.headers['Content-Security-Policy'] = "frame-ancestors *"
+    response.headers["X-Frame-Options"] = "ALLOWALL"
+    response.headers["Content-Security-Policy"] = "frame-ancestors *"
   end
 end

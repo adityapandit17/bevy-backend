@@ -9,12 +9,12 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create upload with valid PDF file" do
     pdf_content = "%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n"
-    
+
     # Create a temporary file
-    temp_file = Tempfile.new(['test_resume', '.pdf'])
+    temp_file = Tempfile.new([ "test_resume", ".pdf" ])
     temp_file.write(pdf_content)
     temp_file.rewind
-    
+
     pdf_file = fixture_file_upload(temp_file.path, "application/pdf", original_filename: "test_resume.pdf")
 
     assert_difference -> { Dir.glob(Rails.root.join("storage", "uploads", "*")).count } do
@@ -28,19 +28,19 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
     assert json_response["filename"].include?("test_resume")
     assert json_response["filename"].end_with?(".pdf")
     assert_equal "application/pdf", json_response["content_type"]
-    
+
     temp_file.close
     temp_file.unlink
   end
 
   test "should create upload with valid Word document" do
     doc_content = "This is a test Word document content"
-    
+
     # Create a temporary file
-    temp_file = Tempfile.new(['test_cover_letter', '.doc'])
+    temp_file = Tempfile.new([ "test_cover_letter", ".doc" ])
     temp_file.write(doc_content)
     temp_file.rewind
-    
+
     doc_file = fixture_file_upload(temp_file.path, "application/msword", original_filename: "test_cover_letter.doc")
 
     assert_difference -> { Dir.glob(Rails.root.join("storage", "uploads", "*")).count } do
@@ -53,17 +53,17 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
     assert json_response["filename"].include?("test_cover_letter")
     assert json_response["filename"].end_with?(".doc")
     assert_equal "application/msword", json_response["content_type"]
-    
+
     temp_file.close
     temp_file.unlink
   end
 
   test "should reject invalid file type" do
     # Create a temporary text file
-    temp_file = Tempfile.new(['test', '.txt'])
+    temp_file = Tempfile.new([ "test", ".txt" ])
     temp_file.write("This is a text file")
     temp_file.rewind
-    
+
     txt_file = fixture_file_upload(temp_file.path, "text/plain", original_filename: "test.txt")
 
     post uploads_url, params: { file: txt_file }, as: :json
@@ -71,7 +71,7 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     json_response = JSON.parse(response.body)
     assert_includes json_response["error"], "Invalid file type"
-    
+
     temp_file.close
     temp_file.unlink
   end
@@ -79,11 +79,11 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
   test "should reject file that is too large" do
     # Create a file larger than 5MB
     large_content = "x" * (6 * 1024 * 1024) # 6MB
-    
-    temp_file = Tempfile.new(['large_file', '.pdf'])
+
+    temp_file = Tempfile.new([ "large_file", ".pdf" ])
     temp_file.write(large_content)
     temp_file.rewind
-    
+
     large_file = fixture_file_upload(temp_file.path, "application/pdf", original_filename: "large_file.pdf")
 
     post uploads_url, params: { file: large_file }, as: :json
@@ -93,7 +93,7 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
     assert_response :created
     json_response = JSON.parse(response.body)
     assert json_response["url"]
-    
+
     temp_file.close
     temp_file.unlink
   end
@@ -109,11 +109,11 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
   test "should serve uploaded file" do
     # First upload a file
     pdf_content = "%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n"
-    
-    temp_file = Tempfile.new(['test_resume', '.pdf'])
+
+    temp_file = Tempfile.new([ "test_resume", ".pdf" ])
     temp_file.write(pdf_content)
     temp_file.rewind
-    
+
     pdf_file = fixture_file_upload(temp_file.path, "application/pdf", original_filename: "test_resume.pdf")
 
     post uploads_url, params: { file: pdf_file }, as: :json
@@ -130,7 +130,7 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
     assert response.headers["Content-Disposition"].include?("inline")
     assert_equal "ALLOWALL", response.headers["X-Frame-Options"]
     assert_equal "frame-ancestors *", response.headers["Content-Security-Policy"]
-    
+
     temp_file.close
     temp_file.unlink
   end
@@ -155,11 +155,11 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
   test "should set proper CORS headers when serving file" do
     # First upload a file
     pdf_content = "%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n"
-    
-    temp_file = Tempfile.new(['test_resume', '.pdf'])
+
+    temp_file = Tempfile.new([ "test_resume", ".pdf" ])
     temp_file.write(pdf_content)
     temp_file.rewind
-    
+
     pdf_file = fixture_file_upload(temp_file.path, "application/pdf", original_filename: "test_resume.pdf")
 
     post uploads_url, params: { file: pdf_file }, as: :json
@@ -178,19 +178,19 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
     assert response.headers["Cache-Control"].include?("max-age=3600")
     assert_equal "ALLOWALL", response.headers["X-Frame-Options"]
     assert_equal "frame-ancestors *", response.headers["Content-Security-Policy"]
-    
+
     temp_file.close
     temp_file.unlink
   end
 
   test "should serve file with download disposition when download parameter is true" do
     # Create a test file
-    temp_file = Tempfile.new(['test_resume', '.pdf'])
+    temp_file = Tempfile.new([ "test_resume", ".pdf" ])
     temp_file.write("Test PDF content")
     temp_file.rewind
 
     # Upload the file
-    post "/uploads", params: { file: fixture_file_upload(temp_file.path, 'application/pdf') }
+    post "/uploads", params: { file: fixture_file_upload(temp_file.path, "application/pdf") }
     assert_response :created
 
     json_response = JSON.parse(response.body)
@@ -204,7 +204,7 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
     assert response.headers["Content-Disposition"].include?("attachment")
     assert_equal "ALLOWALL", response.headers["X-Frame-Options"]
     assert_equal "frame-ancestors *", response.headers["Content-Security-Policy"]
-    
+
     temp_file.close
     temp_file.unlink
   end
