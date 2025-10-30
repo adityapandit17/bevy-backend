@@ -128,7 +128,7 @@ class EmployeeProfilesController < ApplicationController
         pending_requests: @employee.pending_leave_requests,
         leave_balance: calculate_leave_balance
       },
-      leave_requests: @employee.leave_requests.recent.limit(10).map do |request|
+      leave_requests: @employee.leave_requests.limit(10).map do |request|
         {
           id: request.id,
           leave_type: request.leave_type_label,
@@ -146,8 +146,8 @@ class EmployeeProfilesController < ApplicationController
   def get_pay_info_data
     {
       current_salary: @employee.salary,
-      salary_structure: @employee.salary_structures.recent.first&.as_json(include: :employee),
-      payroll_history: @employee.payrolls.recent.limit(12).map do |payroll|
+      salary_structure: @employee.salary_structures.first&.as_json(include: :employee),
+      payroll_history: @employee.payrolls.limit(12).map do |payroll|
         {
           id: payroll.id,
           month: payroll.month,
@@ -166,7 +166,7 @@ class EmployeeProfilesController < ApplicationController
         active_documents: @employee.active_documents,
         expiring_soon: @employee.expiring_documents
       },
-      documents: @employee.employee_documents.recent.map do |doc|
+      documents: @employee.employee_documents.map do |doc|
         {
           id: doc.id,
           name: doc.name,
@@ -329,7 +329,7 @@ class EmployeeProfilesController < ApplicationController
     activities = []
 
     # Add recent leave requests
-    @employee.leave_requests.recent.limit(5).each do |request|
+    @employee.leave_requests.limit(5).each do |request|
       activities << {
         type: "leave_request",
         date: request.created_at,
@@ -339,7 +339,7 @@ class EmployeeProfilesController < ApplicationController
     end
 
     # Add recent timesheets
-    @employee.timesheets.recent.limit(5).each do |timesheet|
+    @employee.timesheets.limit(5).each do |timesheet|
       activities << {
         type: "timesheet",
         date: timesheet.created_at,
@@ -349,7 +349,7 @@ class EmployeeProfilesController < ApplicationController
     end
 
     # Add recent performance reviews
-    @employee.performance_reviews.recent.limit(3).each do |review|
+    @employee.performance_reviews.limit(3).each do |review|
       activities << {
         type: "performance_review",
         date: review.review_date,

@@ -174,7 +174,7 @@ class Employee < ApplicationRecord
   end
 
   def latest_performance_review
-    performance_reviews.recent.first
+    performance_reviews.first
   end
 
   def average_performance_rating
@@ -218,7 +218,7 @@ class Employee < ApplicationRecord
 
   def salary
     # This would need to be implemented based on salary structure
-    salary_structures.recent.first&.basic || 0
+    salary_structures.first&.basic || 0
   end
 
   # Birthday methods
