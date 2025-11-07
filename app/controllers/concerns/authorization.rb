@@ -28,12 +28,31 @@ module Authorization
   end
 
   def can_access_employee_data?(employee_id)
-    return true if current_user.has_role?("Super Admin") || current_user.has_role?("HR Manager")
+    return false unless current_user
+
+    return true if current_user.has_role?("Super Admin") || current_user.has_role?("HR Manager") || current_user.has_role?("HR")
 
     return true if current_user.employee_id == employee_id.to_i
 
     return true if current_user.has_role?("Department Head") &&
                   current_user.employee&.department_id == Employee.find(employee_id).department_id
+
+    false
+  end
+
+  def can_apply_leave_for?(employee_id)
+    return false unless current_user
+
+    # Super Admin and HR Manager can apply for anyone
+    return true if current_user.has_role?("Super Admin") || current_user.has_role?("HR Manager") || current_user.has_role?("HR")
+
+    # Users with any leave_requests permission can apply for anyone (management access)
+    return true if current_user.has_permission?("leave_requests", "create") ||
+                  current_user.has_permission?("leave_requests", "approve") ||
+                  current_user.has_permission?("leave_requests", "index")
+
+    # Users can always apply for their own leave
+    return true if current_user.employee_id == employee_id.to_i
 
     false
   end

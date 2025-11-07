@@ -181,18 +181,9 @@ class LeaveRequest < ApplicationRecord
 
     total_days = approved_requests.sum(:days)
 
-    # Default leave balances (can be made configurable)
-    leave_limits = {
-      "annual" => 21,
-      "sick" => 12,
-      "personal" => 5,
-      "maternity" => 90,
-      "paternity" => 15,
-      "unpaid" => 30,
-      "other" => 5
-    }
-
-    limit = leave_limits[leave_type] || 0
+    # Get leave limit from policy
+    policy = LeavePolicy.for_year(year)
+    limit = policy.leave_limit_for_type(leave_type)
     remaining = [ limit - total_days, 0 ].max
 
     {

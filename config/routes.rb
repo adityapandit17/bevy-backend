@@ -180,6 +180,12 @@ Rails.application.routes.draw do
       get :approvers
     end
   end
+
+  resources :leave_policies do
+    collection do
+      get :current
+    end
+  end
   resources :salary_structures
   resources :payrolls
   resources :attendance_records do

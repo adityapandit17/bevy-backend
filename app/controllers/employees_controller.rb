@@ -2,8 +2,14 @@ class EmployeesController < ApplicationController
   before_action :set_employee, only: [ :show, :update, :destroy ]
 
   def index
-    @employees = Employee.all
-    render json: @employees
+    @employees = Employee.includes(:manager, :department, :direct_reports).all
+    render json: @employees.as_json(
+      include: {
+        manager: { only: [:id, :first_name, :last_name, :email, :designation] },
+        department: { only: [:id, :name] },
+        direct_reports: { only: [:id, :first_name, :last_name, :email] }
+      }
+    )
   end
 
   def show
@@ -44,6 +50,6 @@ class EmployeesController < ApplicationController
   end
 
   def employee_params
-    params.require(:employee).permit(:first_name, :last_name, :email, :phone, :department_id, :designation, :date_of_joining, :status)
+    params.require(:employee).permit(:first_name, :last_name, :email, :phone, :department_id, :designation, :date_of_joining, :status, :manager_id)
   end
 end

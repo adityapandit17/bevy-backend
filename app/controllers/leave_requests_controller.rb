@@ -5,7 +5,23 @@ class LeaveRequestsController < ApplicationController
   def index
     @leave_requests = LeaveRequest.includes(:employee)
 
-    # Apply filters
+    # For regular employees (not HR/Admin), filter by their employee_id
+    is_admin_or_hr = current_user&.has_role?("Super Admin") ||
+                     current_user&.has_role?("HR Manager") ||
+                     current_user&.has_role?("HR") ||
+                     current_user&.has_permission?("leave_requests", "index")
+
+    unless is_admin_or_hr
+      if current_user&.employee_id.present?
+        @leave_requests = @leave_requests.by_employee(current_user.employee_id)
+      else
+        # If user has no employee_id, return empty array
+        render json: []
+        return
+      end
+    end
+
+    # Apply filters (only for HR/Admin or if explicitly provided)
     @leave_requests = @leave_requests.by_employee(params[:employee_id]) if params[:employee_id].present?
     @leave_requests = @leave_requests.by_type(params[:leave_type]) if params[:leave_type].present?
     @leave_requests = @leave_requests.where(status: params[:status]) if params[:status].present?
@@ -35,6 +51,13 @@ class LeaveRequestsController < ApplicationController
 
   def create
     @leave_request = LeaveRequest.new(leave_request_params)
+
+    # Check authorization: user can only apply for their own leave unless they're HR/Admin
+    unless can_apply_leave_for?(@leave_request.employee_id)
+      render json: { errors: [ "You don't have permission to apply leave for this employee" ] }, status: :forbidden
+      return
+    end
+
     # Assign approvers context (manager inferred from employee)
     if @leave_request.employee&.manager
       # no persisted field needed now; used for UI
@@ -76,6 +99,11 @@ class LeaveRequestsController < ApplicationController
 
   # Approve leave request (stepwise: manager then HR)
   def approve
+    unless current_user
+      render json: { errors: [ "Authentication required" ] }, status: :unauthorized
+      return
+    end
+
     if current_user.hr_manager?
       if @leave_request.manager_approved? || @leave_request.pending?
         @leave_request.update!(
@@ -104,6 +132,11 @@ class LeaveRequestsController < ApplicationController
 
   # Reject leave request
   def reject
+    unless current_user
+      render json: { errors: [ "Authentication required" ] }, status: :unauthorized
+      return
+    end
+
     if @leave_request.pending? || @leave_request.manager_approved?
       @leave_request.update!(
         status: "rejected",
@@ -131,6 +164,22 @@ class LeaveRequestsController < ApplicationController
   def balance
     employee_id = params[:employee_id]
     year = params[:year] || Date.current.year
+
+    # If employee_id is provided, validate access
+    if employee_id.present?
+      unless can_access_employee_data?(employee_id)
+        render json: { error: "You don't have permission to view this employee's leave balance" }, status: :forbidden
+        return
+      end
+    else
+      # If no employee_id provided, use current user's employee_id
+      if current_user&.employee_id.present?
+        employee_id = current_user.employee_id
+      else
+        render json: { error: "Employee ID is required" }, status: :bad_request
+        return
+      end
+    end
 
     balance = LeaveRequest.employee_leave_summary(employee_id, year)
     render json: balance

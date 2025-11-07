@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_30_060443) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_06_081544) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.date "assigned_date"
@@ -205,6 +205,21 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_30_060443) do
     t.string "jti"
     t.datetime "updated_at", null: false
     t.index ["jti"], name: "index_jwt_denylists_on_jti", unique: true
+  end
+
+  create_table "leave_policies", force: :cascade do |t|
+    t.boolean "active"
+    t.integer "annual_leave"
+    t.datetime "created_at", null: false
+    t.integer "holidays_per_year"
+    t.integer "maternity_leave"
+    t.integer "other_leave"
+    t.integer "paternity_leave"
+    t.integer "personal_leave"
+    t.integer "sick_leave"
+    t.integer "unpaid_leave"
+    t.datetime "updated_at", null: false
+    t.integer "year"
   end
 
   create_table "leave_requests", force: :cascade do |t|
