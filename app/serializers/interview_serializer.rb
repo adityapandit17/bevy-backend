@@ -31,4 +31,3 @@ class InterviewSerializer < Panko::Serializer
     object.status_color
   end
 end
-

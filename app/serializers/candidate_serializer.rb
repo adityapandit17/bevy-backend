@@ -28,4 +28,3 @@ class CandidateSerializer < Panko::Serializer
     object.days_since_last_contact
   end
 end
-

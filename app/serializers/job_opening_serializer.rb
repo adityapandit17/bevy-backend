@@ -64,4 +64,3 @@ class JobOpeningSerializer < Panko::Serializer
     object.department&.name
   end
 end
-

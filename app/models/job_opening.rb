@@ -49,7 +49,7 @@ class JobOpening < ApplicationRecord
   def salary_range
     return "Not specified" unless salary_min.present? && salary_max.present?
 
-    "$#{salary_min.to_s} - $#{salary_max.to_s}"
+    "$#{salary_min} - $#{salary_max}"
   end
 
   def average_salary
