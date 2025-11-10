@@ -80,4 +80,3 @@ class LeavePolicy < ApplicationRecord
     }
   end
 end
-

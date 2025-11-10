@@ -1,5 +1,5 @@
 class LeavePoliciesController < ApplicationController
-  before_action :set_leave_policy, only: [:show, :update, :destroy]
+  before_action :set_leave_policy, only: [ :show, :update, :destroy ]
 
   def index
     @policies = LeavePolicy.order(year: :desc)
@@ -79,4 +79,3 @@ class LeavePoliciesController < ApplicationController
     }
   end
 end
-

@@ -5,9 +5,9 @@ class EmployeesController < ApplicationController
     @employees = Employee.includes(:manager, :department, :direct_reports).all
     render json: @employees.as_json(
       include: {
-        manager: { only: [:id, :first_name, :last_name, :email, :designation] },
-        department: { only: [:id, :name] },
-        direct_reports: { only: [:id, :first_name, :last_name, :email] }
+        manager: { only: [ :id, :first_name, :last_name, :email, :designation ] },
+        department: { only: [ :id, :name ] },
+        direct_reports: { only: [ :id, :first_name, :last_name, :email ] }
       }
     )
   end
