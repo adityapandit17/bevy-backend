@@ -30,6 +30,7 @@ class OnboardingEmployeesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should create onboarding employee" do
+    OnboardingEmployee.find_by(employee_id: @employee.id).destroy!
     assert_difference("OnboardingEmployee.count") do
       post onboarding_employees_url, params: { onboarding_employee: @valid_attributes }, as: :json
     end
@@ -124,6 +125,7 @@ class OnboardingEmployeesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should handle onboarding employee with missing optional fields" do
+    OnboardingEmployee.find_by(employee_id: @employee.id).destroy!
     minimal_attributes = {
       employee_id: @employee.id,
       start_date: Date.current + 1.week,
