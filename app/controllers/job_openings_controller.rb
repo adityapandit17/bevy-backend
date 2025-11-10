@@ -6,6 +6,9 @@ class JobOpeningsController < ApplicationController
 
   def index
     @job_openings = JobOpening.all
+    if params[:search].present?
+      @job_openings = @job_openings.search(params[:search])
+    end
     render json: @job_openings
   end
 

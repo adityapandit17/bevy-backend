@@ -27,6 +27,16 @@ class JobOpening < ApplicationRecord
   scope :by_department, ->(department_id) { where(department_id: department_id) }
   scope :high_salary, -> { where("salary_max >= ?", 100000) }
   scope :entry_level, -> { where("salary_max <= ?", 50000) }
+  scope :search, ->(query) {
+    return all if query.blank?
+
+    q = "%#{query.downcase}%"
+    where(
+      "LOWER(title) LIKE :q OR LOWER(location) LIKE :q OR LOWER(status) LIKE :q OR CAST(salary_min AS TEXT) LIKE :q OR CAST(salary_max AS TEXT) LIKE :q",
+      q: q
+    )
+  }
+
 
   def salary_range_validity
     return unless salary_min.present? && salary_max.present?
