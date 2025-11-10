@@ -72,3 +72,6 @@ gem "pry-nav"
 
 # JWT Authentication
 gem "jwt"
+
+# Fast JSON serialization
+gem "panko_serializer"

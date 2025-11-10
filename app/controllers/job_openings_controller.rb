@@ -5,21 +5,23 @@ class JobOpeningsController < ApplicationController
   before_action :set_job_opening, only: [ :show, :update, :destroy ]
 
   def index
-    @job_openings = JobOpening.all
+    @job_openings = JobOpening.includes(:department).all
+
     if params[:search].present?
       @job_openings = @job_openings.search(params[:search])
     end
-    render json: @job_openings
+
+    render json: Panko::ArraySerializer.new(@job_openings, each_serializer: JobOpeningSerializer).to_json
   end
 
   def show
-    render json: @job_opening
+    render json: JobOpeningSerializer.new.serialize(@job_opening)
   end
 
   def create
     @job_opening = JobOpening.new(job_opening_params)
     if @job_opening.save
-      render json: @job_opening, status: :created
+      render json: JobOpeningSerializer.new.serialize(@job_opening), status: :created
     else
       render_error(@job_opening.errors.full_messages)
     end
@@ -27,7 +29,7 @@ class JobOpeningsController < ApplicationController
 
   def update
     if @job_opening.update(job_opening_params)
-      render json: @job_opening
+      render json: JobOpeningSerializer.new.serialize(@job_opening)
     else
       render_error(@job_opening.errors.full_messages)
     end
@@ -35,7 +37,7 @@ class JobOpeningsController < ApplicationController
 
   def destroy
     if @job_opening.update(status: "closed")
-      render json: @job_opening
+      render json: JobOpeningSerializer.new.serialize(@job_opening)
     else
       render_error(@job_opening.errors.full_messages)
     end

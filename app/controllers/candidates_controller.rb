@@ -10,12 +10,12 @@ class CandidatesController < ApplicationController
     @candidates = @candidates.by_department(params[:department]) if params[:department].present?
     @candidates = @candidates.where("name ILIKE ? OR email ILIKE ? OR position ILIKE ?", "%#{params[:search]}%", "%#{params[:search]}%", "%#{params[:search]}%") if params[:search].present?
 
-    render json: @candidates.map { |candidate| format_candidate(candidate) }
+    render json: Panko::ArraySerializer.new(@candidates, each_serializer: CandidateSerializer).to_json
   end
 
   # GET /candidates/:id
   def show
-    render json: format_candidate(@candidate)
+    render json: CandidateSerializer.new.serialize(@candidate)
   end
 
   # POST /candidates
@@ -26,7 +26,7 @@ class CandidatesController < ApplicationController
     @candidate.status ||= "applied"
 
     if @candidate.save
-      render json: format_candidate(@candidate), status: :created
+      render json: CandidateSerializer.new.serialize(@candidate), status: :created
     else
       render json: { errors: @candidate.errors.full_messages }, status: :unprocessable_entity
     end
@@ -35,7 +35,7 @@ class CandidatesController < ApplicationController
   # PATCH/PUT /candidates/:id
   def update
     if @candidate.update(candidate_params)
-      render json: format_candidate(@candidate)
+      render json: CandidateSerializer.new.serialize(@candidate)
     else
       render json: { errors: @candidate.errors.full_messages }, status: :unprocessable_entity
     end
@@ -53,7 +53,7 @@ class CandidatesController < ApplicationController
     new_status = params[:status]
 
     if @candidate.update(status: new_status, last_contact: Date.current)
-      render json: format_candidate(@candidate)
+      render json: CandidateSerializer.new.serialize(@candidate)
     else
       render json: { errors: @candidate.errors.full_messages }, status: :unprocessable_entity
     end
@@ -87,7 +87,7 @@ class CandidatesController < ApplicationController
       candidates = Candidate.by_status(status).includes(:interviews)
       pipeline_data[status] = {
         count: candidates.size,
-        candidates: candidates.map { |c| format_candidate(c) }
+        candidates: Panko::ArraySerializer.new(candidates, each_serializer: CandidateSerializer).to_a
       }
     end
 
@@ -104,57 +104,6 @@ class CandidatesController < ApplicationController
     params.require(:candidate).permit(:name, :email, :phone, :position, :department, :experience, :location, :status, :applied_date, :last_contact, :resume, :cover_letter, :notes, :skills, :education, :current_company, :expected_salary, :availability)
   end
 
-  def format_candidate(candidate)
-    {
-      id: candidate.id,
-      name: candidate.name,
-      email: candidate.email,
-      phone: candidate.phone,
-      position: candidate.position,
-      department: candidate.department,
-      experience: candidate.experience,
-      location: candidate.location,
-      status: candidate.status,
-      applied_date: candidate.applied_date,
-      last_contact: candidate.last_contact,
-      resume: candidate.resume,
-      cover_letter: candidate.cover_letter,
-      notes: candidate.notes,
-      skills: candidate.skills_list,
-      education: candidate.education,
-      current_company: candidate.current_company,
-      expected_salary: candidate.expected_salary,
-      availability: candidate.availability,
-      interviews: candidate.interviews.map { |interview| format_interview(interview) },
-      interview_count: candidate.interview_count,
-      days_since_applied: candidate.days_since_applied,
-      days_since_last_contact: candidate.days_since_last_contact,
-      next_interview: candidate.next_interview ? format_interview(candidate.next_interview) : nil,
-      created_at: candidate.created_at,
-      updated_at: candidate.updated_at
-    }
-  end
-
-  def format_interview(interview)
-    {
-      id: interview.id,
-      candidate_id: interview.candidate_id,
-      interview_type: interview.interview_type,
-      scheduled_date: interview.scheduled_date,
-      scheduled_time: interview.scheduled_time,
-      interviewer: interview.interviewer,
-      status: interview.status,
-      notes: interview.notes,
-      feedback: interview.feedback,
-      rating: interview.rating,
-      is_today: interview.is_today?,
-      is_overdue: interview.is_overdue?,
-      is_upcoming: interview.is_upcoming?,
-      formatted_time: interview.formatted_time,
-      formatted_date: interview.formatted_date,
-      status_color: interview.status_color,
-      created_at: interview.created_at,
-      updated_at: interview.updated_at
-    }
-  end
+  # Legacy format methods kept for backward compatibility if needed
+  # Can be removed after full migration to Panko
 end
