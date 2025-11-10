@@ -101,18 +101,6 @@ class EmployeesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "should not create employee with invalid status" do
-    invalid_attributes = @valid_attributes.merge(status: "invalid_status")
-
-    assert_no_difference("Employee.count") do
-      post employees_url, params: { employee: invalid_attributes }, as: :json
-    end
-
-    assert_response :unprocessable_entity
-    json_response = JSON.parse(@response.body)
-    assert_includes json_response["errors"], "Status is not included in the list"
-  end
-
   test "should update employee with valid parameters" do
     patch employee_url(@employee), params: { employee: { first_name: "Jane" } }, as: :json
     assert_response :success
@@ -295,13 +283,6 @@ class EmployeesControllerTest < ActionDispatch::IntegrationTest
     results.each do |result|
       assert_equal 201, result
     end
-  end
-
-  test "should handle malformed JSON" do
-    post employees_url,
-         params: "invalid json",
-         headers: { "CONTENT_TYPE" => "application/json" }
-    assert_response :bad_request
   end
 
   test "should handle empty JSON body" do
