@@ -345,7 +345,7 @@ class LeaveRequestTest < ActiveSupport::TestCase
 
   test "leave_type_label should return titleized type" do
     @leave_request.leave_type = "annual"
-    assert_equal "Annual", @leave_request.leave_type_label
+    assert_equal "Annual Leave", @leave_request.leave_type_label
   end
 
   # Callback tests
