@@ -37,6 +37,7 @@ class Permission < ApplicationRecord
       { name: "leave_requests.index", resource: "leave_requests", action: "index", description: "View leave requests" },
       { name: "leave_requests.approve", resource: "leave_requests", action: "approve", description: "Approve leave requests" },
       { name: "leave_requests.reject", resource: "leave_requests", action: "reject", description: "Reject leave requests" },
+      { name: "leave_management.index", resource: "leave_management", action: "index", description: "Manage leave requests for all employees, apply leave on behalf of others, and approve pending leave requests" },
 
       # Recruitment
       { name: "candidates.index", resource: "candidates", action: "index", description: "View candidates list" },

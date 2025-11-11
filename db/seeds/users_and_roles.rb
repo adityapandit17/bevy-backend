@@ -37,10 +37,11 @@ end
 # HR Manager - Employee, Payroll, Reports, User Management permissions
 hr_manager = Role.find_by(name: 'HR Manager')
 if hr_manager
-  # 5 of 8 permissions (employees: index/create/update, payrolls: index/create)
+  # 6 permissions (employees: index/create/update, payrolls: index/create, leave_management: index)
   hr_permission_names = [
     'employees.index', 'employees.create', 'employees.update',
-    'payrolls.index', 'payrolls.create'
+    'payrolls.index', 'payrolls.create',
+    'leave_management.index'
   ]
   hr_permissions = Permission.where(name: hr_permission_names)
   hr_manager.permission_ids = hr_permissions.pluck(:id)

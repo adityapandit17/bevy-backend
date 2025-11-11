@@ -34,6 +34,12 @@ class LeaveRequestsController < ApplicationController
       @leave_requests = @leave_requests.where(start_date: params[:start_date]..params[:end_date])
     end
 
+    # Filter by manager pending approvals
+    if params[:manager_pending] == "true" && current_user&.employee
+      manager_employee_id = current_user.employee.id
+      @leave_requests = @leave_requests.pending_for_manager(manager_employee_id)
+    end
+
     # Apply search
     if params[:search].present?
       search_term = "%#{params[:search]}%"
@@ -104,7 +110,8 @@ class LeaveRequestsController < ApplicationController
       return
     end
 
-    if current_user.hr_manager?
+    # Check if user is HR Manager or has HR approval permission
+    if current_user.hr_manager? || current_user.has_permission?("leave_requests", "approve")
       if @leave_request.manager_approved? || @leave_request.pending?
         @leave_request.update!(
           status: "approved",
@@ -116,7 +123,16 @@ class LeaveRequestsController < ApplicationController
         render json: { errors: [ "Manager approval required before HR approval" ] }, status: :unprocessable_entity
       end
     else
-      # Treat non-HR approvers with permission as manager-level
+      # Check if current_user is the manager of the employee
+      employee = @leave_request.employee
+      manager_employee = current_user.employee
+      
+      unless manager_employee && employee.manager_id == manager_employee.id
+        render json: { errors: [ "You are not authorized to approve this leave request. Only the employee's manager can approve." ] }, status: :forbidden
+        return
+      end
+
+      # Manager approval
       if @leave_request.pending?
         @leave_request.update!(
           status: "manager_approved",

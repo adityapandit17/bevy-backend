@@ -22,6 +22,11 @@ class LeaveRequest < ApplicationRecord
   scope :current_year, -> { where("start_date >= ?", Date.current.beginning_of_year) }
   scope :upcoming, -> { where("start_date >= ?", Date.current) }
   scope :past, -> { where("end_date < ?", Date.current) }
+  scope :pending_for_manager, ->(manager_employee_id) {
+    joins(:employee)
+      .where(employees: { manager_id: manager_employee_id })
+      .where(status: "pending")
+  }
 
   # Callbacks
   before_save :calculate_days
