@@ -20,7 +20,12 @@ class CandidatesController < ApplicationController
 
   # POST /candidates
   def create
-    @candidate = Candidate.new(candidate_params)
+    params_hash = candidate_params.to_h
+    if params_hash[:skills].is_a?(Array)
+      params_hash[:skills] = params_hash[:skills].join(", ")
+    end
+    
+    @candidate = Candidate.new(params_hash)
     @candidate.applied_date ||= Date.current
     @candidate.last_contact ||= Date.current
     @candidate.status ||= "applied"
@@ -34,6 +39,13 @@ class CandidatesController < ApplicationController
 
   # PATCH/PUT /candidates/:id
   def update
+    # if @candidate.update(candidate_params)
+    #   render json: CandidateSerializer.new.serialize(@candidate)
+    params_hash = candidate_params.to_h
+    if params_hash[:skills].is_a?(Array)
+      params_hash[:skills] = params_hash[:skills].join(", ")
+    end
+    
     if @candidate.update(candidate_params)
       render json: CandidateSerializer.new.serialize(@candidate)
     else
