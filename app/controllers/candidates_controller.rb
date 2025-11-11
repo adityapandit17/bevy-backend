@@ -39,8 +39,6 @@ class CandidatesController < ApplicationController
 
   # PATCH/PUT /candidates/:id
   def update
-    # if @candidate.update(candidate_params)
-    #   render json: CandidateSerializer.new.serialize(@candidate)
     params_hash = candidate_params.to_h
     if params_hash[:skills].is_a?(Array)
       params_hash[:skills] = params_hash[:skills].join(", ")
