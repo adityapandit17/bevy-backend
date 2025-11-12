@@ -26,7 +26,18 @@ class OnboardingTask < ApplicationRecord
   def documents_list
     return [] if documents.blank?
 
-    documents.split(",").map(&:strip)
+    # Handle string representation of array (e.g., '["doc1", "doc2"]')
+    if documents.strip.start_with?('[') && documents.strip.end_with?(']')
+      begin
+        parsed = JSON.parse(documents)
+        return parsed if parsed.is_a?(Array)
+      rescue JSON::ParserError
+        # Fall through to comma-split if JSON parsing fails
+      end
+    end
+
+    # Handle comma-separated string
+    documents.split(",").map(&:strip).reject(&:blank?)
   end
 
   def documents_list=(docs)
