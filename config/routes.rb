@@ -40,6 +40,10 @@ Rails.application.routes.draw do
       patch :update_roles
       post :invite
       patch :resend_invitation
+      patch :change_password
+      patch :update_profile
+      get :preferences
+      patch :update_preferences
     end
     collection do
       get :invitations

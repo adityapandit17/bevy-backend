@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
-  before_action :set_user, only: [ :show, :update, :destroy ]
-  before_action :authorize_users_access!
+  before_action :set_user, only: [ :show, :update, :destroy, :change_password, :update_profile, :preferences, :update_preferences ]
+  before_action :authorize_users_access!, except: [ :change_password, :update_profile, :preferences, :update_preferences ]
 
   # GET /users
   def index
@@ -161,6 +161,95 @@ class UsersController < ApplicationController
     }
   end
 
+  # PATCH /users/:id/change_password
+  def change_password
+    unless @user == current_user
+      render json: { error: "You can only change your own password" }, status: :forbidden
+      return
+    end
+
+    current_password = params[:current_password]
+    new_password = params[:new_password]
+    confirm_password = params[:confirm_password]
+
+    # Validate current password
+    unless @user.valid_password?(current_password)
+      render json: { error: "Current password is incorrect" }, status: :unprocessable_entity
+      return
+    end
+
+    # Validate new password
+    if new_password.blank? || new_password.length < 8
+      render json: { error: "New password must be at least 8 characters long" }, status: :unprocessable_entity
+      return
+    end
+
+    if new_password != confirm_password
+      render json: { error: "New password and confirmation do not match" }, status: :unprocessable_entity
+      return
+    end
+
+    # Update password
+    if @user.update(password: new_password, password_confirmation: confirm_password)
+      render json: { message: "Password changed successfully" }
+    else
+      render json: { error: "Failed to change password", errors: @user.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  # PATCH /users/:id/profile
+  def update_profile
+    unless @user == current_user
+      render json: { error: "You can only update your own profile" }, status: :forbidden
+      return
+    end
+
+    # Only allow updating name, not email
+    if @user.update(profile_params)
+      render json: {
+        message: "Profile updated successfully",
+        user: format_user(@user)
+      }
+    else
+      render json: {
+        message: "Failed to update profile",
+        errors: @user.errors.full_messages
+      }, status: :unprocessable_entity
+    end
+  end
+
+  # GET /users/:id/preferences
+  def preferences
+    unless @user == current_user
+      render json: { error: "You can only view your own preferences" }, status: :forbidden
+      return
+    end
+
+    pref = UserPreference.for_user(@user)
+    render json: format_preferences(pref)
+  end
+
+  # PATCH /users/:id/preferences
+  def update_preferences
+    unless @user == current_user
+      render json: { error: "You can only update your own preferences" }, status: :forbidden
+      return
+    end
+
+    pref = UserPreference.for_user(@user)
+    if pref.update(preference_params)
+      render json: {
+        message: "Preferences updated successfully",
+        preferences: format_preferences(pref)
+      }
+    else
+      render json: {
+        message: "Failed to update preferences",
+        errors: pref.errors.full_messages
+      }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def set_user
@@ -171,6 +260,36 @@ class UsersController < ApplicationController
 
   def user_params
     params.require(:user).permit(:email, :password, :password_confirmation, :first_name, :last_name, :status, :employee_id)
+  end
+
+  def profile_params
+    params.require(:user).permit(:first_name, :last_name)
+  end
+
+  def preference_params
+    params.require(:preferences).permit(
+      :language, :timezone, :date_format, :theme,
+      :email_notifications, :push_notifications, :leave_notifications,
+      :attendance_notifications, :payroll_notifications, :system_notifications
+    )
+  end
+
+  def format_preferences(pref)
+    {
+      id: pref.id,
+      language: pref.language,
+      timezone: pref.timezone,
+      date_format: pref.date_format,
+      theme: pref.theme,
+      email_notifications: pref.email_notifications,
+      push_notifications: pref.push_notifications,
+      leave_notifications: pref.leave_notifications,
+      attendance_notifications: pref.attendance_notifications,
+      payroll_notifications: pref.payroll_notifications,
+      system_notifications: pref.system_notifications,
+      created_at: pref.created_at,
+      updated_at: pref.updated_at
+    }
   end
 
   def authorize_users_access!

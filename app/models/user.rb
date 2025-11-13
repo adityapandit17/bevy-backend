@@ -8,6 +8,7 @@
   has_many :user_roles, dependent: :destroy
   has_many :roles, through: :user_roles
   belongs_to :employee, optional: true
+  has_one :user_preference, dependent: :destroy
 
   # Validations
   validates :first_name, presence: true

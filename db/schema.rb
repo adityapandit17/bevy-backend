@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_06_081544) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_11_125541) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.date "assigned_date"
@@ -410,6 +410,23 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_06_081544) do
     t.index ["employee_id"], name: "index_timesheets_on_employee_id"
   end
 
+  create_table "user_preferences", force: :cascade do |t|
+    t.boolean "attendance_notifications", default: true
+    t.datetime "created_at", null: false
+    t.string "date_format", default: "MM/DD/YYYY"
+    t.boolean "email_notifications", default: true
+    t.string "language", default: "en"
+    t.boolean "leave_notifications", default: true
+    t.boolean "payroll_notifications", default: false
+    t.boolean "push_notifications", default: true
+    t.boolean "system_notifications", default: true
+    t.string "theme", default: "light"
+    t.string "timezone", default: "UTC"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_user_preferences_on_user_id", unique: true
+  end
+
   create_table "user_roles", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "role_id", null: false
@@ -480,6 +497,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_06_081544) do
   add_foreign_key "role_permissions", "roles"
   add_foreign_key "salary_structures", "employees"
   add_foreign_key "timesheets", "employees"
+  add_foreign_key "user_preferences", "users"
   add_foreign_key "user_roles", "roles"
   add_foreign_key "user_roles", "users"
   add_foreign_key "users", "employees"
