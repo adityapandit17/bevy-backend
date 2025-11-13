@@ -36,7 +36,8 @@ class Api::V1::AuthController < ApplicationController
           status: user.status,
           roles: user.roles.pluck(:name),
           permissions: user.permissions.pluck(:resource, :action).map { |r, a| "#{r}:#{a}" },
-          last_login_at: user.last_login_at
+          last_login_at: user.last_login_at,
+          employee_id: user.employee_id
         }
       })
     else
@@ -69,7 +70,8 @@ class Api::V1::AuthController < ApplicationController
         status: current_user.status,
         roles: current_user.roles.pluck(:name),
         permissions: current_user.permissions.pluck(:resource, :action).map { |r, a| "#{r}:#{a}" },
-        last_login_at: current_user.last_login_at
+        last_login_at: current_user.last_login_at,
+        employee_id: current_user.employee_id
       }
     })
   end
@@ -88,7 +90,8 @@ class Api::V1::AuthController < ApplicationController
         permissions: current_user.permissions.pluck(:resource, :action).map { |r, a| "#{r}:#{a}" },
         last_login_at: current_user.last_login_at,
         created_at: current_user.created_at,
-        updated_at: current_user.updated_at
+        updated_at: current_user.updated_at,
+        employee_id: current_user.employee_id
       }
     })
   end

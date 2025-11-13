@@ -13,7 +13,7 @@ class EmployeesController < ApplicationController
   end
 
   def show
-    render json: @employee
+    render json: EmployeeSerializer.new.serialize(@employee)
   end
 
   def create
