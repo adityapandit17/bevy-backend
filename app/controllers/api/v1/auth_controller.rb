@@ -1,7 +1,7 @@
 class Api::V1::AuthController < ApplicationController
   # Skip CSRF protection for API endpoints
   skip_before_action :verify_authenticity_token
-  before_action :authenticate_user!, only: [ :logout, :refresh, :me ]
+  before_action :authenticate_user!, only: [ :logout, :refresh, :me, :change_password ]
 
   # POST /api/v1/auth/login
   def login
@@ -116,6 +116,41 @@ class Api::V1::AuthController < ApplicationController
       })
     else
       render_error("Invalid or expired token", :unauthorized)
+    end
+  end
+
+  # POST /api/v1/auth/change_password
+  def change_password
+    current_password = params[:current_password]
+    new_password = params[:new_password]
+    confirm_password = params[:confirm_password]
+
+    # Validate required parameters
+    if current_password.blank? || new_password.blank? || confirm_password.blank?
+      return render_error("Current password, new password, and confirmation are required", :bad_request)
+    end
+
+    # Validate password confirmation
+    if new_password != confirm_password
+      return render_error("New password and confirmation do not match", :bad_request)
+    end
+
+    # Validate password length
+    if new_password.length < 8
+      return render_error("Password must be at least 8 characters long", :bad_request)
+    end
+
+    # Verify current password
+    unless current_user.valid_password?(current_password)
+      return render_error("Current password is incorrect", :unauthorized)
+    end
+
+    # Update password
+    if current_user.update(password: new_password, password_confirmation: confirm_password)
+      render_success({ message: "Password changed successfully" })
+    else
+      errors = current_user.errors.full_messages.join(", ")
+      render_error("Failed to change password: #{errors}", :unprocessable_entity)
     end
   end
 

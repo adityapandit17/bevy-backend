@@ -10,6 +10,7 @@ Rails.application.routes.draw do
       post "auth/refresh", to: "auth#refresh"
       get "auth/me", to: "auth#me"
       post "auth/validate", to: "auth#validate"
+      post "auth/change_password", to: "auth#change_password"
     end
   end
 
