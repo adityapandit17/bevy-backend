@@ -6,7 +6,7 @@ module JwtAuthenticatable
     skip_before_action :verify_authenticity_token, if: :api_request?
 
     # Set current user from JWT token (skip for login endpoint)
-    before_action :authenticate_user_from_token!, if: :should_authenticate_api_request?
+    before_action :authenticate_user_from_token!, unless: :login_endpoint?
   end
 
   private
@@ -15,9 +15,9 @@ module JwtAuthenticatable
     request.path.start_with?("/api/")
   end
 
-  def should_authenticate_api_request?
-    api_request? && !login_endpoint?
-  end
+  # def should_authenticate_api_request?
+  #   login_endpoint?
+  # end
 
   def login_endpoint?
     request.path == "/api/v1/auth/login"

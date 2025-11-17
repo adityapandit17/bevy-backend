@@ -15,7 +15,7 @@ class ApplicationController < ActionController::Base
 
   def current_user
     # For API requests, use JWT authentication
-    if api_request?
+    if true #api_request?
       @current_user
     else
       # For web requests, use session-based authentication
