@@ -1,6 +1,10 @@
 class UploadsController < ApplicationController
   # Skip X-Frame-Options for this controller
   skip_before_action :verify_authenticity_token, if: -> { request.format.json? }
+  
+  # Skip authentication for viewing/downloading files (iframes can't send Authorization headers)
+  # Files are already protected by UUID filenames, so direct access is limited
+  skip_before_action :authenticate_user_from_token!, only: [ :show, :options ]
 
   # Remove default X-Frame-Options header and set our own
   before_action :set_frame_options_header, only: [ :show ]
