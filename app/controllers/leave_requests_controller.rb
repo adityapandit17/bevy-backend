@@ -59,7 +59,6 @@ class LeaveRequestsController < ApplicationController
     @leave_request = LeaveRequest.new(leave_request_params)
 
     # Check authorization: user can only apply for their own leave unless they're HR/Admin
-    binding.pry
     unless can_apply_leave_for?(@leave_request.employee_id)
       render json: { errors: [ "You don't have permission to apply leave for this employee" ] }, status: :forbidden
       return
