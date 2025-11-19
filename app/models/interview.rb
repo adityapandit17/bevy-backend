@@ -7,6 +7,7 @@ class Interview < ApplicationRecord
   validates :interviewer, presence: true
   validates :status, presence: true, inclusion: { in: %w[scheduled completed cancelled no_show] }
   validates :rating, numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 5 }, allow_nil: true
+  validate :candidate_not_rejected
 
   scope :scheduled, -> { where(status: "scheduled") }
   scope :completed, -> { where(status: "completed") }
@@ -54,6 +55,14 @@ class Interview < ApplicationRecord
       "orange"
     else
       "gray"
+    end
+  end
+
+  private
+
+  def candidate_not_rejected
+    if candidate&.status == "rejected"
+      errors.add(:candidate, "cannot schedule interviews for rejected candidates")
     end
   end
 end
