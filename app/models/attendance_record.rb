@@ -4,7 +4,7 @@ class AttendanceRecord < ApplicationRecord
   # Validations
   validates :date, presence: true
   validates :status, presence: true, inclusion: { in: %w[present absent late half_day work_from_home early_departure] }
-  validates :employee_id, uniqueness: { scope: :date, message: "already has attendance record for this date" }
+  # Removed uniqueness validation to allow multiple check-ins/check-outs per day
   validate :check_out_after_check_in
   validate :date_not_in_future
 
@@ -115,6 +115,29 @@ class AttendanceRecord < ApplicationRecord
     else
       status.humanize
     end
+  end
+
+  # Class method to calculate total hours for an employee on a specific date
+  def self.total_hours_for_day(employee_id, date)
+    records = where(employee_id: employee_id, date: date)
+    total = 0.0
+    
+    records.each do |record|
+      if record.check_in && record.check_out
+        # Calculate hours from check_in and check_out
+        duration = record.check_out - record.check_in
+        hours = (duration / 1.hour)
+        total += hours if hours > 0 && hours < 24 # Sanity check: hours should be between 0 and 24
+      elsif record.read_attribute(:working_hours)
+        # Use stored working_hours if available
+        stored_hours = record.read_attribute(:working_hours)
+        if stored_hours && stored_hours > 0 && stored_hours < 24
+          total += stored_hours
+        end
+      end
+    end
+    
+    total.round(2)
   end
 
   private

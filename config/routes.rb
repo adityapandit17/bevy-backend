@@ -1,4 +1,13 @@
 Rails.application.routes.draw do
+  get "events/index"
+  get "events/show"
+  get "events/create"
+  get "events/update"
+  get "events/destroy"
+  get "ticket_comments/index"
+  get "ticket_comments/create"
+  get "ticket_comments/update"
+  get "ticket_comments/destroy"
   devise_for :users
 
   # API Routes
@@ -195,10 +204,10 @@ Rails.application.routes.draw do
   resources :payrolls
   resources :attendance_records do
     member do
-      patch :check_in
       patch :check_out
     end
     collection do
+      post :check_in
       get :today
       get :stats
       get :calendar
@@ -302,6 +311,20 @@ Rails.application.routes.draw do
       options ":filename", to: "uploads#options", constraints: { filename: /.*/ }
     end
   end
+
+  # Helpdesk System
+  resources :helpdesk_tickets do
+    collection do
+      get :stats
+    end
+    resources :ticket_comments, only: [ :index, :create, :update, :destroy ]
+  end
+
+  resources :sla_workflows
+  resources :knowledge_articles
+
+  # Events and Meetings
+  resources :events
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   get "up" => "rails/health#show", as: :rails_health_check

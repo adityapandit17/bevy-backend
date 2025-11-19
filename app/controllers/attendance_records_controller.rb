@@ -1,5 +1,5 @@
 class AttendanceRecordsController < ApplicationController
-  before_action :set_attendance_record, only: [ :show, :update, :destroy, :check_in, :check_out ]
+  before_action :set_attendance_record, only: [ :show, :update, :destroy, :check_out ]
 
   def index
     @attendance_records = AttendanceRecord.includes(:employee)
@@ -55,26 +55,34 @@ class AttendanceRecordsController < ApplicationController
   end
 
   # Check in functionality
+  # Always creates a new record for each check-in to allow multiple sessions per day
   def check_in
-    if @attendance_record.check_in.present?
-      render json: { error: "Already checked in" }, status: :unprocessable_entity
+    employee_id = params[:employee_id]
+    
+    unless employee_id
+      render json: { error: "employee_id is required" }, status: :unprocessable_entity
       return
     end
-
-    @attendance_record.check_in = Time.current
-    @attendance_record.status = "present"
-
-    if @attendance_record.save
-      render json: format_attendance_record(@attendance_record)
-    else
-      render json: { errors: @attendance_record.errors.full_messages }, status: :unprocessable_entity
-    end
+    
+    # Always create a new record for check-in
+    today = Date.current
+    
+    @attendance_record = AttendanceRecord.create!(
+      employee_id: employee_id,
+      date: today,
+      check_in: Time.current,
+      status: "present"
+    )
+    
+    render json: format_attendance_record(@attendance_record), status: :created
+  rescue => e
+    render json: { errors: [e.message] }, status: :unprocessable_entity
   end
 
   # Check out functionality
   def check_out
     if @attendance_record.check_out.present?
-      render json: { error: "Already checked out" }, status: :unprocessable_entity
+      render json: { error: "Already checked out for this session" }, status: :unprocessable_entity
       return
     end
 
@@ -84,6 +92,11 @@ class AttendanceRecordsController < ApplicationController
     end
 
     @attendance_record.check_out = Time.current
+    # Calculate working hours
+    if @attendance_record.check_in.present?
+      duration = @attendance_record.check_out - @attendance_record.check_in
+      @attendance_record.working_hours = (duration / 1.hour).round(2)
+    end
 
     if @attendance_record.save
       render json: format_attendance_record(@attendance_record)
@@ -93,23 +106,45 @@ class AttendanceRecordsController < ApplicationController
   end
 
   # Get today's attendance for an employee
+  # Returns all records for today with total hours
   def today
     employee_id = params[:employee_id]
     today = Date.current
 
-    @attendance_record = AttendanceRecord.find_by(employee_id: employee_id, date: today)
+    # Get all records for today
+    records = AttendanceRecord
+      .where(employee_id: employee_id, date: today)
+      .order(created_at: :asc)
 
-    if @attendance_record
-      render json: format_attendance_record(@attendance_record)
+    # Calculate total hours
+    total_hours = AttendanceRecord.total_hours_for_day(employee_id, today)
+
+    # Find the most recent record without check_out (active session)
+    active_record = records.where(check_out: nil).order(created_at: :desc).first
+
+    # Always return sessions array and total hours
+    result = {
+      total_hours_today: total_hours,
+      total_sessions_today: records.count,
+      sessions: records.map { |r| format_attendance_record(r) }
+    }
+    
+    # If there's an active session, also include it as the main record
+    if active_record
+      result.merge!(format_attendance_record(active_record))
     else
-      # Create a new record for today if it doesn't exist
-      @attendance_record = AttendanceRecord.create!(
+      # Return summary if no active session
+      result.merge!({
+        id: nil,
         employee_id: employee_id,
         date: today,
+        check_in: nil,
+        check_out: nil,
         status: "absent"
-      )
-      render json: format_attendance_record(@attendance_record)
+      })
     end
+    
+    render json: result
   end
 
   # Get attendance statistics
@@ -162,21 +197,7 @@ class AttendanceRecordsController < ApplicationController
   private
 
   def set_attendance_record
-    if params[:action] == "today"
-      employee_id = params[:employee_id]
-      today = Date.current
-      @attendance_record = AttendanceRecord.find_by(employee_id: employee_id, date: today)
-
-      unless @attendance_record
-        @attendance_record = AttendanceRecord.create!(
-          employee_id: employee_id,
-          date: today,
-          status: "absent"
-        )
-      end
-    else
-      @attendance_record = AttendanceRecord.find(params[:id])
-    end
+    @attendance_record = AttendanceRecord.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Attendance record not found" }, status: :not_found
   end

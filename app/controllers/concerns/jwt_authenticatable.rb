@@ -3,16 +3,25 @@ module JwtAuthenticatable
 
   included do
     # Skip CSRF protection for API endpoints
-    skip_before_action :verify_authenticity_token, if: :api_request?
+    skip_before_action :verify_authenticity_token, if: :json_request?
 
-    # Set current user from JWT token (skip for login endpoint)
-    before_action :authenticate_user_from_token!, unless: :login_endpoint?
+    # Set current user from JWT token (skip for login endpoint and non-JSON requests)
+    before_action :authenticate_user_from_token!, if: :should_authenticate?
   end
 
   private
 
   def api_request?
     request.path.start_with?("/api/")
+  end
+
+  def json_request?
+    request.format.json? || request.headers["Accept"]&.include?("application/json")
+  end
+
+  def should_authenticate?
+    # Authenticate if it's a JSON request and not the login endpoint
+    json_request? && !login_endpoint?
   end
 
   # def should_authenticate_api_request?

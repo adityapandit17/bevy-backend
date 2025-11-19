@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_11_125541) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_19_193555) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.date "assigned_date"
@@ -164,6 +164,45 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_11_125541) do
     t.index ["email"], name: "index_employees_on_email", unique: true
   end
 
+  create_table "events", force: :cascade do |t|
+    t.text "attendee_ids"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.datetime "end_time", null: false
+    t.string "event_type", default: "meeting"
+    t.string "location"
+    t.integer "organizer_id"
+    t.datetime "start_time", null: false
+    t.string "status", default: "scheduled"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_type"], name: "index_events_on_event_type"
+    t.index ["organizer_id"], name: "index_events_on_organizer_id"
+    t.index ["start_time"], name: "index_events_on_start_time"
+    t.index ["status"], name: "index_events_on_status"
+  end
+
+  create_table "helpdesk_tickets", force: :cascade do |t|
+    t.integer "assigned_to_id"
+    t.string "category"
+    t.string "channel", default: "portal"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "priority", default: "medium"
+    t.integer "requester_id"
+    t.integer "sla_hours"
+    t.string "sla_status", default: "on-track"
+    t.string "status", default: "open"
+    t.text "tags"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assigned_to_id"], name: "index_helpdesk_tickets_on_assigned_to_id"
+    t.index ["category"], name: "index_helpdesk_tickets_on_category"
+    t.index ["priority"], name: "index_helpdesk_tickets_on_priority"
+    t.index ["requester_id"], name: "index_helpdesk_tickets_on_requester_id"
+    t.index ["status"], name: "index_helpdesk_tickets_on_status"
+  end
+
   create_table "interviews", force: :cascade do |t|
     t.integer "candidate_id", null: false
     t.datetime "created_at", null: false
@@ -205,6 +244,22 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_11_125541) do
     t.string "jti"
     t.datetime "updated_at", null: false
     t.index ["jti"], name: "index_jwt_denylists_on_jti", unique: true
+  end
+
+  create_table "knowledge_articles", force: :cascade do |t|
+    t.string "author"
+    t.string "category"
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.integer "helpful", default: 0
+    t.datetime "last_updated"
+    t.string "status", default: "draft"
+    t.text "tags"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.integer "views", default: 0
+    t.index ["category"], name: "index_knowledge_articles_on_category"
+    t.index ["status"], name: "index_knowledge_articles_on_status"
   end
 
   create_table "leave_policies", force: :cascade do |t|
@@ -394,6 +449,34 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_11_125541) do
     t.decimal "hra"
     t.datetime "updated_at", null: false
     t.index ["employee_id"], name: "index_salary_structures_on_employee_id"
+  end
+
+  create_table "sla_workflows", force: :cascade do |t|
+    t.decimal "avg_resolution_hours", precision: 10, scale: 2
+    t.string "category"
+    t.datetime "created_at", null: false
+    t.text "escalation_levels"
+    t.string "name", null: false
+    t.string "priority", default: "medium"
+    t.integer "sla_hours", null: false
+    t.string "status", default: "active"
+    t.integer "tickets_handled", default: 0
+    t.datetime "updated_at", null: false
+    t.index ["category"], name: "index_sla_workflows_on_category"
+    t.index ["status"], name: "index_sla_workflows_on_status"
+  end
+
+  create_table "ticket_comments", force: :cascade do |t|
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.integer "employee_id"
+    t.integer "helpdesk_ticket_id", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id"
+    t.index ["created_at"], name: "index_ticket_comments_on_created_at"
+    t.index ["employee_id"], name: "index_ticket_comments_on_employee_id"
+    t.index ["helpdesk_ticket_id"], name: "index_ticket_comments_on_helpdesk_ticket_id"
+    t.index ["user_id"], name: "index_ticket_comments_on_user_id"
   end
 
   create_table "timesheets", force: :cascade do |t|

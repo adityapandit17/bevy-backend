@@ -1776,5 +1776,224 @@ puts "Created #{EmployeeBenefit.count} employee benefits"
 puts "Created #{EmployeeTraining.count} employee trainings"
 puts "Created #{LeaveRequest.count} leave requests"
 
+# Create Helpdesk Tickets
+puts "Creating helpdesk tickets..."
+if Employee.count > 0
+  hr_dept = Department.find_by(name: "HR")
+  hr_employees = hr_dept ? hr_dept.employees : Employee.limit(3)
+  
+  helpdesk_tickets = [
+    {
+      title: "Payroll Query - Missing Overtime",
+      description: "Employee reports missing overtime hours in last month's payroll. Need to verify and process the correction.",
+      category: "Payroll",
+      priority: "high",
+      status: "open",
+      assigned_to_id: hr_employees.first&.id,
+      requester_id: Employee.where.not(id: hr_employees.map(&:id)).first&.id,
+      sla_hours: 24,
+      sla_status: "on-track",
+      channel: "email",
+      tags: "payroll,overtime,urgent"
+    },
+    {
+      title: "Benefits Enrollment Issue",
+      description: "Unable to enroll in new health insurance plan through portal. Getting error message when submitting enrollment form.",
+      category: "Benefits",
+      priority: "medium",
+      status: "in-progress",
+      assigned_to_id: hr_employees.second&.id,
+      requester_id: Employee.where.not(id: hr_employees.map(&:id)).second&.id,
+      sla_hours: 48,
+      sla_status: "on-track",
+      channel: "portal",
+      tags: "benefits,enrollment,portal"
+    },
+    {
+      title: "Leave Request Approval",
+      description: "Pending approval for 2 weeks vacation in March. Request submitted 5 days ago but still showing as pending.",
+      category: "Leave Management",
+      priority: "low",
+      status: "pending",
+      assigned_to_id: hr_employees.first&.id,
+      requester_id: Employee.where.not(id: hr_employees.map(&:id)).third&.id,
+      sla_hours: 72,
+      sla_status: "on-track",
+      channel: "system",
+      tags: "leave,approval,vacation"
+    },
+    {
+      title: "Performance Review Query",
+      description: "Questions about the performance review process and timeline for Q4 reviews.",
+      category: "Performance",
+      priority: "medium",
+      status: "open",
+      assigned_to_id: hr_employees.first&.id,
+      requester_id: Employee.where.not(id: hr_employees.map(&:id)).fourth&.id,
+      sla_hours: 48,
+      sla_status: "on-track",
+      channel: "email",
+      tags: "performance,review"
+    },
+    {
+      title: "IT Access Request",
+      description: "Need access to new project management tool and development environment.",
+      category: "IT Support",
+      priority: "high",
+      status: "resolved",
+      assigned_to_id: hr_employees.first&.id,
+      requester_id: Employee.where.not(id: hr_employees.map(&:id)).fifth&.id,
+      sla_hours: 24,
+      sla_status: "on-track",
+      channel: "portal",
+      tags: "it,access,request"
+    }
+  ]
+
+  helpdesk_tickets.each do |ticket_data|
+    HelpdeskTicket.find_or_create_by!(title: ticket_data[:title]) do |ticket|
+      ticket.assign_attributes(ticket_data)
+      ticket.created_at = rand(1..10).days.ago
+    end
+  end
+end
+
+# Create SLA Workflows
+puts "Creating SLA workflows..."
+sla_workflows = [
+  {
+    name: "Payroll Issues",
+    category: "Payroll",
+    priority: "high",
+    sla_hours: 24,
+    status: "active",
+    tickets_handled: 45,
+    avg_resolution_hours: 18.5,
+    escalation_levels: [
+      { level: 1, time: "4h", action: "Initial Response" },
+      { level: 2, time: "12h", action: "Escalate to Specialist" },
+      { level: 3, time: "24h", action: "Escalate to Manager" }
+    ].to_json
+  },
+  {
+    name: "Benefits & Enrollment",
+    category: "Benefits",
+    priority: "medium",
+    sla_hours: 48,
+    status: "active",
+    tickets_handled: 32,
+    avg_resolution_hours: 36.0,
+    escalation_levels: [
+      { level: 1, time: "8h", action: "Initial Response" },
+      { level: 2, time: "24h", action: "Escalate to Benefits Team" },
+      { level: 3, time: "48h", action: "Escalate to Manager" }
+    ].to_json
+  },
+  {
+    name: "Leave Management",
+    category: "Leave Management",
+    priority: "low",
+    sla_hours: 72,
+    status: "active",
+    tickets_handled: 28,
+    avg_resolution_hours: 48.0,
+    escalation_levels: [
+      { level: 1, time: "12h", action: "Initial Response" },
+      { level: 2, time: "48h", action: "Escalate to HR Manager" },
+      { level: 3, time: "72h", action: "Escalate to Director" }
+    ].to_json
+  },
+  {
+    name: "IT Support Requests",
+    category: "IT Support",
+    priority: "high",
+    sla_hours: 24,
+    status: "active",
+    tickets_handled: 67,
+    avg_resolution_hours: 16.0,
+    escalation_levels: [
+      { level: 1, time: "2h", action: "Initial Response" },
+      { level: 2, time: "8h", action: "Escalate to IT Team Lead" },
+      { level: 3, time: "24h", action: "Escalate to IT Manager" }
+    ].to_json
+  }
+]
+
+sla_workflows.each do |workflow_data|
+  SlaWorkflow.find_or_create_by!(name: workflow_data[:name]) do |workflow|
+    workflow.assign_attributes(workflow_data)
+  end
+end
+
+# Create Knowledge Articles
+puts "Creating knowledge articles..."
+knowledge_articles = [
+  {
+    title: "How to Submit a Leave Request",
+    content: "Step-by-step guide for submitting leave requests through the HR portal:\n\n1. Log in to the HR portal\n2. Navigate to the Leave Management section\n3. Click on 'Request Leave'\n4. Select the leave type (Sick, Vacation, Personal, etc.)\n5. Choose your start and end dates\n6. Add any comments or notes\n7. Submit your request\n\nYour manager will be notified automatically and you'll receive updates via email.",
+    category: "Leave Management",
+    author: "HR Team",
+    tags: "leave,request,portal,guide",
+    views: 156,
+    helpful: 23,
+    status: "published",
+    last_updated: 15.days.ago
+  },
+  {
+    title: "Payroll Schedule and Payment Methods",
+    content: "Information about payroll processing dates, payment methods, and direct deposit setup:\n\nPayroll Schedule:\n- Payroll is processed on the 25th of each month\n- Payments are disbursed on the 1st of the following month\n- For months with holidays, payments are processed one business day earlier\n\nPayment Methods:\n- Direct Deposit (recommended): Set up through the employee portal\n- Bank Transfer: Automatic transfer to your registered bank account\n- Check: Available upon request (may take additional 2-3 business days)\n\nTo set up direct deposit, go to Payroll > Payment Methods in your employee portal.",
+    category: "Payroll",
+    author: "Payroll Team",
+    tags: "payroll,schedule,payment,direct-deposit",
+    views: 234,
+    helpful: 45,
+    status: "published",
+    last_updated: 10.days.ago
+  },
+  {
+    title: "Benefits Enrollment Guide",
+    content: "Complete guide to enrolling in employee benefits:\n\nAvailable Benefits:\n- Health Insurance (Medical, Dental, Vision)\n- Life Insurance\n- Retirement Plans (401k)\n- Flexible Spending Accounts (FSA)\n\nEnrollment Periods:\n- New Hire: Within 30 days of joining\n- Annual Open Enrollment: November 1-15\n- Qualifying Life Events: Within 30 days of event\n\nTo enroll:\n1. Access the Benefits Portal\n2. Review available plans\n3. Select your coverage options\n4. Add dependents if applicable\n5. Submit your enrollment\n\nFor questions, contact the Benefits team at benefits@company.com",
+    category: "Benefits",
+    author: "Benefits Team",
+    tags: "benefits,enrollment,insurance,guide",
+    views: 189,
+    helpful: 34,
+    status: "published",
+    last_updated: 7.days.ago
+  },
+  {
+    title: "Performance Review Process",
+    content: "Understanding the performance review cycle:\n\nReview Schedule:\n- Annual Reviews: Conducted in December\n- Mid-Year Check-ins: Conducted in June\n- Quarterly Goals: Reviewed each quarter\n\nProcess:\n1. Self-Assessment: Complete your self-evaluation\n2. Manager Review: Your manager reviews and provides feedback\n3. Goal Setting: Set goals for the next period\n4. Development Plan: Create a professional development plan\n\nPerformance Ratings:\n- Exceeds Expectations\n- Meets Expectations\n- Needs Improvement\n\nAll reviews are documented in the Performance Management system.",
+    category: "Performance",
+    author: "HR Team",
+    tags: "performance,review,goals,feedback",
+    views: 142,
+    helpful: 28,
+    status: "published",
+    last_updated: 5.days.ago
+  },
+  {
+    title: "IT Support and Access Requests",
+    content: "How to request IT support and system access:\n\nIT Support:\n- Submit tickets through the Helpdesk portal\n- Email: it-support@company.com\n- Phone: Extension 1234\n- Response time: Within 4 hours for urgent issues\n\nAccess Requests:\n- Software Access: Request through the IT portal\n- System Access: Submit access request form\n- Hardware Requests: Contact IT procurement\n\nCommon Requests:\n- Email account setup\n- VPN access\n- Software licenses\n- Hardware (laptops, monitors, etc.)\n- Password resets\n\nFor urgent issues, call the IT helpdesk directly.",
+    category: "IT Support",
+    author: "IT Team",
+    tags: "it,support,access,helpdesk",
+    views: 201,
+    helpful: 41,
+    status: "published",
+    last_updated: 3.days.ago
+  }
+]
+
+knowledge_articles.each do |article_data|
+  KnowledgeArticle.find_or_create_by!(title: article_data[:title]) do |article|
+    article.assign_attributes(article_data)
+  end
+end
+
+puts "Created #{HelpdeskTicket.count} helpdesk tickets"
+puts "Created #{SlaWorkflow.count} SLA workflows"
+puts "Created #{KnowledgeArticle.count} knowledge articles"
+
 # Load user roles and permissions
 load Rails.root.join('db', 'seeds', 'users_and_roles.rb')
