@@ -1,5 +1,5 @@
 class CandidatesController < ApplicationController
-  before_action :set_candidate, only: [ :show, :update, :destroy ]
+  before_action :set_candidate, only: [ :show, :update, :destroy, :send_email ]
 
   # GET /candidates
   def index
@@ -102,6 +102,33 @@ class CandidatesController < ApplicationController
     end
 
     render json: pipeline_data
+  end
+
+  # POST /candidates/:id/send_email
+  def send_email
+    subject = params[:subject]
+    message = params[:message]
+    sender_name = params[:sender_name]
+
+    if subject.blank? || message.blank?
+      render json: { errors: ["Subject and message are required"] }, status: :unprocessable_entity
+      return
+    end
+
+    begin
+      CandidateMailer.candidate_email(@candidate, subject, message, sender_name).deliver_now
+      
+      # Update last_contact date
+      @candidate.update(last_contact: Date.current)
+      
+      render json: { 
+        message: "Email sent successfully",
+        candidate: CandidateSerializer.new.serialize(@candidate)
+      }
+    rescue => e
+      Rails.logger.error "Failed to send email: #{e.message}"
+      render json: { errors: ["Failed to send email: #{e.message}"] }, status: :internal_server_error
+    end
   end
 
   private

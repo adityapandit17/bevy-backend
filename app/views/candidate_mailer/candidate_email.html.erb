@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= @subject %></title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+      }
+      .container {
+        background-color: white;
+        border-radius: 8px;
+        padding: 40px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #10b981;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: #10b981;
+        margin-bottom: 10px;
+      }
+      .content {
+        margin-bottom: 30px;
+      }
+      .message-content {
+        background-color: #f9fafb;
+        padding: 20px;
+        border-radius: 6px;
+        margin: 20px 0;
+        border-left: 4px solid #10b981;
+        white-space: pre-wrap;
+      }
+      .candidate-info {
+        background-color: #f3f4f6;
+        padding: 20px;
+        border-radius: 6px;
+        margin: 20px 0;
+      }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+      .info-label {
+        font-weight: 600;
+        color: #374151;
+      }
+      .info-value {
+        color: #6b7280;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+        color: #6b7280;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">🏢 HRMS Pro</div>
+        <h1 style="font-size: 24px; color: #1f2937; margin: 10px 0;"><%= @subject %></h1>
+      </div>
+
+      <div class="content">
+        <p>Hello <%= @candidate.name %>,</p>
+        
+        <div class="message-content">
+          <%= @message %>
+        </div>
+
+        <div class="candidate-info">
+          <div class="info-row">
+            <span class="info-label">Position Applied:</span>
+            <span class="info-value"><%= @candidate.position %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Department:</span>
+            <span class="info-value"><%= @candidate.department %></span>
+          </div>
+          <% if @candidate.status.present? %>
+          <div class="info-row">
+            <span class="info-label">Current Status:</span>
+            <span class="info-value"><%= @candidate.status.humanize %></span>
+          </div>
+          <% end %>
+        </div>
+
+        <p>If you have any questions or need to discuss further, please don't hesitate to reach out to us.</p>
+
+        <p>Best regards,<br>
+        <%= @sender_name %><br>
+        HRMS Pro Recruitment Team</p>
+      </div>
+
+      <div class="footer">
+        <p>This email was sent by HRMS Pro - Human Resource Management System</p>
+        <p>If you have any questions, please contact our HR department.</p>
+      </div>
+    </div>
+  </body>
+</html>
+

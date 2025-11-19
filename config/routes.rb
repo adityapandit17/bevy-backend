@@ -254,6 +254,7 @@ Rails.application.routes.draw do
   resources :candidates do
     member do
       patch :update_status
+      post :send_email
     end
     collection do
       get :stats
