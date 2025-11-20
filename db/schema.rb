@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_19_193555) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_20_070755) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.date "assigned_date"
@@ -48,8 +48,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_19_193555) do
   end
 
   create_table "attendance_records", force: :cascade do |t|
-    t.time "check_in"
-    t.time "check_out"
     t.datetime "created_at", null: false
     t.date "date"
     t.integer "employee_id", null: false
@@ -57,6 +55,16 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_19_193555) do
     t.datetime "updated_at", null: false
     t.decimal "working_hours"
     t.index ["employee_id"], name: "index_attendance_records_on_employee_id"
+  end
+
+  create_table "attendance_sessions", force: :cascade do |t|
+    t.integer "attendance_record_id", null: false
+    t.datetime "check_in"
+    t.datetime "check_out"
+    t.datetime "created_at", null: false
+    t.decimal "session_hours", precision: 5, scale: 2
+    t.datetime "updated_at", null: false
+    t.index ["attendance_record_id"], name: "index_attendance_sessions_on_attendance_record_id"
   end
 
   create_table "candidates", force: :cascade do |t|
@@ -558,6 +566,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_19_193555) do
   add_foreign_key "asset_allocations", "employees"
   add_foreign_key "assets", "employees"
   add_foreign_key "attendance_records", "employees"
+  add_foreign_key "attendance_sessions", "attendance_records"
   add_foreign_key "employee_benefits", "employees"
   add_foreign_key "employee_documents", "employees"
   add_foreign_key "employee_trainings", "employees"

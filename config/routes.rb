@@ -203,11 +203,7 @@ Rails.application.routes.draw do
   resources :salary_structures
   resources :payrolls
   resources :attendance_records do
-    member do
-      patch :check_out
-    end
     collection do
-      post :check_in
       get :today
       get :stats
       get :calendar
@@ -290,6 +286,11 @@ Rails.application.routes.draw do
       get :allocations
       get :maintenance
     end
+  end
+
+  resources :employees do
+    post "attendance_records/clock_in",  to: "attendance_records#clock_in"
+    post "attendance_records/clock_out", to: "attendance_records#clock_out"
   end
 
   resources :asset_allocations do

@@ -1,5 +1,6 @@
 class AttendanceRecordsController < ApplicationController
-  before_action :set_attendance_record, only: [ :show, :update, :destroy, :check_out ]
+  before_action :set_attendance_record, only: [ :show, :update, :destroy ]
+  before_action :set_employee, only: [:clock_in, :clock_out]
 
   def index
     @attendance_records = AttendanceRecord.includes(:employee)
@@ -54,84 +55,184 @@ class AttendanceRecordsController < ApplicationController
     head :no_content
   end
 
-  # Check in functionality
-  # Always creates a new record for each check-in to allow multiple sessions per day
-  def check_in
-    employee_id = params[:employee_id]
-    
-    unless employee_id
-      render json: { error: "employee_id is required" }, status: :unprocessable_entity
+  def clock_in
+    unless @employee
+      render json: { error: "Employee not found" }, status: :not_found
       return
     end
     
-    # Always create a new record for check-in
-    today = Date.current
-    
-    @attendance_record = AttendanceRecord.create!(
-      employee_id: employee_id,
-      date: today,
-      check_in: Time.current,
-      status: "present"
-    )
-    
-    render json: format_attendance_record(@attendance_record), status: :created
-  rescue => e
-    render json: { errors: [e.message] }, status: :unprocessable_entity
-  end
+    service = AttendanceService.new(@employee)
+    result = service.clock_in
 
-  # Check out functionality
-  def check_out
-    if @attendance_record.check_out.present?
-      render json: { error: "Already checked out for this session" }, status: :unprocessable_entity
-      return
-    end
-
-    if @attendance_record.check_in.blank?
-      render json: { error: "Must check in before checking out" }, status: :unprocessable_entity
-      return
-    end
-
-    @attendance_record.check_out = Time.current
-    # Calculate working hours
-    if @attendance_record.check_in.present?
-      duration = @attendance_record.check_out - @attendance_record.check_in
-      @attendance_record.working_hours = (duration / 1.hour).round(2)
-    end
-
-    if @attendance_record.save
-      render json: format_attendance_record(@attendance_record)
+    if result.is_a?(Hash) && result[:error]
+      render json: { error: result[:error] }, status: :unprocessable_entity
     else
-      render json: { errors: @attendance_record.errors.full_messages }, status: :unprocessable_entity
+      # Reload to ensure we have all associations
+      result.reload
+      
+      # Query sessions directly to ensure we get fresh data
+      sessions = AttendanceSession
+                  .where(attendance_record_id: result.id)
+                  .order(created_at: :asc)
+      
+      Rails.logger.info "Clock in response: Record #{result.id}, Sessions count: #{sessions.count}"
+      
+      render json: {
+        message: "Clock-in successful",
+        attendance_record: format_attendance_record(result),
+        sessions: sessions.map do |session|
+          {
+            id: session.id,
+            check_in: session.check_in,
+            check_out: session.check_out,
+            session_hours: session.session_hours,
+            created_at: session.created_at,
+            updated_at: session.updated_at
+          }
+        end
+      }, status: :ok
     end
+  rescue => e
+    Rails.logger.error "Error in clock_in: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    render json: { 
+      error: "Failed to clock in",
+      message: e.message
+    }, status: :internal_server_error
   end
+
+  def clock_out
+    unless @employee
+      render json: { error: "Employee not found" }, status: :not_found
+      return
+    end
+    
+    service = AttendanceService.new(@employee)
+    result = service.clock_out
+
+    if result.is_a?(Hash) && result[:error]
+      render json: { error: result[:error] }, status: :unprocessable_entity
+    else
+      # Reload to ensure we have all associations
+      result.reload
+      render json: {
+        message: "Clock-out successful",
+        attendance_record: format_attendance_record(result),
+        sessions: result.attendance_sessions.reload.map do |session|
+          {
+            id: session.id,
+            check_in: session.check_in,
+            check_out: session.check_out,
+            session_hours: session.session_hours,
+            created_at: session.created_at,
+            updated_at: session.updated_at
+          }
+        end
+      }, status: :ok
+    end
+  rescue => e
+    Rails.logger.error "Error in clock_out: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    render json: { 
+      error: "Failed to clock out",
+      message: e.message
+    }, status: :internal_server_error
+  end
+
 
   # Get today's attendance for an employee
-  # Returns all records for today with total hours
+  # Returns all records for today with total hours and sessions
   def today
     employee_id = params[:employee_id]
+    
+    unless employee_id.present?
+      render json: { error: "employee_id parameter is required" }, status: :bad_request
+      return
+    end
+    
+    # Convert to integer if it's a string
+    employee_id = employee_id.to_i
+    
+    unless employee_id > 0
+      render json: { error: "Invalid employee_id" }, status: :bad_request
+      return
+    end
+    
     today = Date.current
 
-    # Get all records for today
+    # Get all records for today with sessions
     records = AttendanceRecord
+      .includes(:attendance_sessions)
       .where(employee_id: employee_id, date: today)
       .order(created_at: :asc)
 
-    # Calculate total hours
-    total_hours = AttendanceRecord.total_hours_for_day(employee_id, today)
+    # Calculate total hours from all sessions across all records
+    total_hours = 0.0
+    records.each do |record|
+      record.attendance_sessions.each do |session|
+        if session.check_in.present? && session.check_out.present?
+          duration = session.check_out - session.check_in
+          hours = (duration / 1.hour)
+          total_hours += hours if hours > 0 && hours < 24
+        elsif session.session_hours.present?
+          total_hours += session.session_hours if session.session_hours > 0 && session.session_hours < 24
+        end
+      end
+    end
+    total_hours = total_hours.round(2)
 
-    # Find the most recent record without check_out (active session)
-    active_record = records.where(check_out: nil).order(created_at: :desc).first
+    # Find if there's an active session (any session without check_out)
+    # Use direct SQL query to ensure we get fresh data
+    active_session = nil
+    active_record = nil
+    records.each do |record|
+      session = AttendanceSession
+                  .where(attendance_record_id: record.id)
+                  .where("check_out IS NULL")
+                  .order(created_at: :desc)
+                  .first
+      if session
+        active_session = session
+        active_record = record
+        break
+      end
+    end
+
+    # Collect all sessions from all records
+    all_sessions = []
+    records.each do |record|
+      record.attendance_sessions.each do |session|
+        all_sessions << {
+          id: session.id,
+          attendance_record_id: record.id,
+          check_in: session.check_in,
+          check_out: session.check_out,
+          session_hours: session.session_hours,
+          created_at: session.created_at,
+          updated_at: session.updated_at
+        }
+      end
+    end
 
     # Always return sessions array and total hours
     result = {
       total_hours_today: total_hours,
-      total_sessions_today: records.count,
-      sessions: records.map { |r| format_attendance_record(r) }
+      total_sessions_today: all_sessions.count,
+      sessions: all_sessions,
+      attendance_records: records.map { |r| format_attendance_record(r) }
     }
     
     # If there's an active session, also include it as the main record
-    if active_record
-      result.merge!(format_attendance_record(active_record))
+    if active_record && active_session
+      result.merge!({
+        id: active_record.id,
+        employee_id: employee_id,
+        date: today,
+        check_in: active_session.check_in,
+        check_out: nil,
+        status: "present",
+        current_session_id: active_session.id
+      })
     else
       # Return summary if no active session
       result.merge!({
@@ -140,11 +241,19 @@ class AttendanceRecordsController < ApplicationController
         date: today,
         check_in: nil,
         check_out: nil,
-        status: "absent"
+        status: "absent",
+        current_session_id: nil
       })
     end
     
     render json: result
+  rescue => e
+    Rails.logger.error "Error in today endpoint: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    render json: { 
+      error: "Failed to fetch today's attendance",
+      message: e.message
+    }, status: :internal_server_error
   end
 
   # Get attendance statistics
@@ -196,6 +305,19 @@ class AttendanceRecordsController < ApplicationController
 
   private
 
+  def set_employee
+    employee_id = params[:employee_id]
+    
+    unless employee_id.present?
+      render json: { error: "employee_id parameter is required" }, status: :bad_request
+      return
+    end
+    
+    @employee = Employee.find(employee_id)
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Employee not found" }, status: :not_found
+  end
+
   def set_attendance_record
     @attendance_record = AttendanceRecord.find(params[:id])
   rescue ActiveRecord::RecordNotFound
@@ -207,6 +329,10 @@ class AttendanceRecordsController < ApplicationController
   end
 
   def format_attendance_record(record)
+    # Get first session's check_in and last session's check_out for backward compatibility
+    first_session = record.attendance_sessions.order(created_at: :asc).first
+    last_session = record.attendance_sessions.order(created_at: :desc).first
+    
     {
       id: record.id,
       employee_id: record.employee_id,
@@ -214,18 +340,28 @@ class AttendanceRecordsController < ApplicationController
       employee_email: record.employee_email,
       employee_department: record.employee_department,
       date: record.date,
-      check_in: record.check_in,
-      check_out: record.check_out,
-      formatted_check_in: record.formatted_check_in,
-      formatted_check_out: record.formatted_check_out,
+      check_in: first_session&.check_in,
+      check_out: last_session&.check_out,
+      formatted_check_in: first_session&.check_in&.strftime("%I:%M %p"),
+      formatted_check_out: last_session&.check_out&.strftime("%I:%M %p"),
       status: record.status,
       status_label: record.status_label,
       status_color: record.status_color,
-      working_hours: record.working_hours,
-      overtime_hours: record.overtime_hours,
-      is_late: record.is_late?,
+      working_hours: record.working_hours || record.total_hours,
+      overtime_hours: (record.working_hours || record.total_hours) > 8 ? ((record.working_hours || record.total_hours) - 8) : 0,
+      is_late: first_session&.check_in ? (first_session.check_in > Time.parse("09:00")) : false,
       created_at: record.created_at,
-      updated_at: record.updated_at
+      updated_at: record.updated_at,
+      attendance_sessions: record.attendance_sessions.map do |session|
+        {
+          id: session.id,
+          check_in: session.check_in,
+          check_out: session.check_out,
+          session_hours: session.session_hours,
+          created_at: session.created_at,
+          updated_at: session.updated_at
+        }
+      end
     }
   end
 end
