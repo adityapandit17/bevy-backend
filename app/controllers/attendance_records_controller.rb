@@ -141,7 +141,7 @@ class AttendanceRecordsController < ApplicationController
 
 
   # Get today's attendance for an employee
-  # Returns all records for today with total hours and sessions
+  # Returns the single attendance record for today with total hours and sessions
   def today
     employee_id = params[:employee_id]
     
@@ -160,15 +160,16 @@ class AttendanceRecordsController < ApplicationController
     
     today = Date.current
 
-    # Get all records for today with sessions
-    records = AttendanceRecord
+    # Get the single attendance record for today (only one per employee per day)
+    record = AttendanceRecord
       .includes(:attendance_sessions)
-      .where(employee_id: employee_id, date: today)
-      .order(created_at: :asc)
+      .find_by(employee_id: employee_id, date: today)
 
-    # Calculate total hours from all sessions across all records
+    # Calculate total hours from all sessions
     total_hours = 0.0
-    records.each do |record|
+    all_sessions = []
+    
+    if record
       record.attendance_sessions.each do |session|
         if session.check_in.present? && session.check_out.present?
           duration = session.check_out - session.check_in
@@ -177,31 +178,7 @@ class AttendanceRecordsController < ApplicationController
         elsif session.session_hours.present?
           total_hours += session.session_hours if session.session_hours > 0 && session.session_hours < 24
         end
-      end
-    end
-    total_hours = total_hours.round(2)
-
-    # Find if there's an active session (any session without check_out)
-    # Use direct SQL query to ensure we get fresh data
-    active_session = nil
-    active_record = nil
-    records.each do |record|
-      session = AttendanceSession
-                  .where(attendance_record_id: record.id)
-                  .where("check_out IS NULL")
-                  .order(created_at: :desc)
-                  .first
-      if session
-        active_session = session
-        active_record = record
-        break
-      end
-    end
-
-    # Collect all sessions from all records
-    all_sessions = []
-    records.each do |record|
-      record.attendance_sessions.each do |session|
+        
         all_sessions << {
           id: session.id,
           attendance_record_id: record.id,
@@ -212,6 +189,17 @@ class AttendanceRecordsController < ApplicationController
           updated_at: session.updated_at
         }
       end
+      total_hours = total_hours.round(2)
+    end
+
+    # Find if there's an active session (session without check_out)
+    active_session = nil
+    if record
+      active_session = AttendanceSession
+                        .where(attendance_record_id: record.id)
+                        .where("check_out IS NULL")
+                        .order(created_at: :desc)
+                        .first
     end
 
     # Always return sessions array and total hours
@@ -219,22 +207,32 @@ class AttendanceRecordsController < ApplicationController
       total_hours_today: total_hours,
       total_sessions_today: all_sessions.count,
       sessions: all_sessions,
-      attendance_records: records.map { |r| format_attendance_record(r) }
+      attendance_records: record ? [format_attendance_record(record)] : []
     }
     
     # If there's an active session, also include it as the main record
-    if active_record && active_session
+    if record && active_session
       result.merge!({
-        id: active_record.id,
+        id: record.id,
         employee_id: employee_id,
         date: today,
         check_in: active_session.check_in,
         check_out: nil,
-        status: "present",
+        status: record.status,
         current_session_id: active_session.id
       })
+    elsif record
+      result.merge!({
+        id: record.id,
+        employee_id: employee_id,
+        date: today,
+        check_in: nil,
+        check_out: nil,
+        status: record.status,
+        current_session_id: nil
+      })
     else
-      # Return summary if no active session
+      # Return summary if no record exists
       result.merge!({
         id: nil,
         employee_id: employee_id,

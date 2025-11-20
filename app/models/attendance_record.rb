@@ -5,8 +5,7 @@ class AttendanceRecord < ApplicationRecord
   # Validations
   validates :date, presence: true
   validates :status, presence: true, inclusion: { in: %w[present absent late half_day work_from_home early_departure] }
-  # Removed uniqueness validation to allow multiple check-ins/check-outs per day
-  # Removed check_out_after_check_in validation as check_in/check_out are now on sessions
+  validates :employee_id, uniqueness: { scope: :date, message: "can only have one attendance record per day" }
   validate :date_not_in_future
 
   # Scopes
@@ -130,26 +129,19 @@ class AttendanceRecord < ApplicationRecord
   end
 
   # Class method to calculate total hours for an employee on a specific date
+  # Since there's only one record per employee per day, this is simplified
   def self.total_hours_for_day(employee_id, date)
-    records = where(employee_id: employee_id, date: date)
-    total = 0.0
+    record = find_by(employee_id: employee_id, date: date)
+    return 0.0 unless record
     
-    records.each do |record|
-      if record.check_in && record.check_out
-        # Calculate hours from check_in and check_out
-        duration = record.check_out - record.check_in
-        hours = (duration / 1.hour)
-        total += hours if hours > 0 && hours < 24 # Sanity check: hours should be between 0 and 24
-      elsif record.read_attribute(:working_hours)
-        # Use stored working_hours if available
-        stored_hours = record.read_attribute(:working_hours)
-        if stored_hours && stored_hours > 0 && stored_hours < 24
-          total += stored_hours
-        end
-      end
+    # Use working_hours if available, otherwise calculate from sessions
+    if record.read_attribute(:working_hours)
+      stored_hours = record.read_attribute(:working_hours)
+      return stored_hours.round(2) if stored_hours && stored_hours > 0 && stored_hours < 24
     end
     
-    total.round(2)
+    # Calculate from sessions
+    record.total_hours.round(2)
   end
 
   private
@@ -170,7 +162,10 @@ class AttendanceRecord < ApplicationRecord
     return if status.present? && status != "present"
 
     if attendance_sessions.empty?
-      self.status = "absent"
+      # Only set to absent if status wasn't explicitly set to present
+      # This prevents overriding "present" status when a record is created
+      # and a session will be added immediately after (e.g., during clock_in)
+      self.status = "absent" unless status == "present"
     else
       # Check if there's an active session (no check_out)
       active_session = attendance_sessions.where(check_out: nil).first
