@@ -7,14 +7,34 @@ class AttendanceRecordsController < ApplicationController
 
     # Apply filters
     @attendance_records = @attendance_records.by_employee(params[:employee_id]) if params[:employee_id].present?
-    @attendance_records = @attendance_records.by_date(params[:date]) if params[:date].present?
+    
+    # Parse date parameter properly
+    if params[:date].present?
+      begin
+        parsed_date = Date.parse(params[:date])
+        @attendance_records = @attendance_records.by_date(parsed_date)
+      rescue ArgumentError => e
+        Rails.logger.error "Invalid date format: #{params[:date]} - #{e.message}"
+        render json: { error: "Invalid date format. Please use YYYY-MM-DD format." }, status: :bad_request
+        return
+      end
+    end
+    
     @attendance_records = @attendance_records.where(status: params[:status]) if params[:status].present?
     @attendance_records = @attendance_records.current_month if params[:current_month] == "true"
     @attendance_records = @attendance_records.current_year if params[:current_year] == "true"
 
     # Apply date range filter
     if params[:start_date].present? && params[:end_date].present?
-      @attendance_records = @attendance_records.where(date: params[:start_date]..params[:end_date])
+      begin
+        start_date = Date.parse(params[:start_date])
+        end_date = Date.parse(params[:end_date])
+        @attendance_records = @attendance_records.where(date: start_date..end_date)
+      rescue ArgumentError => e
+        Rails.logger.error "Invalid date range format: #{e.message}"
+        render json: { error: "Invalid date range format. Please use YYYY-MM-DD format." }, status: :bad_request
+        return
+      end
     end
 
     # Apply search
@@ -26,6 +46,10 @@ class AttendanceRecordsController < ApplicationController
     end
 
     render json: @attendance_records.map { |record| format_attendance_record(record) }
+  rescue => e
+    Rails.logger.error "Error in attendance_records#index: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    render json: { error: "Failed to fetch attendance records", message: e.message }, status: :internal_server_error
   end
 
   def show
@@ -33,20 +57,108 @@ class AttendanceRecordsController < ApplicationController
   end
 
   def create
-    @attendance_record = AttendanceRecord.new(attendance_record_params)
+    begin
+      # Extract check_in and check_out from params before creating record (safely)
+      attendance_params = params[:attendance_record] || {}
+      check_in = attendance_params[:check_in]
+      check_out = attendance_params[:check_out]
+      
+      @attendance_record = AttendanceRecord.new(attendance_record_params)
 
-    if @attendance_record.save
-      render json: format_attendance_record(@attendance_record), status: :created
-    else
-      render json: { errors: @attendance_record.errors.full_messages }, status: :unprocessable_entity
+      if @attendance_record.save
+        # Create attendance session if check_in or check_out is provided
+        if check_in.present? || check_out.present?
+          session_params = {}
+          begin
+            session_params[:check_in] = Time.parse(check_in) if check_in.present?
+            session_params[:check_out] = Time.parse(check_out) if check_out.present?
+            
+            @attendance_record.attendance_sessions.create!(session_params)
+            @attendance_record.reload
+          rescue ArgumentError => e
+            Rails.logger.error "Invalid time format: #{e.message}"
+            render json: { 
+              error: "Invalid time format for check_in or check_out",
+              message: e.message
+            }, status: :bad_request
+            return
+          end
+        end
+        
+        render json: format_attendance_record(@attendance_record), status: :created
+      else
+        error_messages = @attendance_record.errors.full_messages
+        Rails.logger.error "Failed to create attendance record: #{error_messages.join(', ')}"
+        render json: { 
+          error: error_messages.join(', '),
+          errors: error_messages 
+        }, status: :unprocessable_entity
+      end
+    rescue => e
+      Rails.logger.error "Error in attendance_records#create: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      render json: { 
+        error: "Failed to create attendance record",
+        message: e.message
+      }, status: :internal_server_error
     end
   end
 
   def update
-    if @attendance_record.update(attendance_record_params)
-      render json: format_attendance_record(@attendance_record)
-    else
-      render json: { errors: @attendance_record.errors.full_messages }, status: :unprocessable_entity
+    begin
+      # Extract check_in and check_out from params before updating record (safely)
+      attendance_params = params[:attendance_record] || {}
+      check_in = attendance_params[:check_in]
+      check_out = attendance_params[:check_out]
+      
+      if @attendance_record.update(attendance_record_params)
+        # Update or create attendance session if check_in or check_out are provided
+        if check_in.present? || check_out.present?
+          begin
+            # Find existing session or create new one
+            session = @attendance_record.attendance_sessions.order(created_at: :asc).first
+            
+            if session
+              # Update existing session
+              update_params = {}
+              update_params[:check_in] = Time.parse(check_in) if check_in.present?
+              update_params[:check_out] = Time.parse(check_out) if check_out.present?
+              session.update!(update_params)
+            else
+              # Create new session
+              session_params = {}
+              session_params[:check_in] = Time.parse(check_in) if check_in.present?
+              session_params[:check_out] = Time.parse(check_out) if check_out.present?
+              @attendance_record.attendance_sessions.create!(session_params)
+            end
+            
+            @attendance_record.reload
+          rescue ArgumentError => e
+            Rails.logger.error "Invalid time format: #{e.message}"
+            render json: { 
+              error: "Invalid time format for check_in or check_out",
+              message: e.message
+            }, status: :bad_request
+            return
+          end
+        end
+        
+        render json: format_attendance_record(@attendance_record)
+      else
+        error_messages = @attendance_record.errors.full_messages
+        Rails.logger.error "Failed to update attendance record: #{error_messages.join(', ')}"
+        render json: { 
+          error: error_messages.join(', '),
+          errors: error_messages 
+        }, status: :unprocessable_entity
+      end
+    rescue => e
+      Rails.logger.error "Error in attendance_records#update: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      render json: { 
+        error: "Failed to update attendance record",
+        message: e.message
+      }, status: :internal_server_error
     end
   end
 
@@ -323,7 +435,7 @@ class AttendanceRecordsController < ApplicationController
   end
 
   def attendance_record_params
-    params.require(:attendance_record).permit(:employee_id, :date, :check_in, :check_out, :status, :working_hours)
+    params.require(:attendance_record).permit(:employee_id, :date, :status, :working_hours)
   end
 
   def format_attendance_record(record)
