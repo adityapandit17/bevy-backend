@@ -184,11 +184,36 @@ class DashboardController < ApplicationController
   def pending_tasks
     tasks = []
 
-    # Pending leave approvals
-    pending_leaves = LeaveRequest.joins(:employee)
-                                .where(leave_requests: { status: "pending" })
-                                .where(employees: { status: "active" })
-                                .size
+    # Pending leave approvals - filter by manager if user is a manager
+    pending_leaves = 0
+    
+    if current_user&.employee
+      # User has an employee record - check if they have direct reports with pending leaves
+      manager_employee_id = current_user.employee.id
+      # pending_for_manager scope already joins employee and filters by status pending
+      pending_leaves = LeaveRequest.pending_for_manager(manager_employee_id)
+                                   .where(employees: { status: "active" })
+                                   .distinct
+                                   .count
+    end
+    
+    # For HR/Admin users who are NOT managers (no direct reports), show all pending leaves
+    is_admin_or_hr = current_user&.has_role?("Super Admin") ||
+                     current_user&.has_role?("HR Manager") ||
+                     current_user&.has_role?("HR") ||
+                     current_user&.has_permission?("leave_requests", "index")
+    
+    # Only show all pending leaves if user is HR/Admin AND has no direct reports (pending_leaves == 0)
+    # This ensures managers see their direct reports first, HR/Admin without direct reports see all
+    if is_admin_or_hr && pending_leaves == 0
+      # HR/Admin with no direct reports see all pending leaves
+      pending_leaves = LeaveRequest.joins(:employee)
+                                   .where(leave_requests: { status: "pending" })
+                                   .where(employees: { status: "active" })
+                                   .distinct
+                                   .count
+    end
+    
     if pending_leaves > 0
       tasks << {
         id: 1,
