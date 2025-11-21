@@ -8,7 +8,10 @@ class CandidatesController < ApplicationController
     # Apply filters
     @candidates = @candidates.by_status(params[:status]) if params[:status].present?
     @candidates = @candidates.by_department(params[:department]) if params[:department].present?
-    @candidates = @candidates.where("name ILIKE ? OR email ILIKE ? OR position ILIKE ?", "%#{params[:search]}%", "%#{params[:search]}%", "%#{params[:search]}%") if params[:search].present?
+    if params[:search].present?
+      search_term = "%#{params[:search]}%"
+      @candidates = @candidates.where("LOWER(name) LIKE LOWER(?) OR LOWER(email) LIKE LOWER(?) OR LOWER(position) LIKE LOWER(?)", search_term, search_term, search_term)
+    end
 
     render json: Panko::ArraySerializer.new(@candidates, each_serializer: CandidateSerializer).to_json
   end
