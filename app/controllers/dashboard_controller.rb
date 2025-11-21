@@ -274,6 +274,26 @@ class DashboardController < ApplicationController
       }
     end
 
+    # Missed interviews assigned to current employee (scheduled_date < Date.current and status == "scheduled")
+    missed_interviews = 0
+    if current_user&.employee
+      employee_name = current_user.employee.name
+      missed_interviews = Interview.where(interviewer: employee_name)
+                                   .where(status: "scheduled")
+                                   .where("scheduled_date < ?", Date.current)
+                                   .size
+    end
+    
+    if missed_interviews > 0
+      tasks << {
+        id: 5,
+        title: "Missed Interviews",
+        count: missed_interviews,
+        priority: "high",
+        dueDate: "Overdue"
+      }
+    end
+
     tasks
   end
 
