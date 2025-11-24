@@ -279,22 +279,22 @@ end
 
 # Create attendance records for all employees
 puts "Creating attendance records..."
-Employee.all.each do |employee|
-  # Create attendance records for the last 30 days
-  (0..29).each do |day_offset|
-    date = Date.current - day_offset.days
-    next if date.saturday? || date.sunday? # Skip weekends
+# Employee.all.each do |employee|
+#   # Create attendance records for the last 30 days
+#   (0..29).each do |day_offset|
+#     date = Date.current - day_offset.days
+#     next if date.saturday? || date.sunday? # Skip weekends
 
-    AttendanceRecord.find_or_create_by!(
-      employee: employee,
-      date: date
-    ) do |attendance|
-      attendance.check_in = Time.parse("09:00") + rand(0..30).minutes
-      attendance.check_out = Time.parse("18:00") + rand(-30..30).minutes
-      attendance.status = [ "present", "late", "early_departure" ].sample
-    end
-  end
-end
+#     AttendanceRecord.find_or_create_by!(
+#       employee: employee,
+#       date: date
+#     ) do |attendance|
+#       attendance.check_in = Time.parse("09:00") + rand(0..30).minutes
+#       attendance.check_out = Time.parse("18:00") + rand(-30..30).minutes
+#       attendance.status = [ "present", "late", "early_departure" ].sample
+#     end
+#   end
+# end
 
 # Create job openings
 puts "Creating job openings..."
@@ -1997,3 +1997,26 @@ puts "Created #{KnowledgeArticle.count} knowledge articles"
 
 # Load user roles and permissions
 load Rails.root.join('db', 'seeds', 'users_and_roles.rb')
+
+puts "Creating employee for Super Admin user..."
+super_admin_user = User.find_by(email: 'admin@hrms.com')
+if super_admin_user && super_admin_user.employee_id.nil?
+  hr_department = Department.find_by(name: "HR") || Department.first
+  
+  employee = Employee.find_or_create_by!(email: super_admin_user.email) do |emp|
+    emp.first_name = super_admin_user.first_name
+    emp.last_name = super_admin_user.last_name
+    emp.phone = "+91 00000 00000"
+    emp.department_id = hr_department.id
+    emp.designation = "Super Administrator"
+    emp.date_of_joining = super_admin_user.created_at.to_date
+    emp.status = "active"
+  end
+  
+  super_admin_user.update!(employee_id: employee.id)
+  puts "✓ Created employee for Super Admin user (Employee ID: #{employee.id})"
+elsif super_admin_user && super_admin_user.employee_id.present?
+  puts "✓ Super Admin user already has an employee record (Employee ID: #{super_admin_user.employee_id})"
+elsif super_admin_user.nil?
+  puts "⚠ Super Admin user (admin@hrms.com) not found"
+end

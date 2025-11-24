@@ -2,27 +2,9 @@
 puts "Creating default roles..."
 Role.create_default_roles
 
-puts "Creating default demo permissions (8 total)..."
-demo_permissions = [
-  { name: "employees.index", resource: "employees", action: "index", description: "View employees list" },
-  { name: "employees.create", resource: "employees", action: "create", description: "Create new employees" },
-  { name: "employees.update", resource: "employees", action: "update", description: "Update employee information" },
-  { name: "employees.destroy", resource: "employees", action: "destroy", description: "Delete employees" },
-  { name: "payrolls.index", resource: "payrolls", action: "index", description: "View payroll list" },
-  { name: "payrolls.create", resource: "payrolls", action: "create", description: "Create payroll records" },
-  { name: "payrolls.update", resource: "payrolls", action: "update", description: "Update payroll records" },
-  { name: "payrolls.destroy", resource: "payrolls", action: "destroy", description: "Delete payroll records" },
-  # Needed for accessing RolesController
-  { name: "roles.index", resource: "roles", action: "index", description: "View roles list" }
-]
-
-demo_permissions.each do |attrs|
-  Permission.find_or_create_by!(name: attrs[:name]) do |p|
-    p.resource = attrs[:resource]
-    p.action = attrs[:action]
-    p.description = attrs[:description]
-  end
-end
+puts "Creating default permissions..."
+Permission.create_default_permissions
+puts "✓ Created #{Permission.count} permissions"
 
 # Assign permissions to roles
 puts "Assigning permissions to roles..."
