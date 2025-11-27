@@ -7,7 +7,7 @@ class EventsController < ApplicationController
     # Filtering
     @events = @events.upcoming if params[:upcoming] == "true"
     @events = @events.past if params[:past] == "true"
-    @events = @events.scheduled if params[:status] == "scheduled"
+    @events = @events.where(status: params[:status]) if params[:status].present?
     @events = @events.by_type(params[:event_type]) if params[:event_type].present?
 
     # Date range filter
@@ -23,8 +23,8 @@ class EventsController < ApplicationController
       @events = @events.where("LOWER(title) LIKE :search OR LOWER(description) LIKE :search", search: search_term)
     end
 
-    # Default to upcoming if no filters
-    @events = @events.upcoming if params[:upcoming].nil? && params[:past].nil? && params[:start_date].blank?
+    # Default to upcoming if no filters (but not if show_all is explicitly requested)
+    @events = @events.upcoming if params[:upcoming].nil? && params[:past].nil? && params[:status].blank? && params[:start_date].blank? && params[:show_all] != "true"
 
     render json: @events.as_json(
       include: {
