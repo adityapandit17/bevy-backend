@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_27_091332) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_27_105337) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.date "assigned_date"
@@ -129,6 +129,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_27_091332) do
     t.string "document_type"
     t.integer "employee_id", null: false
     t.date "expiry_date"
+    t.string "file_path"
     t.string "file_size"
     t.string "name"
     t.string "status"
