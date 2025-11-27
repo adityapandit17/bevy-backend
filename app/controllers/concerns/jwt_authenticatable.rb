@@ -36,6 +36,7 @@ module JwtAuthenticatable
     token = JwtService.extract_token(request.headers["Authorization"])
 
     if token.blank?
+      Rails.logger.error "JWT Authentication failed: No token provided"
       render_unauthorized("Authorization token is required")
       return
     end
@@ -43,18 +44,18 @@ module JwtAuthenticatable
     user = JwtService.verify_token(token)
 
     if user
+      # Ensure roles are loaded and set current_user
+      user.roles.load unless user.association(:roles).loaded?
       @current_user = user
+      Rails.logger.info "JWT Authentication successful - User: #{user.id}, Email: #{user.email}, Roles: #{user.roles.pluck(:name).inspect}, @current_user set: #{@current_user.present?}"
     else
+      Rails.logger.error "JWT Authentication failed: Invalid or expired token"
       render_unauthorized("Invalid or expired token")
     end
   end
 
-  def current_user
-    @current_user
-  end
-
   def user_signed_in?
-    current_user.present?
+    @current_user.present?
   end
 
   def authenticate_user!

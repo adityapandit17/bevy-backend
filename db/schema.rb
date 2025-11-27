@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_25_073638) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_27_091332) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.date "assigned_date"
@@ -447,6 +447,24 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_25_073638) do
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_permissions_on_name", unique: true
     t.index ["resource", "action"], name: "index_permissions_on_resource_and_action", unique: true
+  end
+
+  create_table "policy_documents", force: :cascade do |t|
+    t.string "category", null: false
+    t.datetime "created_at", null: false
+    t.integer "downloads", default: 0
+    t.date "expiry_date"
+    t.string "file_path", null: false
+    t.integer "file_size", default: 0
+    t.date "last_updated"
+    t.boolean "requires_signature", default: false
+    t.string "status", default: "active"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.integer "uploaded_by"
+    t.string "version"
+    t.index ["category"], name: "index_policy_documents_on_category"
+    t.index ["status"], name: "index_policy_documents_on_status"
   end
 
   create_table "role_permissions", force: :cascade do |t|

@@ -120,6 +120,13 @@ Rails.application.routes.draw do
     end
   end
 
+  # Policy Documents
+  resources :policy_documents do
+    member do
+      get :download
+    end
+  end
+
   # Performance Management
   resources :performance_reviews do
     collection do

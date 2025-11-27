@@ -50,12 +50,15 @@ class JwtService
       # Check if token is expired
       return nil if payload["exp"] && Time.current.to_i > payload["exp"]
 
-      # Find user by ID from token
-      user = User.find_by(id: payload["user_id"])
+      # Find user by ID from token and eager load roles
+      user = User.includes(:roles).find_by(id: payload["user_id"])
       return nil unless user&.active?
 
-      # Update last login time
+      # Update last login time (this might reload the user, so reload roles after)
       user.update_last_login!
+      
+      # Reload roles association if it was cleared by update_last_login!
+      user.roles.reload unless user.association(:roles).loaded?
 
       user
     end

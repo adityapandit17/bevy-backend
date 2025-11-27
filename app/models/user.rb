@@ -101,7 +101,9 @@
   end
 
   def update_last_login!
-    update!(last_login_at: Time.current)
+    # Use update_column to avoid clearing associations
+    update_column(:last_login_at, Time.current)
+    update_column(:updated_at, Time.current)
   end
 
   private

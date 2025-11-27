@@ -14,11 +14,11 @@ class ApplicationController < ActionController::Base
   private
 
   def current_user
-    # For API requests, use JWT authentication
-    if true #api_request?
+    # For JSON requests, @current_user is set by JwtAuthenticatable concern's authenticate_user_from_token!
+    # For web requests, use session-based authentication
+    if request.format.json?
       @current_user
     else
-      # For web requests, use session-based authentication
       @current_user ||= User.find(session[:user_id]) if session[:user_id]
     end
   rescue ActiveRecord::RecordNotFound
@@ -28,7 +28,8 @@ class ApplicationController < ActionController::Base
 
   def authenticate_user!
     unless current_user
-      if api_request?
+      # For JSON requests, always return JSON error (handled by JwtAuthenticatable)
+      if json_request?
         render json: { error: "Authentication required" }, status: :unauthorized
       else
         # Handle case where Devise routes might not be available
@@ -39,5 +40,9 @@ class ApplicationController < ActionController::Base
         end
       end
     end
+  end
+
+  def json_request?
+    request.format.json? || request.headers["Accept"]&.include?("application/json")
   end
 end
