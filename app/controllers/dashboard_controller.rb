@@ -182,38 +182,38 @@ class DashboardController < ApplicationController
   end
 
   def pending_tasks
+    return [] unless current_user&.employee
+
+    employee_id = current_user.employee.id
     tasks = []
 
-    # Pending leave approvals - filter by manager if user is a manager
-    pending_leaves = 0
-    
-    if current_user&.employee
-      # User has an employee record - check if they have direct reports with pending leaves
-      manager_employee_id = current_user.employee.id
-      # pending_for_manager scope already joins employee and filters by status pending
-      pending_leaves = LeaveRequest.pending_for_manager(manager_employee_id)
-                                   .where(employees: { status: "active" })
-                                   .distinct
-                                   .count
-    end
-    
+    # Get pending leave approvals for this manager
+    pending_leaves = PendingTask.pending
+                                 .by_type("LeaveRequest")
+                                 .for_employee(employee_id)
+                                 .count
     # For HR/Admin users who are NOT managers (no direct reports), show all pending leaves
-    is_admin_or_hr = current_user&.has_role?("Super Admin") ||
-                     current_user&.has_role?("HR Manager") ||
-                     current_user&.has_role?("HR") ||
-                     current_user&.has_permission?("leave_requests", "index")
-    
-    # Only show all pending leaves if user is HR/Admin AND has no direct reports (pending_leaves == 0)
+    is_admin_or_hr = current_user.has_role?("Super Admin") ||
+                     current_user.has_role?("HR Manager") ||
+                     current_user.has_role?("HR") ||
+                     current_user.has_permission?("leave_requests", "index")
+
+    # Check if user has direct reports
+    has_direct_reports = current_user.employee.direct_reports.active.exists?
+
+    # Only show all pending leaves if user is HR/Admin AND has no direct reports
     # This ensures managers see their direct reports first, HR/Admin without direct reports see all
-    if is_admin_or_hr && pending_leaves == 0
+    if is_admin_or_hr && !has_direct_reports && pending_leaves == 0
       # HR/Admin with no direct reports see all pending leaves
-      pending_leaves = LeaveRequest.joins(:employee)
-                                   .where(leave_requests: { status: "pending" })
-                                   .where(employees: { status: "active" })
+      pending_leaves = PendingTask.pending
+                                   .by_type("LeaveRequest")
+                                   .joins("INNER JOIN leave_requests ON pending_tasks.taskable_id = leave_requests.id")
+                                   .joins("INNER JOIN employees ON leave_requests.employee_id = employees.id")
+                                   .where("employees.status = ?", "active")
                                    .distinct
                                    .count
     end
-    
+
     if pending_leaves > 0
       tasks << {
         id: 1,
@@ -224,46 +224,13 @@ class DashboardController < ApplicationController
       }
     end
 
-    # Pending timesheet approvals
-    pending_timesheets = Timesheet.joins(:employee)
-                                 .where(timesheets: { status: "pending" })
-                                 .where(employees: { status: "active" })
-                                 .size
-    if pending_timesheets > 0
-      tasks << {
-        id: 2,
-        title: "Approve Timesheets",
-        count: pending_timesheets,
-        priority: "medium",
-        dueDate: "Tomorrow"
-      }
-    end
-
-    # Pending performance reviews
-    pending_reviews = PerformanceReview.joins(:employee)
-                                      .where("performance_reviews.review_date <= ?", Date.current)
-                                      .where(employees: { status: "active" })
-                                      .size
-    if pending_reviews > 0
-      tasks << {
-        id: 3,
-        title: "Complete Performance Reviews",
-        count: pending_reviews,
-        priority: "high",
-        dueDate: "This Week"
-      }
-    end
-
     # Scheduled interviews assigned to current employee
-    scheduled_interviews = 0
-    if current_user&.employee
-      employee_name = current_user.employee.name
-      scheduled_interviews = Interview.where(interviewer: employee_name)
-                                     .where(status: "scheduled")
-                                     .where("scheduled_date >= ?", Date.current)
-                                     .size
-    end
-    
+    scheduled_interviews = PendingTask.pending
+                                      .by_type("Interview")
+                                      .for_employee(employee_id)
+                                      .where("title LIKE ?", "%Interview Scheduled%")
+                                      .where("due_date >= ?", Date.current)
+                                      .count
     if scheduled_interviews > 0
       tasks << {
         id: 4,
@@ -274,16 +241,14 @@ class DashboardController < ApplicationController
       }
     end
 
-    # Missed interviews assigned to current employee (scheduled_date < Date.current and status == "scheduled")
-    missed_interviews = 0
-    if current_user&.employee
-      employee_name = current_user.employee.name
-      missed_interviews = Interview.where(interviewer: employee_name)
-                                   .where(status: "scheduled")
-                                   .where("scheduled_date < ?", Date.current)
-                                   .size
-    end
-    
+    # Missed interviews assigned to current employee
+    missed_interviews = PendingTask.pending
+                                   .by_type("Interview")
+                                   .for_employee(employee_id)
+                                   .where("title LIKE ?", "%Interview%")
+                                   .where("due_date < ?", Date.current)
+                                   .count
+
     if missed_interviews > 0
       tasks << {
         id: 5,

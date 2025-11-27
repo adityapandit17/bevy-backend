@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_20_100533) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_25_073638) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.date "assigned_date"
@@ -392,6 +392,24 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_20_100533) do
     t.index ["employee_id"], name: "index_payrolls_on_employee_id"
   end
 
+  create_table "pending_tasks", force: :cascade do |t|
+    t.integer "assigned_to_id"
+    t.datetime "created_at", null: false
+    t.date "due_date"
+    t.string "priority", default: "medium"
+    t.string "status", default: "pending"
+    t.integer "taskable_id", null: false
+    t.string "taskable_type", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assigned_to_id", "status"], name: "index_pending_tasks_on_assigned_to_id_and_status"
+    t.index ["assigned_to_id"], name: "index_pending_tasks_on_assigned_to_id"
+    t.index ["due_date"], name: "index_pending_tasks_on_due_date"
+    t.index ["status"], name: "index_pending_tasks_on_status"
+    t.index ["taskable_type", "taskable_id"], name: "index_pending_tasks_on_taskable"
+    t.index ["taskable_type", "taskable_id"], name: "index_pending_tasks_on_taskable_type_and_taskable_id"
+  end
+
   create_table "performance_goals", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -584,6 +602,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_20_100533) do
   add_foreign_key "onboarding_employees", "employees"
   add_foreign_key "onboarding_tasks", "onboarding_employees"
   add_foreign_key "payrolls", "employees"
+  add_foreign_key "pending_tasks", "employees", column: "assigned_to_id"
   add_foreign_key "performance_goals", "employees"
   add_foreign_key "performance_reviews", "employees"
   add_foreign_key "role_permissions", "permissions"

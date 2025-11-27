@@ -159,6 +159,39 @@ class InterviewsController < ApplicationController
     render json: calendar_data
   end
 
+  # Optimized endpoint: Get pending interviews from PendingTask
+  def pending_from_tasks
+    return render json: [], status: :ok unless current_user&.employee
+
+    employee_id = current_user.employee.id
+    missed_only = params[:missed] == "true"
+
+    # Get pending tasks for interviews assigned to this employee
+    pending_tasks = PendingTask.pending
+                                .by_type("Interview")
+                                .for_employee(employee_id)
+                                .includes(taskable: :candidate)
+
+    # Filter by missed (overdue) or upcoming based on parameter
+    if missed_only
+      pending_tasks = pending_tasks.where("due_date < ?", Date.current)
+                                    .where("title LIKE ?", "%Missed Interview%")
+    else
+      pending_tasks = pending_tasks.where("due_date >= ?", Date.current)
+                                    .where("title LIKE ?", "%Interview Scheduled%")
+    end
+
+    # Format the response to match what frontend expects
+    interviews = pending_tasks.map do |task|
+      interview = task.taskable
+      next unless interview.is_a?(Interview)
+      
+      format_interview(interview)
+    end.compact
+
+    render json: interviews
+  end
+
   private
 
   def set_interview

@@ -192,6 +192,7 @@ Rails.application.routes.draw do
       get :calendar
       get :stats
       get :approvers
+      get :pending_from_tasks
     end
   end
 
@@ -276,6 +277,7 @@ Rails.application.routes.draw do
     collection do
       get :stats
       get :calendar
+      get :pending_from_tasks
     end
   end
 

@@ -254,6 +254,48 @@ class LeaveRequestsController < ApplicationController
     end
   end
 
+  # Optimized endpoint: Get pending leave requests from PendingTask
+  def pending_from_tasks
+    return render json: [], status: :ok unless current_user&.employee
+
+    employee_id = current_user.employee.id
+    
+    # Get pending tasks for leave requests assigned to this employee
+    pending_tasks = PendingTask.pending
+                                .by_type("LeaveRequest")
+                                .for_employee(employee_id)
+                                .includes(taskable: { employee: :department })
+
+    # For HR/Admin users who are NOT managers (no direct reports), show all pending leaves
+    is_admin_or_hr = current_user.has_role?("Super Admin") ||
+                     current_user.has_role?("HR Manager") ||
+                     current_user.has_role?("HR") ||
+                     current_user.has_permission?("leave_requests", "index")
+
+    has_direct_reports = current_user.employee.direct_reports.active.exists?
+
+    # Only show all pending leaves if user is HR/Admin AND has no direct reports
+    if is_admin_or_hr && !has_direct_reports && pending_tasks.empty?
+      pending_tasks = PendingTask.pending
+                                  .by_type("LeaveRequest")
+                                  .joins("INNER JOIN leave_requests ON pending_tasks.taskable_id = leave_requests.id")
+                                  .joins("INNER JOIN employees ON leave_requests.employee_id = employees.id")
+                                  .where("employees.status = ?", "active")
+                                  .includes(taskable: { employee: :department })
+                                  .distinct
+    end
+
+    # Format the response to match what frontend expects
+    leave_requests = pending_tasks.map do |task|
+      leave_request = task.taskable
+      next unless leave_request.is_a?(LeaveRequest)
+      
+      format_leave_request(leave_request)
+    end.compact
+
+    render json: leave_requests
+  end
+
   private
 
   def set_leave_request

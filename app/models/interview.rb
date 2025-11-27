@@ -1,5 +1,6 @@
 class Interview < ApplicationRecord
   belongs_to :candidate
+  has_many :pending_tasks, as: :taskable, dependent: :destroy
 
   validates :interview_type, presence: true, inclusion: { in: %w[phone video onsite] }
   validates :scheduled_date, presence: true
@@ -17,6 +18,10 @@ class Interview < ApplicationRecord
   scope :this_week, -> { where(scheduled_date: Date.current.beginning_of_week..Date.current.end_of_week) }
   scope :by_status, ->(status) { where(status: status) }
   scope :by_type, ->(interview_type) { where(interview_type: interview_type) }
+
+  # Callbacks
+  after_save :sync_pending_tasks
+  after_destroy :cleanup_pending_tasks
 
   def scheduled_datetime
     DateTime.new(scheduled_date.year, scheduled_date.month, scheduled_date.day,
@@ -64,5 +69,13 @@ class Interview < ApplicationRecord
     if candidate&.status == "rejected"
       errors.add(:candidate, "cannot schedule interviews for rejected candidates")
     end
+  end
+
+  def sync_pending_tasks
+    PendingTaskService.sync_interview(self)
+  end
+
+  def cleanup_pending_tasks
+    pending_tasks.destroy_all
   end
 end

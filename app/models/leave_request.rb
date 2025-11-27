@@ -3,6 +3,7 @@ class LeaveRequest < ApplicationRecord
   belongs_to :manager_approved_by, class_name: "User", optional: true
   belongs_to :hr_approved_by, class_name: "User", optional: true
   belongs_to :rejected_by, class_name: "User", optional: true
+  has_many :pending_tasks, as: :taskable, dependent: :destroy
 
   # Validations
   validates :leave_type, presence: true, inclusion: { in: %w[annual sick personal maternity paternity unpaid other] }
@@ -31,6 +32,8 @@ class LeaveRequest < ApplicationRecord
   # Callbacks
   before_save :calculate_days
   before_create :set_default_status
+  after_save :sync_pending_tasks
+  after_destroy :cleanup_pending_tasks
 
   # Approval helpers
   def manager_approved?
@@ -255,5 +258,13 @@ class LeaveRequest < ApplicationRecord
     if end_date < start_date
       errors.add(:end_date, "must be after start date")
     end
+  end
+
+  def sync_pending_tasks
+    PendingTaskService.sync_leave_request(self)
+  end
+
+  def cleanup_pending_tasks
+    pending_tasks.destroy_all
   end
 end
