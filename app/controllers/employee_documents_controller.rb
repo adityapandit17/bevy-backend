@@ -5,7 +5,7 @@ class EmployeeDocumentsController < ApplicationController
     # Force authentication for JSON requests
     if json_request? && !login_endpoint?
       token = JwtService.extract_token(request.headers["Authorization"])
-      
+
       if token.blank?
         Rails.logger.error "JWT Authentication failed: No token provided for employee_documents#index"
         render json: { error: "Authorization token is required" }, status: :unauthorized
@@ -38,7 +38,7 @@ class EmployeeDocumentsController < ApplicationController
     # Force authentication for JSON requests
     if json_request? && !login_endpoint?
       token = JwtService.extract_token(request.headers["Authorization"])
-      
+
       if token.blank?
         render json: { error: "Authorization token is required" }, status: :unauthorized
         return
@@ -66,7 +66,7 @@ class EmployeeDocumentsController < ApplicationController
     # Force authentication for JSON requests
     if json_request? && !login_endpoint?
       token = JwtService.extract_token(request.headers["Authorization"])
-      
+
       if token.blank?
         Rails.logger.error "JWT Authentication failed: No token provided for employee_documents#create"
         render json: { error: "Authorization token is required" }, status: :unauthorized
@@ -93,7 +93,7 @@ class EmployeeDocumentsController < ApplicationController
 
     @employee_document = EmployeeDocument.new(employee_document_params)
     @employee_document.uploaded_by = current_user.name || "System"
-    
+
     if @employee_document.save
       render json: format_employee_document(@employee_document), status: :created
     else
@@ -105,7 +105,7 @@ class EmployeeDocumentsController < ApplicationController
     # Force authentication for JSON requests
     if json_request? && !login_endpoint?
       token = JwtService.extract_token(request.headers["Authorization"])
-      
+
       if token.blank?
         render json: { error: "Authorization token is required" }, status: :unauthorized
         return
@@ -137,7 +137,7 @@ class EmployeeDocumentsController < ApplicationController
     # Force authentication for JSON requests
     if json_request? && !login_endpoint?
       token = JwtService.extract_token(request.headers["Authorization"])
-      
+
       if token.blank?
         render json: { error: "Authorization token is required" }, status: :unauthorized
         return

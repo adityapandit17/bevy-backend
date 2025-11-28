@@ -3,7 +3,7 @@ class UserPreference < ApplicationRecord
 
   validates :language, inclusion: { in: %w[en es fr de] }, allow_nil: true
   validates :timezone, presence: true
-  validates :date_format, inclusion: { in: ["MM/DD/YYYY", "DD/MM/YYYY", "YYYY-MM-DD", "DD MMM YYYY"] }, allow_nil: true
+  validates :date_format, inclusion: { in: [ "MM/DD/YYYY", "DD/MM/YYYY", "YYYY-MM-DD", "DD MMM YYYY" ] }, allow_nil: true
   validates :theme, inclusion: { in: %w[light dark system] }, allow_nil: true
 
   # Ensure one preference per user
@@ -24,4 +24,3 @@ class UserPreference < ApplicationRecord
     end
   end
 end
-

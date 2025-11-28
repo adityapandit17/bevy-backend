@@ -1,13 +1,13 @@
 class AttendanceRecordsController < ApplicationController
   before_action :set_attendance_record, only: [ :show, :update, :destroy ]
-  before_action :set_employee, only: [:clock_in, :clock_out]
+  before_action :set_employee, only: [ :clock_in, :clock_out ]
 
   def index
     @attendance_records = AttendanceRecord.includes(:employee)
 
     # Apply filters
     @attendance_records = @attendance_records.by_employee(params[:employee_id]) if params[:employee_id].present?
-    
+
     # Parse date parameter properly
     if params[:date].present?
       begin
@@ -19,7 +19,7 @@ class AttendanceRecordsController < ApplicationController
         return
       end
     end
-    
+
     @attendance_records = @attendance_records.where(status: params[:status]) if params[:status].present?
     @attendance_records = @attendance_records.current_month if params[:current_month] == "true"
     @attendance_records = @attendance_records.current_year if params[:current_year] == "true"
@@ -62,7 +62,7 @@ class AttendanceRecordsController < ApplicationController
       attendance_params = params[:attendance_record] || {}
       check_in = attendance_params[:check_in]
       check_out = attendance_params[:check_out]
-      
+
       @attendance_record = AttendanceRecord.new(attendance_record_params)
 
       if @attendance_record.save
@@ -72,32 +72,32 @@ class AttendanceRecordsController < ApplicationController
           begin
             session_params[:check_in] = Time.parse(check_in) if check_in.present?
             session_params[:check_out] = Time.parse(check_out) if check_out.present?
-            
+
             @attendance_record.attendance_sessions.create!(session_params)
             @attendance_record.reload
           rescue ArgumentError => e
             Rails.logger.error "Invalid time format: #{e.message}"
-            render json: { 
+            render json: {
               error: "Invalid time format for check_in or check_out",
               message: e.message
             }, status: :bad_request
             return
           end
         end
-        
+
         render json: format_attendance_record(@attendance_record), status: :created
       else
         error_messages = @attendance_record.errors.full_messages
         Rails.logger.error "Failed to create attendance record: #{error_messages.join(', ')}"
-        render json: { 
-          error: error_messages.join(', '),
-          errors: error_messages 
+        render json: {
+          error: error_messages.join(", "),
+          errors: error_messages
         }, status: :unprocessable_entity
       end
     rescue => e
       Rails.logger.error "Error in attendance_records#create: #{e.message}"
       Rails.logger.error e.backtrace.join("\n")
-      render json: { 
+      render json: {
         error: "Failed to create attendance record",
         message: e.message
       }, status: :internal_server_error
@@ -110,14 +110,14 @@ class AttendanceRecordsController < ApplicationController
       attendance_params = params[:attendance_record] || {}
       check_in = attendance_params[:check_in]
       check_out = attendance_params[:check_out]
-      
+
       if @attendance_record.update(attendance_record_params)
         # Update or create attendance session if check_in or check_out are provided
         if check_in.present? || check_out.present?
           begin
             # Find existing session or create new one
             session = @attendance_record.attendance_sessions.order(created_at: :asc).first
-            
+
             if session
               # Update existing session
               update_params = {}
@@ -131,31 +131,31 @@ class AttendanceRecordsController < ApplicationController
               session_params[:check_out] = Time.parse(check_out) if check_out.present?
               @attendance_record.attendance_sessions.create!(session_params)
             end
-            
+
             @attendance_record.reload
           rescue ArgumentError => e
             Rails.logger.error "Invalid time format: #{e.message}"
-            render json: { 
+            render json: {
               error: "Invalid time format for check_in or check_out",
               message: e.message
             }, status: :bad_request
             return
           end
         end
-        
+
         render json: format_attendance_record(@attendance_record)
       else
         error_messages = @attendance_record.errors.full_messages
         Rails.logger.error "Failed to update attendance record: #{error_messages.join(', ')}"
-        render json: { 
-          error: error_messages.join(', '),
-          errors: error_messages 
+        render json: {
+          error: error_messages.join(", "),
+          errors: error_messages
         }, status: :unprocessable_entity
       end
     rescue => e
       Rails.logger.error "Error in attendance_records#update: #{e.message}"
       Rails.logger.error e.backtrace.join("\n")
-      render json: { 
+      render json: {
         error: "Failed to update attendance record",
         message: e.message
       }, status: :internal_server_error
@@ -172,7 +172,7 @@ class AttendanceRecordsController < ApplicationController
       render json: { error: "Employee not found" }, status: :not_found
       return
     end
-    
+
     service = AttendanceService.new(@employee)
     result = service.clock_in
 
@@ -181,14 +181,14 @@ class AttendanceRecordsController < ApplicationController
     else
       # Reload to ensure we have all associations
       result.reload
-      
+
       # Query sessions directly to ensure we get fresh data
       sessions = AttendanceSession
                   .where(attendance_record_id: result.id)
                   .order(created_at: :asc)
-      
+
       Rails.logger.info "Clock in response: Record #{result.id}, Sessions count: #{sessions.count}"
-      
+
       render json: {
         message: "Clock-in successful",
         attendance_record: format_attendance_record(result),
@@ -207,7 +207,7 @@ class AttendanceRecordsController < ApplicationController
   rescue => e
     Rails.logger.error "Error in clock_in: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
-    render json: { 
+    render json: {
       error: "Failed to clock in",
       message: e.message
     }, status: :internal_server_error
@@ -218,7 +218,7 @@ class AttendanceRecordsController < ApplicationController
       render json: { error: "Employee not found" }, status: :not_found
       return
     end
-    
+
     service = AttendanceService.new(@employee)
     result = service.clock_out
 
@@ -245,7 +245,7 @@ class AttendanceRecordsController < ApplicationController
   rescue => e
     Rails.logger.error "Error in clock_out: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
-    render json: { 
+    render json: {
       error: "Failed to clock out",
       message: e.message
     }, status: :internal_server_error
@@ -256,20 +256,20 @@ class AttendanceRecordsController < ApplicationController
   # Returns the single attendance record for today with total hours and sessions
   def today
     employee_id = params[:employee_id]
-    
+
     unless employee_id.present?
       render json: { error: "employee_id parameter is required" }, status: :bad_request
       return
     end
-    
+
     # Convert to integer if it's a string
     employee_id = employee_id.to_i
-    
+
     unless employee_id > 0
       render json: { error: "Invalid employee_id" }, status: :bad_request
       return
     end
-    
+
     today = Date.current
 
     # Get the single attendance record for today (only one per employee per day)
@@ -280,7 +280,7 @@ class AttendanceRecordsController < ApplicationController
     # Calculate total hours from all sessions
     total_hours = 0.0
     all_sessions = []
-    
+
     if record
       record.attendance_sessions.each do |session|
         if session.check_in.present? && session.check_out.present?
@@ -290,7 +290,7 @@ class AttendanceRecordsController < ApplicationController
         elsif session.session_hours.present?
           total_hours += session.session_hours if session.session_hours > 0 && session.session_hours < 24
         end
-        
+
         all_sessions << {
           id: session.id,
           attendance_record_id: record.id,
@@ -319,9 +319,9 @@ class AttendanceRecordsController < ApplicationController
       total_hours_today: total_hours,
       total_sessions_today: all_sessions.count,
       sessions: all_sessions,
-      attendance_records: record ? [format_attendance_record(record)] : []
+      attendance_records: record ? [ format_attendance_record(record) ] : []
     }
-    
+
     # If there's an active session, also include it as the main record
     if record && active_session
       result.merge!({
@@ -355,12 +355,12 @@ class AttendanceRecordsController < ApplicationController
         current_session_id: nil
       })
     end
-    
+
     render json: result
   rescue => e
     Rails.logger.error "Error in today endpoint: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
-    render json: { 
+    render json: {
       error: "Failed to fetch today's attendance",
       message: e.message
     }, status: :internal_server_error
@@ -417,12 +417,12 @@ class AttendanceRecordsController < ApplicationController
 
   def set_employee
     employee_id = params[:employee_id]
-    
+
     unless employee_id.present?
       render json: { error: "employee_id parameter is required" }, status: :bad_request
       return
     end
-    
+
     @employee = Employee.find(employee_id)
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Employee not found" }, status: :not_found
@@ -442,7 +442,7 @@ class AttendanceRecordsController < ApplicationController
     # Get first session's check_in and last session's check_out for backward compatibility
     first_session = record.attendance_sessions.order(created_at: :asc).first
     last_session = record.attendance_sessions.order(created_at: :desc).first
-    
+
     {
       id: record.id,
       employee_id: record.employee_id,

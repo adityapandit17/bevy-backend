@@ -1781,7 +1781,7 @@ puts "Creating helpdesk tickets..."
 if Employee.count > 0
   hr_dept = Department.find_by(name: "HR")
   hr_employees = hr_dept ? hr_dept.employees : Employee.limit(3)
-  
+
   helpdesk_tickets = [
     {
       title: "Payroll Query - Missing Overtime",
@@ -2002,7 +2002,7 @@ puts "Creating employee for Super Admin user..."
 super_admin_user = User.find_by(email: 'admin@hrms.com')
 if super_admin_user && super_admin_user.employee_id.nil?
   hr_department = Department.find_by(name: "HR") || Department.first
-  
+
   employee = Employee.find_or_create_by!(email: super_admin_user.email) do |emp|
     emp.first_name = super_admin_user.first_name
     emp.last_name = super_admin_user.last_name
@@ -2012,7 +2012,7 @@ if super_admin_user && super_admin_user.employee_id.nil?
     emp.date_of_joining = super_admin_user.created_at.to_date
     emp.status = "active"
   end
-  
+
   super_admin_user.update!(employee_id: employee.id)
   puts "✓ Created employee for Super Admin user (Employee ID: #{employee.id})"
 elsif super_admin_user && super_admin_user.employee_id.present?

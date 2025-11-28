@@ -14,15 +14,15 @@ class SlaWorkflow < ApplicationRecord
   # Helper methods
   def escalation_levels_list
     return [] if escalation_levels.blank?
-    
-    if escalation_levels.strip.start_with?('[') && escalation_levels.strip.end_with?(']')
+
+    if escalation_levels.strip.start_with?("[") && escalation_levels.strip.end_with?("]")
       begin
         parsed = JSON.parse(escalation_levels)
         return parsed if parsed.is_a?(Array)
       rescue JSON::ParserError
       end
     end
-    
+
     []
   end
 

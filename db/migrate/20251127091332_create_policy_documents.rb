@@ -15,7 +15,7 @@ class CreatePolicyDocuments < ActiveRecord::Migration[8.1]
 
       t.timestamps
     end
-    
+
     add_index :policy_documents, :category
     add_index :policy_documents, :status
   end

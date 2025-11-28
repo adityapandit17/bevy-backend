@@ -56,7 +56,7 @@ class JwtService
 
       # Update last login time (this might reload the user, so reload roles after)
       user.update_last_login!
-      
+
       # Reload roles association if it was cleared by update_last_login!
       user.roles.reload unless user.association(:roles).loaded?
 

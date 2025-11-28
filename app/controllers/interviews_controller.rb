@@ -31,9 +31,9 @@ class InterviewsController < ApplicationController
   # POST /interviews
   def create
     candidate = Candidate.find_by(id: interview_params[:candidate_id])
-    
+
     if candidate&.status == "rejected"
-      render json: { errors: ["Cannot schedule interviews for rejected candidates"] }, status: :unprocessable_entity
+      render json: { errors: [ "Cannot schedule interviews for rejected candidates" ] }, status: :unprocessable_entity
       return
     end
 
@@ -56,7 +56,7 @@ class InterviewsController < ApplicationController
     if interview_params[:candidate_id].present? && interview_params[:candidate_id] != @interview.candidate_id.to_s
       new_candidate = Candidate.find_by(id: interview_params[:candidate_id])
       if new_candidate&.status == "rejected"
-        render json: { errors: ["Cannot assign interviews to rejected candidates"] }, status: :unprocessable_entity
+        render json: { errors: [ "Cannot assign interviews to rejected candidates" ] }, status: :unprocessable_entity
         return
       end
     end
@@ -185,7 +185,7 @@ class InterviewsController < ApplicationController
     interviews = pending_tasks.map do |task|
       interview = task.taskable
       next unless interview.is_a?(Interview)
-      
+
       format_interview(interview)
     end.compact
 

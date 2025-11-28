@@ -14,4 +14,3 @@ class CandidateMailer < ApplicationMailer
     )
   end
 end
-

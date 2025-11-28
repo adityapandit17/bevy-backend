@@ -29,15 +29,15 @@ class HelpdeskTicket < ApplicationRecord
   # Helper methods
   def tags_list
     return [] if tags.blank?
-    
-    if tags.strip.start_with?('[') && tags.strip.end_with?(']')
+
+    if tags.strip.start_with?("[") && tags.strip.end_with?("]")
       begin
         parsed = JSON.parse(tags)
         return parsed if parsed.is_a?(Array)
       rescue JSON::ParserError
       end
     end
-    
+
     tags.split(",").map(&:strip).reject(&:blank?)
   end
 
@@ -62,10 +62,10 @@ class HelpdeskTicket < ApplicationRecord
 
   def update_sla_status
     return unless sla_hours.present? && created_at.present?
-    
+
     hours_elapsed = (Time.current - created_at) / 1.hour
     hours_remaining = sla_hours - hours_elapsed
-    
+
     if hours_remaining < 0
       self.sla_status = "breached"
     elsif hours_remaining < (sla_hours * 0.2) # Less than 20% time remaining

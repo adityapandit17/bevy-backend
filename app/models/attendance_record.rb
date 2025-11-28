@@ -32,7 +32,7 @@ class AttendanceRecord < ApplicationRecord
   def update_total_hours!
     update(working_hours: total_hours)
   end
-  
+
   def present?
     status == "present"
   end
@@ -133,13 +133,13 @@ class AttendanceRecord < ApplicationRecord
   def self.total_hours_for_day(employee_id, date)
     record = find_by(employee_id: employee_id, date: date)
     return 0.0 unless record
-    
+
     # Use working_hours if available, otherwise calculate from sessions
     if record.read_attribute(:working_hours)
       stored_hours = record.read_attribute(:working_hours)
       return stored_hours.round(2) if stored_hours && stored_hours > 0 && stored_hours < 24
     end
-    
+
     # Calculate from sessions
     record.total_hours.round(2)
   end

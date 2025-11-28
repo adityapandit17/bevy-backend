@@ -126,7 +126,7 @@ class LeaveRequestsController < ApplicationController
       # Check if current_user is the manager of the employee
       employee = @leave_request.employee
       manager_employee = current_user.employee
-      
+
       unless manager_employee && employee.manager_id == manager_employee.id
         render json: { errors: [ "You are not authorized to approve this leave request. Only the employee's manager can approve." ] }, status: :forbidden
         return
@@ -259,7 +259,7 @@ class LeaveRequestsController < ApplicationController
     return render json: [], status: :ok unless current_user&.employee
 
     employee_id = current_user.employee.id
-    
+
     # Get pending tasks for leave requests assigned to this employee
     pending_tasks = PendingTask.pending
                                 .by_type("LeaveRequest")
@@ -289,7 +289,7 @@ class LeaveRequestsController < ApplicationController
     leave_requests = pending_tasks.map do |task|
       leave_request = task.taskable
       next unless leave_request.is_a?(LeaveRequest)
-      
+
       format_leave_request(leave_request)
     end.compact
 

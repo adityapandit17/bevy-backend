@@ -53,4 +53,3 @@ class PendingTask < ApplicationRecord
     update(status: "cancelled")
   end
 end
-

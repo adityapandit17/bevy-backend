@@ -11,9 +11,9 @@ class CreatePendingTasks < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :pending_tasks, [:taskable_type, :taskable_id]
+    add_index :pending_tasks, [ :taskable_type, :taskable_id ]
     add_index :pending_tasks, :status
     add_index :pending_tasks, :due_date
-    add_index :pending_tasks, [:assigned_to_id, :status]
+    add_index :pending_tasks, [ :assigned_to_id, :status ]
   end
 end

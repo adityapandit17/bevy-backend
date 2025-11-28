@@ -17,9 +17,9 @@ class TicketCommentsController < ApplicationController
     # current_user should be set by JwtAuthenticatable before_action
     # If it's nil, authentication already failed and rendered unauthorized
     # So we can proceed assuming current_user is set
-    
+
     @comment = @ticket.ticket_comments.build(comment_params)
-    
+
     # Set user_id or employee_id based on current_user
     # If user has an employee_id, link to employee, otherwise link to user
     if current_user.employee_id.present?
@@ -37,9 +37,9 @@ class TicketCommentsController < ApplicationController
         methods: [ :author_name, :author_email ]
       ), status: :created
     else
-      render json: { 
+      render json: {
         success: false,
-        errors: @comment.errors.full_messages 
+        errors: @comment.errors.full_messages
       }, status: :unprocessable_entity
     end
   end

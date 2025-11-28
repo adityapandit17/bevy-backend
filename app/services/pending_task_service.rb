@@ -4,24 +4,24 @@ class PendingTaskService
     if leave_request.pending?
       # Find the manager who should approve this leave request
       manager = leave_request.employee.manager
-      
+
       if manager
         # Create or update pending task for the manager
         pending_task = PendingTask.find_or_initialize_by(
           taskable: leave_request,
           assigned_to_id: manager.id
         )
-        
+
         pending_task.assign_attributes(
           title: "Review Leave Application - #{leave_request.employee.name}",
           priority: "high",
           due_date: Date.current,
           status: "pending"
         )
-        
+
         pending_task.save
       end
-      
+
       # Also create pending tasks for HR/Admin users if needed
       # This can be expanded based on your business logic
       if should_create_hr_task?(leave_request)
@@ -42,7 +42,7 @@ class PendingTaskService
         "LOWER(TRIM(first_name || ' ' || last_name)) = ?",
         interview.interviewer&.downcase&.strip
       ).first
-      
+
       if interviewer_employee
         # Determine if it's overdue or upcoming
         if interview.is_overdue?
@@ -54,20 +54,20 @@ class PendingTaskService
           priority = "medium"
           due_date = interview.scheduled_date
         end
-        
+
         # Create or update pending task
         pending_task = PendingTask.find_or_initialize_by(
           taskable: interview,
           assigned_to_id: interviewer_employee.id
         )
-        
+
         pending_task.assign_attributes(
           title: title,
           priority: priority,
           due_date: due_date,
           status: "pending"
         )
-        
+
         pending_task.save
       end
     else
@@ -100,4 +100,3 @@ class PendingTaskService
     end
   end
 end
-

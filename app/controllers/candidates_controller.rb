@@ -27,7 +27,7 @@ class CandidatesController < ApplicationController
     if params_hash[:skills].is_a?(Array)
       params_hash[:skills] = params_hash[:skills].join(", ")
     end
-    
+
     @candidate = Candidate.new(params_hash)
     @candidate.applied_date ||= Date.current
     @candidate.last_contact ||= Date.current
@@ -46,7 +46,7 @@ class CandidatesController < ApplicationController
     if params_hash[:skills].is_a?(Array)
       params_hash[:skills] = params_hash[:skills].join(", ")
     end
-    
+
     if @candidate.update(candidate_params)
       render json: CandidateSerializer.new.serialize(@candidate)
     else
@@ -114,23 +114,23 @@ class CandidatesController < ApplicationController
     sender_name = params[:sender_name]
 
     if subject.blank? || message.blank?
-      render json: { errors: ["Subject and message are required"] }, status: :unprocessable_entity
+      render json: { errors: [ "Subject and message are required" ] }, status: :unprocessable_entity
       return
     end
 
     begin
       CandidateMailer.candidate_email(@candidate, subject, message, sender_name).deliver_now
-      
+
       # Update last_contact date
       @candidate.update(last_contact: Date.current)
-      
-      render json: { 
+
+      render json: {
         message: "Email sent successfully",
         candidate: CandidateSerializer.new.serialize(@candidate)
       }
     rescue => e
       Rails.logger.error "Failed to send email: #{e.message}"
-      render json: { errors: ["Failed to send email: #{e.message}"] }, status: :internal_server_error
+      render json: { errors: [ "Failed to send email: #{e.message}" ] }, status: :internal_server_error
     end
   end
 

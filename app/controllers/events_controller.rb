@@ -62,7 +62,7 @@ class EventsController < ApplicationController
 
   def update
     @event.attendee_ids_list = params[:event][:attendee_ids] if params[:event][:attendee_ids].present?
-    
+
     if @event.update(event_params)
       render json: @event.as_json(
         include: {

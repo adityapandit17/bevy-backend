@@ -27,7 +27,7 @@ class OnboardingTask < ApplicationRecord
     return [] if documents.blank?
 
     # Handle string representation of array (e.g., '["doc1", "doc2"]')
-    if documents.strip.start_with?('[') && documents.strip.end_with?(']')
+    if documents.strip.start_with?("[") && documents.strip.end_with?("]")
       begin
         parsed = JSON.parse(documents)
         return parsed if parsed.is_a?(Array)

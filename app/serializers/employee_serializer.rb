@@ -57,4 +57,3 @@ class EmployeeSerializer < Panko::Serializer
     object.direct_reports.count
   end
 end
-

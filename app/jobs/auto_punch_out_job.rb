@@ -15,4 +15,3 @@ class AutoPunchOutJob < ApplicationJob
     }
   end
 end
-

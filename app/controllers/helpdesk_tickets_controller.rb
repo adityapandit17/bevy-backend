@@ -91,8 +91,8 @@ class HelpdeskTicketsController < ApplicationController
   end
 
   def ticket_params
-    params.require(:helpdesk_ticket).permit(:title, :description, :category, :priority, :status, 
-                                            :assigned_to_id, :requester_id, :sla_hours, :sla_status, 
+    params.require(:helpdesk_ticket).permit(:title, :description, :category, :priority, :status,
+                                            :assigned_to_id, :requester_id, :sla_hours, :sla_status,
                                             :channel, tags: [])
   end
 

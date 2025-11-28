@@ -1,6 +1,6 @@
 class PolicyDocumentsController < ApplicationController
   # JwtAuthenticatable concern handles authentication via should_authenticate? method
-  before_action :set_policy_document, only: [:show, :update, :destroy, :download]
+  before_action :set_policy_document, only: [ :show, :update, :destroy, :download ]
 
   # GET /policy_documents
   # All authenticated users can view
@@ -20,7 +20,7 @@ class PolicyDocumentsController < ApplicationController
   def download
     # Force authentication for all requests (JSON or file downloads)
     token = JwtService.extract_token(request.headers["Authorization"])
-    
+
     if token.blank?
       Rails.logger.error "JWT Authentication failed: No token provided for policy_documents#download"
       render json: { error: "Authorization token is required" }, status: :unauthorized
@@ -45,9 +45,9 @@ class PolicyDocumentsController < ApplicationController
     end
 
     @policy_document.increment_downloads!
-    
+
     file_path = Rails.root.join("storage", "uploads", @policy_document.file_path)
-    
+
     if File.exist?(file_path)
       # Set proper MIME type based on file extension
       mime_type = case File.extname(@policy_document.file_path).downcase
@@ -76,7 +76,7 @@ class PolicyDocumentsController < ApplicationController
     # Force authentication for JSON requests
     if json_request? && !login_endpoint?
       token = JwtService.extract_token(request.headers["Authorization"])
-      
+
       if token.blank?
         Rails.logger.error "JWT Authentication failed: No token provided for policy_documents#create"
         render json: { error: "Authorization token is required" }, status: :unauthorized
@@ -95,16 +95,16 @@ class PolicyDocumentsController < ApplicationController
         return
       end
     end
-    
+
     # current_user should be set by authentication above
     Rails.logger.info "Create action - @current_user: #{@current_user&.id}, current_user method: #{current_user&.id}"
-    
+
     unless current_user
       Rails.logger.error "No current_user in create action - @current_user: #{@current_user.inspect}"
       render json: { error: "Authentication required" }, status: :unauthorized
       return
     end
-    
+
     # Check permissions
     unless can_edit_policy_documents?
       render json: { error: "Insufficient permissions. Only Super Admin and HR Manager can create policy documents." }, status: :forbidden
@@ -129,7 +129,7 @@ class PolicyDocumentsController < ApplicationController
     # Force authentication for JSON requests
     if json_request? && !login_endpoint?
       token = JwtService.extract_token(request.headers["Authorization"])
-      
+
       if token.blank?
         Rails.logger.error "JWT Authentication failed: No token provided for policy_documents#update"
         render json: { error: "Authorization token is required" }, status: :unauthorized
@@ -172,7 +172,7 @@ class PolicyDocumentsController < ApplicationController
     # Force authentication for JSON requests
     if json_request? && !login_endpoint?
       token = JwtService.extract_token(request.headers["Authorization"])
-      
+
       if token.blank?
         Rails.logger.error "JWT Authentication failed: No token provided for policy_documents#destroy"
         render json: { error: "Authorization token is required" }, status: :unauthorized
@@ -229,15 +229,15 @@ class PolicyDocumentsController < ApplicationController
 
   def can_edit_policy_documents?
     return false unless current_user
-    
+
     # Use direct database query to check roles (most reliable)
     # This works even if associations aren't loaded
     user_id = current_user.id
     is_super_admin = User.joins(:roles).where(id: user_id, roles: { name: "Super Admin" }).exists?
     is_hr_manager = User.joins(:roles).where(id: user_id, roles: { name: "HR Manager" }).exists?
-    
+
     Rails.logger.debug "Permission check - User: #{user_id}, Super Admin: #{is_super_admin}, HR Manager: #{is_hr_manager}"
-    
+
     is_super_admin || is_hr_manager
   end
 
@@ -260,4 +260,3 @@ class PolicyDocumentsController < ApplicationController
     }
   end
 end
-

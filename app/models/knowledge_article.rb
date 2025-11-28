@@ -15,15 +15,15 @@ class KnowledgeArticle < ApplicationRecord
   # Helper methods
   def tags_list
     return [] if tags.blank?
-    
-    if tags.strip.start_with?('[') && tags.strip.end_with?(']')
+
+    if tags.strip.start_with?("[") && tags.strip.end_with?("]")
       begin
         parsed = JSON.parse(tags)
         return parsed if parsed.is_a?(Array)
       rescue JSON::ParserError
       end
     end
-    
+
     tags.split(",").map(&:strip).reject(&:blank?)
   end
 
