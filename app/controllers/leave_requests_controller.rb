@@ -76,6 +76,7 @@ class LeaveRequestsController < ApplicationController
     end
 
     if @leave_request.save
+      create_leave_request_notification(@leave_request, current_user)
       render json: format_leave_request(@leave_request), status: :created
     else
       render json: { errors: @leave_request.errors.full_messages }, status: :unprocessable_entity
@@ -118,6 +119,7 @@ class LeaveRequestsController < ApplicationController
           hr_approved_by: current_user,
           hr_approved_at: Time.current
         )
+        create_leave_approved_notification(@leave_request, current_user)
         render json: format_leave_request(@leave_request)
       else
         render json: { errors: [ "Manager approval required before HR approval" ] }, status: :unprocessable_entity
@@ -160,6 +162,7 @@ class LeaveRequestsController < ApplicationController
         rejected_at: Time.current,
         rejected_reason: params[:reason]
       )
+      create_leave_rejected_notification(@leave_request, current_user)
       render json: format_leave_request(@leave_request)
     else
       render json: { errors: [ "Only pending or manager-approved requests can be rejected" ] }, status: :unprocessable_entity
@@ -369,6 +372,54 @@ class LeaveRequestsController < ApplicationController
       created_at: request.created_at,
       updated_at: request.updated_at
     }
+  end
+
+  def create_leave_approved_notification(leave_request, approver)
+    employee_user = leave_request.employee&.user
+    return unless employee_user
+
+    begin
+      employee_user.notifications.create!(
+        notification_type: "leave",
+        title: "Leave Request Approved",
+        message: "Your leave request for #{leave_request.formatted_start_date} to #{leave_request.formatted_end_date} has been approved by #{approver.name}.",
+        action_url: "/attendance"
+      )
+    rescue => e
+      Rails.logger.error "Failed to create leave approval notification for LeaveRequest #{leave_request.id}: #{e.message}"
+    end
+  end
+
+  def create_leave_rejected_notification(leave_request, rejecter)
+    employee_user = leave_request.employee&.user
+    return unless employee_user
+
+    begin
+      employee_user.notifications.create!(
+        notification_type: "leave",
+        title: "Leave Request Rejected",
+        message: "Your leave request for #{leave_request.formatted_start_date} to #{leave_request.formatted_end_date} has been rejected by #{rejecter.name}.",
+        action_url: "/attendance"
+      )
+    rescue => e
+      Rails.logger.error "Failed to create leave approval notification for LeaveRequest #{leave_request.id}: #{e.message}"
+    end
+  end
+
+  def create_leave_request_notification(leave_request, user)
+    employee_user = leave_request.employee&.user
+    return unless employee_user
+
+    begin
+      employee_user.notifications.create!(
+        notification_type: "leave",
+        title: "Leave Applied",
+        message: "Your leave request for #{leave_request.formatted_start_date} to #{leave_request.formatted_end_date} has been applied.",
+        action_url: "/attendance"
+      )
+    rescue => e
+      Rails.logger.error "Failed to create leave approval notification for LeaveRequest #{leave_request.id}: #{e.message}"
+    end
   end
 
   def approvers_for(employee)

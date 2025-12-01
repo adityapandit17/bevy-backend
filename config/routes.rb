@@ -333,6 +333,14 @@ Rails.application.routes.draw do
   resources :sla_workflows
   resources :knowledge_articles
 
+  # Notifications
+  resources :notifications, only: [:index, :update, :destroy] do
+    collection do
+      patch :mark_all_read
+      delete :destroy_all
+    end
+  end
+
   # Events and Meetings
   resources :events
 

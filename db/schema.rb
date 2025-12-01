@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_27_105337) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_01_120000) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.date "assigned_date"
@@ -107,6 +107,24 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_27_105337) do
     t.datetime "created_at", null: false
     t.string "name"
     t.datetime "updated_at", null: false
+  end
+
+  create_table "digital_signatures", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "device_info"
+    t.integer "employee_id", null: false
+    t.string "ip_address"
+    t.integer "policy_document_id", null: false
+    t.string "signature_type"
+    t.date "signed_date"
+    t.string "status", default: "pending"
+    t.datetime "updated_at", null: false
+    t.text "user_agent"
+    t.index ["employee_id"], name: "index_digital_signatures_on_employee_id"
+    t.index ["policy_document_id", "employee_id"], name: "index_digital_signatures_on_policy_and_employee", unique: true
+    t.index ["policy_document_id"], name: "index_digital_signatures_on_policy_document_id"
+    t.index ["signed_date"], name: "index_digital_signatures_on_signed_date"
+    t.index ["status"], name: "index_digital_signatures_on_status"
   end
 
   create_table "employee_benefits", force: :cascade do |t|
@@ -325,6 +343,21 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_27_105337) do
     t.string "performed_by"
     t.datetime "updated_at", null: false
     t.index ["asset_id"], name: "index_maintenance_records_on_asset_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.string "action_url"
+    t.datetime "created_at", null: false
+    t.text "message", null: false
+    t.string "notification_type", null: false
+    t.boolean "read", default: false, null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["created_at"], name: "index_notifications_on_created_at"
+    t.index ["notification_type"], name: "index_notifications_on_notification_type"
+    t.index ["user_id", "read"], name: "index_notifications_on_user_id_and_read"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "offboarding_employees", force: :cascade do |t|
@@ -605,6 +638,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_27_105337) do
   add_foreign_key "assets", "employees"
   add_foreign_key "attendance_records", "employees"
   add_foreign_key "attendance_sessions", "attendance_records"
+  add_foreign_key "digital_signatures", "employees"
+  add_foreign_key "digital_signatures", "policy_documents"
   add_foreign_key "employee_benefits", "employees"
   add_foreign_key "employee_documents", "employees"
   add_foreign_key "employee_trainings", "employees"
@@ -616,6 +651,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_27_105337) do
   add_foreign_key "leave_requests", "users", column: "manager_approved_by_id"
   add_foreign_key "leave_requests", "users", column: "rejected_by_id"
   add_foreign_key "maintenance_records", "assets"
+  add_foreign_key "notifications", "users"
   add_foreign_key "offboarding_employees", "employees"
   add_foreign_key "offboarding_tasks", "offboarding_employees"
   add_foreign_key "onboarding_employees", "employees"
