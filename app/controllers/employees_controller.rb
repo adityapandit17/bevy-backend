@@ -2,14 +2,51 @@ class EmployeesController < ApplicationController
   before_action :set_employee, only: [ :show, :update, :destroy ]
 
   def index
-    @employees = Employee.includes(:manager, :department, :direct_reports).all
-    render json: @employees.as_json(
-      include: {
-        manager: { only: [ :id, :first_name, :last_name, :email, :designation ] },
-        department: { only: [ :id, :name ] },
-        direct_reports: { only: [ :id, :first_name, :last_name, :email ] }
+    @employees = Employee.includes(:manager, :department, :direct_reports)
+
+    # Apply search filter
+    if params[:search].present?
+      search_term = "%#{params[:search]}%"
+      @employees = @employees.where(
+        "LOWER(employees.first_name) LIKE LOWER(?) OR LOWER(employees.last_name) LIKE LOWER(?) OR LOWER(employees.email) LIKE LOWER(?)",
+        search_term, search_term, search_term
+      )
+    end
+
+    # Apply department filter
+    if params[:department].present? && params[:department] != "all"
+      @employees = @employees.joins(:department).where(departments: { name: params[:department] })
+    end
+
+    # Get total count before pagination
+    total_count = @employees.count
+
+    # Apply pagination
+    page = params[:page].to_i > 0 ? params[:page].to_i : 1
+    per_page = params[:per_page].to_i > 0 ? params[:per_page].to_i : 10
+    per_page = [per_page, 100].min # Cap at 100 per page
+
+    @employees = @employees.order(:first_name, :last_name)
+                           .offset((page - 1) * per_page)
+                           .limit(per_page)
+
+    total_pages = (total_count.to_f / per_page).ceil
+
+    render json: {
+      data: @employees.as_json(
+        include: {
+          manager: { only: [ :id, :first_name, :last_name, :email, :designation ] },
+          department: { only: [ :id, :name ] },
+          direct_reports: { only: [ :id, :first_name, :last_name, :email ] }
+        }
+      ),
+      pagination: {
+        current_page: page,
+        per_page: per_page,
+        total_count: total_count,
+        total_pages: total_pages
       }
-    )
+    }
   end
 
   def show
