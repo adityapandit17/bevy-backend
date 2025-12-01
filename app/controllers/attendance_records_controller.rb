@@ -3,7 +3,7 @@ class AttendanceRecordsController < ApplicationController
   before_action :set_employee, only: [ :clock_in, :clock_out ]
 
   def index
-    @attendance_records = AttendanceRecord.includes(:employee)
+    @attendance_records = AttendanceRecord.includes(:employee, :attendance_sessions)
 
     # Apply filters
     @attendance_records = @attendance_records.by_employee(params[:employee_id]) if params[:employee_id].present?
@@ -439,9 +439,12 @@ class AttendanceRecordsController < ApplicationController
   end
 
   def format_attendance_record(record)
-    # Get first session's check_in and last session's check_out for backward compatibility
-    first_session = record.attendance_sessions.order(created_at: :asc).first
-    last_session = record.attendance_sessions.order(created_at: :desc).first
+    sessions = record.association(:attendance_sessions).loaded? ?
+                record.attendance_sessions.sort_by(&:created_at) :
+                record.attendance_sessions.order(created_at: :asc)
+
+    first_session = sessions.first
+    last_session  = sessions.last
 
     {
       id: record.id,
@@ -462,7 +465,7 @@ class AttendanceRecordsController < ApplicationController
       is_late: first_session&.check_in ? (first_session.check_in > Time.parse("09:00")) : false,
       created_at: record.created_at,
       updated_at: record.updated_at,
-      attendance_sessions: record.attendance_sessions.map do |session|
+      attendance_sessions: sessions.map do |session|
         {
           id: session.id,
           check_in: session.check_in,
