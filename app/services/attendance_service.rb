@@ -53,6 +53,10 @@ class AttendanceService
       # Ensure status is set to present after session is created
       record.update!(status: "present") unless record.status == "present"
       record.reload
+
+      # Create an attendance notification for the employee's user
+      create_attendance_marked_notification(record)
+
       record
     end
   rescue ActiveRecord::RecordInvalid => e
@@ -62,6 +66,24 @@ class AttendanceService
     Rails.logger.error "Error in clock_in: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
     { error: "Failed to clock in: #{e.message}" }
+  end
+
+  private
+
+  def create_attendance_marked_notification(record)
+    user = record.employee&.user
+    return unless user
+
+    begin
+      user.notifications.create!(
+        notification_type: "attendance",
+        title: "Attendance Marked",
+        message: "Your attendance has been marked for #{record.date.strftime('%B %d, %Y')}.",
+        action_url: "/attendance"
+      )
+    rescue => e
+      Rails.logger.error "Failed to create attendance notification for AttendanceRecord #{record.id}: #{e.message}"
+    end
   end
 
   def clock_out
