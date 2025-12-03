@@ -68,7 +68,7 @@ class AttendanceService
     { error: "Failed to clock in: #{e.message}" }
   end
 
-  private
+  # private
 
   def create_attendance_marked_notification(record)
     user = record.employee&.user
