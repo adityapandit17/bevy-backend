@@ -65,15 +65,19 @@ class DashboardController < ApplicationController
   def recent_activities
     activities = []
 
-    # Recent employee additions
-    recent_employees = Employee.active.where("employees.created_at >= ?", 7.days.ago).limit(3)
+    # Recent employee additions - include both active and onboarding employees
+    recent_employees = Employee.where(status: ["active", "onboarding"])
+                              .where("employees.created_at >= ?", 7.days.ago)
+                              .order(created_at: :desc)
+                              .limit(3)
     recent_employees.each do |employee|
       activities << {
         id: "employee_#{employee.id}",
         type: "New Employee",
         description: "#{employee.name} joined as #{employee.designation}",
         time: time_ago_in_words(employee.created_at) + " ago",
-        status: "success"
+        status: "success",
+        created_at: employee.created_at
       }
     end
 
@@ -81,6 +85,7 @@ class DashboardController < ApplicationController
     recent_leaves = LeaveRequest.joins(:employee)
                                .where("leave_requests.created_at >= ?", 7.days.ago)
                                .where(employees: { status: "active" })
+                               .order(created_at: :desc)
                                .limit(2)
     recent_leaves.each do |leave|
       activities << {
@@ -88,7 +93,8 @@ class DashboardController < ApplicationController
         type: "Leave Request",
         description: "#{leave.employee.name} requested #{leave.leave_type} leave",
         time: time_ago_in_words(leave.created_at) + " ago",
-        status: leave.status == "approved" ? "success" : "pending"
+        status: leave.status == "approved" ? "success" : "pending",
+        created_at: leave.created_at
       }
     end
 
@@ -96,6 +102,7 @@ class DashboardController < ApplicationController
     recent_reviews = PerformanceReview.joins(:employee)
                                      .where("performance_reviews.created_at >= ?", 7.days.ago)
                                      .where(employees: { status: "active" })
+                                     .order(created_at: :desc)
                                      .limit(2)
     recent_reviews.each do |review|
       activities << {
@@ -103,11 +110,13 @@ class DashboardController < ApplicationController
         type: "Performance Review",
         description: "Q3 reviews completed for #{review.employee.department.name} team",
         time: time_ago_in_words(review.created_at) + " ago",
-        status: "success"
+        status: "success",
+        created_at: review.created_at
       }
     end
 
-    activities.sort_by { |activity| activity[:time] }.first(5)
+    # Sort by created_at timestamp (most recent first) and limit to 5
+    activities.sort_by { |activity| activity[:created_at] }.reverse.first(5).map { |a| a.except(:created_at) }
   end
 
   def upcoming_events
