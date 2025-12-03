@@ -1,16 +1,23 @@
 class CandidatesController < ApplicationController
-  before_action :set_candidate, only: [ :show, :update, :destroy, :send_email ]
+  before_action :set_candidate, only: [ :show, :update, :destroy, :send_email, :archive ]
 
   # GET /candidates
   def index
     @candidates = Candidate.includes(:interviews, :next_interview)
+
+    # Filter by archived status (default to not archived unless archive=true)
+    if params[:archived] == "true"
+      @candidates = @candidates.archived
+    else
+      @candidates = @candidates.not_archived
+    end
 
     # Apply filters
     @candidates = @candidates.by_status(params[:status]) if params[:status].present?
     @candidates = @candidates.by_department(params[:department]) if params[:department].present?
     if params[:search].present?
       search_term = "%#{params[:search]}%"
-      @candidates = @candidates.where("LOWER(name) LIKE LOWER(?) OR LOWER(email) LIKE LOWER(?) OR LOWER(position) LIKE LOWER(?)", search_term, search_term, search_term)
+      @candidates = @candidates.where("LOWER(first_name) LIKE LOWER(?) OR LOWER(last_name) LIKE LOWER(?) OR LOWER(email) LIKE LOWER(?) OR LOWER(position) LIKE LOWER(?)", search_term, search_term, search_term, search_term)
     end
 
     render json: Panko::ArraySerializer.new(@candidates, each_serializer: CandidateSerializer).to_json
@@ -66,6 +73,16 @@ class CandidatesController < ApplicationController
     new_status = params[:status]
 
     if @candidate.update(status: new_status, last_contact: Date.current)
+      render json: CandidateSerializer.new.serialize(@candidate)
+    else
+      render json: { errors: @candidate.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  # PATCH /candidates/:id/archive
+  def archive
+    @candidate = Candidate.find(params[:id])
+    if @candidate.update(archived: true)
       render json: CandidateSerializer.new.serialize(@candidate)
     else
       render json: { errors: @candidate.errors.full_messages }, status: :unprocessable_entity
@@ -141,7 +158,7 @@ class CandidatesController < ApplicationController
   end
 
   def candidate_params
-    params.require(:candidate).permit(:name, :email, :phone, :position, :department, :experience, :location, :status, :applied_date, :last_contact, :resume, :cover_letter, :notes, :skills, :education, :current_company, :expected_salary, :availability)
+    params.require(:candidate).permit(:first_name, :last_name, :date_of_birth, :email, :phone, :position, :department, :experience, :location, :status, :applied_date, :last_contact, :resume, :cover_letter, :notes, :skills, :education, :current_company, :expected_salary, :availability, :archived)
   end
 
   # Legacy format methods kept for backward compatibility if needed

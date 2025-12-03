@@ -3,7 +3,8 @@ require "test_helper"
 class CandidateTest < ActiveSupport::TestCase
   def setup
     @candidate = Candidate.new(
-      name: "John Doe",
+      first_name: "John",
+      last_name: "Doe",
       email: "john.doe@example.com",
       phone: "1234567890",
       position: "Software Engineer",
@@ -28,10 +29,16 @@ class CandidateTest < ActiveSupport::TestCase
     assert @candidate.valid?
   end
 
-  test "should require name" do
-    @candidate.name = nil
+  test "should require first_name" do
+    @candidate.first_name = nil
     assert_not @candidate.valid?
-    assert_includes @candidate.errors[:name], "can't be blank"
+    assert_includes @candidate.errors[:first_name], "can't be blank"
+  end
+
+  test "should require last_name" do
+    @candidate.last_name = nil
+    assert_not @candidate.valid?
+    assert_includes @candidate.errors[:last_name], "can't be blank"
   end
 
   test "should require email" do
@@ -128,7 +135,8 @@ class CandidateTest < ActiveSupport::TestCase
     @candidate.save!
 
     hired_candidate = Candidate.create!(
-      name: "Hired Person",
+      first_name: "Hired",
+      last_name: "Person",
       email: "hired@example.com",
       phone: "1111111111",
       position: "Developer",
@@ -138,7 +146,8 @@ class CandidateTest < ActiveSupport::TestCase
     )
 
     rejected_candidate = Candidate.create!(
-      name: "Rejected Person",
+      first_name: "Rejected",
+      last_name: "Person",
       email: "rejected@example.com",
       phone: "2222222222",
       position: "Developer",
@@ -156,7 +165,8 @@ class CandidateTest < ActiveSupport::TestCase
     @candidate.save!
 
     screening_candidate = Candidate.create!(
-      name: "Screening Person",
+      first_name: "Screening",
+      last_name: "Person",
       email: "screening@example.com",
       phone: "3333333333",
       position: "Developer",
@@ -174,7 +184,8 @@ class CandidateTest < ActiveSupport::TestCase
     @candidate.save!
 
     old_candidate = Candidate.create!(
-      name: "Old Person",
+      first_name: "Old",
+      last_name: "Person",
       email: "old@example.com",
       phone: "4444444444",
       position: "Developer",
@@ -191,7 +202,8 @@ class CandidateTest < ActiveSupport::TestCase
     @candidate.save!
 
     marketing_candidate = Candidate.create!(
-      name: "Marketing Person",
+      first_name: "Marketing",
+      last_name: "Person",
       email: "marketing@example.com",
       phone: "5555555555",
       position: "Marketing Manager",
@@ -205,8 +217,12 @@ class CandidateTest < ActiveSupport::TestCase
   end
 
   # Instance method tests
-  test "full_name should return name" do
+  test "full_name should return first_name and last_name combined" do
     assert_equal "John Doe", @candidate.full_name
+  end
+
+  test "name should return full_name for backward compatibility" do
+    assert_equal "John Doe", @candidate.name
   end
 
   test "skills_list should return array of skills" do
@@ -333,7 +349,8 @@ class CandidateTest < ActiveSupport::TestCase
 
   test "should be able to update candidate" do
     @candidate.save!
-    @candidate.name = "Jane Doe"
+    @candidate.first_name = "Jane"
+    @candidate.last_name = "Doe"
     @candidate.save!
     assert_equal "Jane Doe", @candidate.reload.name
   end

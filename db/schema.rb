@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_01_120000) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_03_131737) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.date "assigned_date"
@@ -70,18 +70,21 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_01_120000) do
 
   create_table "candidates", force: :cascade do |t|
     t.date "applied_date"
+    t.boolean "archived", default: false, null: false
     t.string "availability"
     t.string "cover_letter"
     t.datetime "created_at", null: false
     t.string "current_company"
+    t.date "date_of_birth"
     t.string "department"
     t.string "education"
     t.string "email"
     t.string "expected_salary"
     t.string "experience"
+    t.string "first_name"
     t.date "last_contact"
+    t.string "last_name"
     t.string "location"
-    t.string "name"
     t.text "notes"
     t.string "phone"
     t.string "position"
@@ -89,6 +92,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_01_120000) do
     t.text "skills"
     t.string "status"
     t.datetime "updated_at", null: false
+    t.index ["archived"], name: "index_candidates_on_archived"
   end
 
   create_table "companies", force: :cascade do |t|

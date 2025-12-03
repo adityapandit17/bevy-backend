@@ -1,7 +1,8 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: John Doe
+  first_name: John
+  last_name: Doe
   email: john.doe@example.com
   phone: "1234567890"
   position: Software Engineer
@@ -21,7 +22,8 @@ one:
   availability: "Immediate"
 
 two:
-  name: Jane Smith
+  first_name: Jane
+  last_name: Smith
   email: jane.smith@example.com
   phone: "0987654321"
   position: Marketing Manager

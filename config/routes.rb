@@ -268,6 +268,7 @@ Rails.application.routes.draw do
     member do
       patch :update_status
       post :send_email
+      patch :archive
     end
     collection do
       get :stats

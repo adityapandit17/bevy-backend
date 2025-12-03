@@ -1,16 +1,20 @@
 class CandidateSerializer < Panko::Serializer
-  attributes :id, :name, :email, :phone, :position, :department, :experience,
+  attributes :id, :first_name, :last_name, :date_of_birth, :email, :phone, :position, :department, :experience,
              :location, :status, :applied_date, :last_contact, :resume,
              :cover_letter, :notes, :education, :current_company,
              :expected_salary, :availability, :created_at, :updated_at
 
   # Computed attributes
-  attributes :skills, :interview_count, :days_since_applied,
+  attributes :name, :skills, :interview_count, :days_since_applied,
              :days_since_last_contact
 
   # Associations
   has_many :interviews, serializer: InterviewSerializer
   has_one :next_interview, serializer: InterviewSerializer
+
+  def name
+    object.full_name
+  end
 
   def skills
     object.skills_list

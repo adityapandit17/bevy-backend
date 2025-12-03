@@ -4,7 +4,8 @@ class CandidatesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @candidate = candidates(:one)
     @valid_attributes = {
-      name: "Jane Smith",
+      first_name: "Jane",
+      last_name: "Smith",
       email: "jane.smith@example.com",
       phone: "9876543210",
       position: "Senior Developer",
@@ -103,13 +104,14 @@ class CandidatesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :created
     json_response = JSON.parse(response.body)
-    assert_equal @valid_attributes[:name], json_response["name"]
+    assert_equal "Jane Smith", json_response["name"]
     assert_equal @valid_attributes[:email], json_response["email"]
   end
 
   test "should create candidate with minimal attributes" do
     minimal_attributes = {
-      name: "Minimal Candidate",
+      first_name: "Minimal",
+      last_name: "Candidate",
       email: "minimal@example.com",
       phone: "1234567890",
       position: "Developer",
@@ -123,7 +125,7 @@ class CandidatesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :created
     json_response = JSON.parse(response.body)
-    assert_equal minimal_attributes[:name], json_response["name"]
+    assert_equal "Minimal Candidate", json_response["name"]
     assert_equal minimal_attributes[:email], json_response["email"]
     assert_equal Date.current.to_s, json_response["applied_date"]
     assert_equal Date.current.to_s, json_response["last_contact"]
@@ -156,7 +158,7 @@ class CandidatesControllerTest < ActionDispatch::IntegrationTest
 
   test "should update candidate" do
     patch candidate_url(@candidate), params: {
-      candidate: { name: "Updated Name", status: "interview" }
+      candidate: { first_name: "Updated", last_name: "Name", status: "interview" }
     }, as: :json
 
     assert_response :success
@@ -245,7 +247,7 @@ class CandidatesControllerTest < ActionDispatch::IntegrationTest
 
   test "should return 404 when updating non-existent candidate" do
     patch candidate_url(99999), params: {
-      candidate: { name: "Updated Name" }
+      candidate: { first_name: "Updated", last_name: "Name" }
     }, as: :json
     assert_response :not_found
   end
@@ -290,7 +292,8 @@ class CandidatesControllerTest < ActionDispatch::IntegrationTest
   test "should handle candidate with no interviews" do
     # Create a candidate with no interviews
     candidate_without_interviews = Candidate.create!(
-      name: "No Interviews",
+      first_name: "No",
+      last_name: "Interviews",
       email: "no.interviews@example.com",
       phone: "1234567890",
       position: "Developer",
@@ -341,7 +344,7 @@ class CandidatesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     json_response = JSON.parse(response.body)
-    required_fields = %w[id name email phone position department experience location status applied_date last_contact resume cover_letter notes skills education current_company expected_salary availability interviews created_at updated_at]
+    required_fields = %w[id first_name last_name name email phone position department experience location status applied_date last_contact resume cover_letter notes skills education current_company expected_salary availability interviews created_at updated_at]
 
     required_fields.each do |field|
       assert_includes json_response.keys, field, "Missing field: #{field}"
@@ -350,7 +353,8 @@ class CandidatesControllerTest < ActionDispatch::IntegrationTest
 
   test "should handle candidate with missing optional fields" do
     minimal_candidate = Candidate.create!(
-      name: "Minimal",
+      first_name: "Minimal",
+      last_name: "",
       email: "minimal@example.com",
       phone: "1234567890",
       position: "Developer",

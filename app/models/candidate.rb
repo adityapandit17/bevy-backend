@@ -5,7 +5,8 @@ class Candidate < ApplicationRecord
       .order(:scheduled_date, :scheduled_time)
   }, class_name: "Interview"
 
-  validates :name, presence: true
+  validates :first_name, presence: true
+  validates :last_name, presence: true
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :phone, presence: true
   validates :position, presence: true
@@ -17,9 +18,16 @@ class Candidate < ApplicationRecord
   scope :by_status, ->(status) { where(status: status) }
   scope :recent, -> { where("applied_date >= ?", 30.days.ago) }
   scope :by_department, ->(dept) { where(department: dept) }
+  scope :archived, -> { where(archived: true) }
+  scope :not_archived, -> { where(archived: false) }
 
   def full_name
-    name
+    [first_name, last_name].compact.join(' ').strip
+  end
+
+  # Backward compatibility method
+  def name
+    full_name
   end
 
   def skills_list
