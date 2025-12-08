@@ -3,7 +3,7 @@ class AssetsController < ApplicationController
 
   # GET /assets
   def index
-    @assets = Asset.includes(:employee, :department)
+    @assets = Asset.includes(:employee)
 
     # Apply filters
     @assets = @assets.by_type(params[:asset_type]) if params[:asset_type].present?
@@ -108,10 +108,22 @@ class AssetsController < ApplicationController
         utilization_rate: total_assets > 0 ? (assigned_assets.to_f / total_assets * 100).round(1) : 0
       },
       financial: {
-        total_value: total_value,
-        purchase_value: purchase_value,
-        depreciation: purchase_value - total_value,
-        average_asset_age: Asset.average("EXTRACT(YEAR FROM AGE(CURRENT_DATE, purchase_date))").round(1)
+        total_value: total_value || 0,
+        purchase_value: purchase_value || 0,
+        depreciation: (purchase_value || 0) - (total_value || 0),
+        average_asset_age: begin
+          assets_with_dates = Asset.where.not(purchase_date: nil)
+          if assets_with_dates.exists?
+            if ActiveRecord::Base.connection.adapter_name == 'SQLite'
+              avg = assets_with_dates.average("(julianday('now') - julianday(purchase_date)) / 365.25")
+            else
+              avg = assets_with_dates.average("EXTRACT(YEAR FROM AGE(CURRENT_DATE, purchase_date))")
+            end
+            avg ? avg.round(1) : 0.0
+          else
+            0.0
+          end
+        end
       },
       distribution: {
         asset_types: asset_types,

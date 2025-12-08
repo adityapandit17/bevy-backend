@@ -21,6 +21,15 @@ Rails.application.routes.draw do
       post "auth/validate", to: "auth#validate"
       post "auth/change_password", to: "auth#change_password"
     end
+    
+    # Asset Management API - moved here to avoid conflict with Propshaft /assets route
+    resources :assets, only: [:index, :show, :create, :update, :destroy] do
+      collection do
+        get :stats
+        get :allocations
+        get :maintenance
+      end
+    end
   end
 
   get "super_admin/dashboard"
@@ -289,14 +298,8 @@ Rails.application.routes.draw do
     end
   end
 
-  # Asset Management System
-  resources :assets do
-    collection do
-      get :stats
-      get :allocations
-      get :maintenance
-    end
-  end
+  # Asset Management System - Routes moved to /api/assets to avoid Propshaft conflict
+  # See namespace :api above for asset routes
 
   resources :employees do
     post "attendance_records/clock_in",  to: "attendance_records#clock_in"
@@ -304,9 +307,7 @@ Rails.application.routes.draw do
   end
 
   resources :asset_allocations do
-    member do
-      patch :return
-    end
+    resource :return_asset_allocation, only: [:update], controller: "return_asset_allocations"
   end
 
   resources :maintenance_records do
