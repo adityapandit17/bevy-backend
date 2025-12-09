@@ -85,14 +85,63 @@ class MaintenanceRecordsController < ApplicationController
     scheduled_date = params[:scheduled_date]
     notes = params[:notes]
 
-    asset = Asset.find(asset_id)
+    # Validate required parameters
+    if asset_id.blank?
+      return render json: {
+        message: "Asset ID is required",
+        errors: ["asset_id parameter is missing"]
+      }, status: :unprocessable_entity
+    end
+
+    if maintenance_type.blank?
+      return render json: {
+        message: "Maintenance type is required",
+        errors: ["maintenance_type parameter is missing"]
+      }, status: :unprocessable_entity
+    end
+
+    if scheduled_date.blank?
+      return render json: {
+        message: "Scheduled date is required",
+        errors: ["scheduled_date parameter is missing"]
+      }, status: :unprocessable_entity
+    end
+
+    # Find asset with error handling
+    begin
+      asset = Asset.find(asset_id)
+    rescue ActiveRecord::RecordNotFound
+      return render json: {
+        message: "Asset not found",
+        errors: ["Asset with ID #{asset_id} does not exist"]
+      }, status: :not_found
+    end
+
+    # Parse scheduled date
+    begin
+      parsed_date = Date.parse(scheduled_date)
+    rescue ArgumentError
+      return render json: {
+        message: "Invalid date format",
+        errors: ["scheduled_date must be a valid date (YYYY-MM-DD)"]
+      }, status: :unprocessable_entity
+    end
+
+    # Validate maintenance type
+    valid_types = %w[routine repair upgrade replacement inspection]
+    unless valid_types.include?(maintenance_type)
+      return render json: {
+        message: "Invalid maintenance type",
+        errors: ["maintenance_type must be one of: #{valid_types.join(', ')}"]
+      }, status: :unprocessable_entity
+    end
 
     # Create a scheduled maintenance record
     @maintenance_record = MaintenanceRecord.new(
       asset: asset,
       maintenance_type: maintenance_type,
-      maintenance_date: scheduled_date,
-      description: notes || "Scheduled #{maintenance_type} maintenance",
+      maintenance_date: parsed_date,
+      description: notes.present? ? notes : "Scheduled #{maintenance_type} maintenance",
       cost: 0,
       performed_by: "Scheduled"
     )
