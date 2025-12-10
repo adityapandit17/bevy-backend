@@ -38,6 +38,27 @@ class PayrollsController < ApplicationController
     head :no_content
   end
 
+  def process_month
+    # Temporary: allow any authenticated user to process payroll (adjust with proper permissions later)
+    # authorize!("payrolls", "create")
+    month = params[:month] || Date.current
+    preview = ActiveModel::Type::Boolean.new.cast(params[:preview])
+
+    result = PayrollProcessor.new(month: month, preview: preview).call
+
+    render json: {
+      month: PayrollMonth.label(month),
+      processed: result.processed,
+      created: result.created,
+      updated: result.updated,
+      skipped: result.skipped,
+      errors: result.errors,
+      payrolls: result.payrolls
+    }
+  rescue StandardError => e
+    render json: { error: e.message }, status: :unprocessable_entity unless performed?
+  end
+
   private
 
   def set_payroll

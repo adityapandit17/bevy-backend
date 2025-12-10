@@ -217,8 +217,17 @@ Rails.application.routes.draw do
       get :current
     end
   end
-  resources :salary_structures
-  resources :payrolls
+  resources :salary_structures do
+    collection do
+      post :generate_defaults
+      get :complete_structures
+    end
+  end
+  resources :payrolls do
+    collection do
+      post :process_month
+    end
+  end
   resources :attendance_records do
     collection do
       get :today

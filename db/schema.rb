@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_10_111834) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_10_120000) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.date "assigned_date"
@@ -421,12 +421,20 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_10_111834) do
 
   create_table "payrolls", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.json "deductions_breakdown", default: {}
+    t.json "earnings_breakdown", default: {}
     t.integer "employee_id", null: false
     t.decimal "gross_salary"
+    t.decimal "leave_deduction", precision: 12, scale: 2
     t.string "month"
     t.decimal "net_salary"
+    t.decimal "payable_days", precision: 10, scale: 2
+    t.datetime "processed_at"
+    t.string "run_mode"
     t.string "status"
+    t.decimal "unpaid_days", precision: 10, scale: 2
     t.datetime "updated_at", null: false
+    t.integer "working_days"
     t.index ["employee_id"], name: "index_payrolls_on_employee_id"
   end
 
