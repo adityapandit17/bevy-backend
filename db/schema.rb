@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_03_131737) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_10_111834) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.date "assigned_date"
@@ -525,12 +525,20 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_03_131737) do
   create_table "salary_structures", force: :cascade do |t|
     t.decimal "allowances"
     t.decimal "basic"
+    t.decimal "bonus", precision: 10, scale: 2, default: "0.0"
     t.datetime "created_at", null: false
     t.decimal "deductions"
+    t.integer "department_id"
     t.date "effective_from"
     t.integer "employee_id", null: false
+    t.decimal "esi", precision: 10, scale: 2, default: "0.0"
     t.decimal "hra"
+    t.decimal "income_tax", precision: 10, scale: 2, default: "0.0"
+    t.string "level"
+    t.decimal "pf", precision: 10, scale: 2, default: "0.0"
+    t.decimal "professional_tax", precision: 10, scale: 2, default: "0.0"
     t.datetime "updated_at", null: false
+    t.index ["department_id"], name: "index_salary_structures_on_department_id"
     t.index ["employee_id"], name: "index_salary_structures_on_employee_id"
   end
 
@@ -666,6 +674,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_03_131737) do
   add_foreign_key "performance_reviews", "employees"
   add_foreign_key "role_permissions", "permissions"
   add_foreign_key "role_permissions", "roles"
+  add_foreign_key "salary_structures", "departments"
   add_foreign_key "salary_structures", "employees"
   add_foreign_key "timesheets", "employees"
   add_foreign_key "user_preferences", "users"

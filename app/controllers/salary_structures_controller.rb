@@ -41,6 +41,6 @@ class SalaryStructuresController < ApplicationController
   end
 
   def salary_structure_params
-    params.require(:salary_structure).permit(:employee_id, :basic, :hra, :allowances, :deductions, :effective_from)
+    params.require(:salary_structure).permit(:employee_id, :department_id, :level, :basic, :hra, :allowances, :bonus, :deductions, :pf, :esi, :professional_tax, :income_tax, :effective_from)
   end
 end
