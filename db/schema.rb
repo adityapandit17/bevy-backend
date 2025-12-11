@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_10_120000) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_10_123000) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.date "assigned_date"
@@ -538,6 +538,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_10_120000) do
     t.decimal "deductions"
     t.integer "department_id"
     t.date "effective_from"
+    t.date "effective_upto"
     t.integer "employee_id", null: false
     t.decimal "esi", precision: 10, scale: 2, default: "0.0"
     t.decimal "hra"
