@@ -4,6 +4,10 @@ class SalaryStructuresController < ApplicationController
   def index
     @salary_structures = SalaryStructure.all
     render json: @salary_structures
+  rescue StandardError => e
+    Rails.logger.error "Error fetching salary structures: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    render json: { error: "Failed to fetch salary structures: #{e.message}" }, status: :internal_server_error
   end
 
   def show

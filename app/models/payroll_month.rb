@@ -25,8 +25,11 @@ class PayrollMonth
     dt.strftime("%B %Y")
   end
 
+  # Returns the payroll cycle range: from 1st of the month to 1st of next month (exclusive)
+  # This represents a 1st-to-1st payroll cycle
   def self.range(date)
     dt = parse(date)
+    # From 1st of the month to 1st of next month (exclusive) = all days of the current month
     dt.beginning_of_month..dt.end_of_month
   end
 

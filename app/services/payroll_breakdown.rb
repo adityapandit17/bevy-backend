@@ -44,27 +44,33 @@ class PayrollBreakdown
   end
 
   def monthly
+    return nil unless present?
     result_for(divisor: 12)
   end
 
   def annual
+    return nil unless present?
     result_for(divisor: 1)
   end
 
   private
 
   def result_for(divisor:)
-    basic = normalize(@structure&.basic, divisor)
-    hra = normalize(@structure&.hra, divisor)
-    allowances = normalize(@structure&.allowances, divisor)
-    bonus = normalize(@structure&.bonus, divisor)
-    pf = normalize(@structure&.pf, divisor)
-    esi = normalize(@structure&.esi, divisor)
-    professional_tax = normalize(@structure&.professional_tax, divisor)
-    income_tax = normalize(@structure&.income_tax, divisor)
-    deductions = normalize(@structure&.deductions, divisor)
+    return nil if @structure.nil?
+    
+    basic = normalize(@structure.basic, divisor)
+    hra = normalize(@structure.hra, divisor)
+    other_allowances = normalize(@structure.allowances, divisor)
+    bonus = normalize(@structure.bonus, divisor)
+    # Combine annual bonus + other allowances into total allowances
+    allowances = other_allowances + bonus
+    pf = normalize(@structure.pf, divisor)
+    esi = normalize(@structure.esi, divisor)
+    professional_tax = normalize(@structure.professional_tax, divisor)
+    income_tax = normalize(@structure.income_tax, divisor)
+    deductions = normalize(@structure.deductions, divisor)
 
-    gross = basic + hra + allowances + bonus
+    gross = basic + hra + allowances
     statutory = pf + esi + professional_tax + income_tax
     total_deductions = deductions + statutory
     net = gross - total_deductions
@@ -73,7 +79,7 @@ class PayrollBreakdown
       basic: basic,
       hra: hra,
       allowances: allowances,
-      bonus: bonus,
+      bonus: 0, # Bonus is now included in allowances
       pf: pf,
       esi: esi,
       professional_tax: professional_tax,
@@ -81,12 +87,13 @@ class PayrollBreakdown
       deductions: deductions,
       gross: gross,
       net: net,
-      effective_from: @structure&.effective_from
+      effective_from: @structure.effective_from
     )
   end
 
   def normalize(value, divisor)
-    decimal = BigDecimal(value || 0)
+    return BigDecimal("0") if value.nil?
+    decimal = value.is_a?(BigDecimal) ? value : BigDecimal(value.to_s)
     divisor.positive? ? decimal / divisor : decimal
   end
 end

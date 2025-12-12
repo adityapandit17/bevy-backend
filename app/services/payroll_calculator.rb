@@ -24,20 +24,21 @@ class PayrollCalculator
     monthly = structure.monthly
     earnings = build_earnings(monthly)
 
-    working_days = PayrollMonth.working_days(@month, weekend_only: @weekend_only)
-    working_days = 1 if working_days.zero? # guard against division by zero
+    # Total days in the month (including weekends - all days are payable by default)
+    total_days = PayrollMonth.range(@month).count
+    total_days = 1 if total_days.zero? # guard against division by zero
 
-    payable_days, unpaid_days = calculate_payable_days(working_days)
-    per_day_rate = (earnings[:gross] / working_days).to_d
+    payable_days, unpaid_days = calculate_payable_days(total_days)
+    per_day_rate = (earnings[:basic] / total_days).to_d
     leave_deduction = (per_day_rate * unpaid_days).round(2)
 
     deductions = build_deductions(monthly, leave_deduction)
-    net_salary = (earnings[:gross] - deductions.values.sum).round(2)
+    net_salary = (earnings[:gross] - leave_deduction).round(2)
 
     Result.new(
       gross: earnings[:gross],
       net: net_salary,
-      working_days: working_days,
+      working_days: total_days, # Total days including weekends
       payable_days: payable_days,
       unpaid_days: unpaid_days,
       leave_deduction: leave_deduction,
@@ -52,20 +53,19 @@ class PayrollCalculator
     {
       basic: monthly.basic,
       hra: monthly.hra,
-      allowances: monthly.allowances,
-      bonus: monthly.respond_to?(:bonus) ? monthly.bonus : 0,
+      allowances: monthly.allowances, # Allowances already includes annual bonus + other allowances
+      bonus: 0, # Bonus is now included in allowances
       gross: monthly.gross
     }.transform_values { |v| BigDecimal(v || 0) }
   end
 
   def build_deductions(monthly, leave_deduction)
-    basic = BigDecimal(monthly.basic || 0)
-    gross = BigDecimal(monthly.gross || 0)
-
-    pf = (basic * BigDecimal("0.12")).round(2)
-    esi = gross <= 21_000 ? (gross * BigDecimal("0.0075")).round(2) : BigDecimal("0")
-    professional_tax = BigDecimal("200")
-    income_tax = BigDecimal(monthly.respond_to?(:income_tax) ? monthly.income_tax || 0 : 0)
+    # Use deduction values from salary structure (already converted to monthly)
+    # This ensures consistency with PayrollBreakdown and frontend calculations
+    pf = BigDecimal(monthly.pf || 0)
+    esi = BigDecimal(monthly.esi || 0)
+    professional_tax = BigDecimal(monthly.professional_tax || 0)
+    income_tax = BigDecimal(monthly.income_tax || 0)
 
     {
       pf: pf,
@@ -76,33 +76,51 @@ class PayrollCalculator
     }
   end
 
-  def calculate_payable_days(working_days)
+  def calculate_payable_days(total_days)
     range = PayrollMonth.range(@month)
-    working_dates = range.to_a.select { |d| PayrollMonth.weekday?(d) }
+    # Get all dates in the month (including weekends)
+    all_dates = range.to_a
 
-    attendance = attendance_by_date(working_dates)
+    # Get attendance records for all days in the month
+    attendance = attendance_by_date(all_dates)
     leaves = leaves_by_date(range)
 
-    payable = 0.to_d
+    # Start with full month salary (all days are payable by default)
+    # Weekends (Saturdays and Sundays) are considered always present by default
+    payable = BigDecimal(total_days)
+    deductions = 0.to_d
 
-    working_dates.each do |day|
+    # Process each day in the month (including weekends)
+    all_dates.each do |day|
+      # If there's an attendance record for this day, check for deductions
       if attendance[day]
-        payable += payable_from_attendance(attendance[day])
+        deduction = deduction_from_attendance(attendance[day])
+        deductions += deduction
+      # If there's an approved leave for this day, check for deductions
       elsif leaves[day]
-        payable += payable_from_leave(leaves[day])
+        deduction = deduction_from_leave(leaves[day])
+        deductions += deduction
       else
-        # Absent, counts as 0
+        # No attendance record and no leave
+        if weekend?(day)
+          # Weekends remain payable by default
+        else
+          # Weekday with no record counts as absent
+          deductions += 1.to_d
+        end
       end
     end
 
-    payable = [payable, working_days].min
-    unpaid = BigDecimal(working_days) - payable
+    # Calculate payable days after deductions
+    payable = payable - deductions
+    payable = [payable, 0.to_d].max # Ensure payable is not negative
+    unpaid = BigDecimal(total_days) - payable
     [payable, unpaid]
   end
 
-  def attendance_by_date(working_dates)
+  def attendance_by_date(dates)
     AttendanceRecord
-      .where(employee_id: @employee.id, date: working_dates)
+      .where(employee_id: @employee.id, date: dates)
       .each_with_object({}) do |rec, h|
         h[rec.date] = rec
       end
@@ -114,29 +132,46 @@ class PayrollCalculator
       .where("start_date <= ? AND end_date >= ?", range.end, range.begin)
       .each_with_object({}) do |leave, h|
         leave_days = (leave.start_date..leave.end_date).to_a
+        # Check all days in the leave period (including weekends)
+        # Weekends will be handled by deduction logic (no deduction for weekends)
         leave_days.each do |day|
-          next unless PayrollMonth.weekday?(day)
-          h[day] = leave
+          # Only include days within the payroll month range
+          h[day] = leave if range.include?(day)
         end
       end
   end
 
-  def payable_from_attendance(record)
+  # Calculate deduction from attendance record
+  # Full month salary is granted by default, so we only deduct for:
+  # - half_day: deduct 0.5 days
+  # - absent: deduct 1.0 days
+  # All other statuses (present, late, work_from_home, early_departure) = no deduction
+  def deduction_from_attendance(record)
     case record.status
-    when "present", "late", "work_from_home"
-      1.to_d
     when "half_day"
-      BigDecimal("0.5")
+      BigDecimal("0.5") # Deduct half day
+    when "absent"
+      1.to_d # Deduct full day
+    when "present", "late", "work_from_home", "early_departure"
+      0.to_d # No deduction (full day payable)
     else
-      0.to_d
+      # Unknown status, treat as absent (deduct full day)
+      1.to_d
     end
   end
 
-  def payable_from_leave(leave)
+  # Calculate deduction from leave record
+  # Full month salary is granted by default, so we only deduct for unpaid leaves
+  def deduction_from_leave(leave)
     paid_leave = leave.leave_type != "unpaid"
-    return 0.to_d unless paid_leave
+    return 0.to_d if paid_leave # Paid leave = no deduction
 
+    # Unpaid leave: deduct based on whether it's half day or full day
     leave.half_day? ? BigDecimal("0.5") : 1.to_d
   end
+
+    def weekend?(date)
+      date.saturday? || date.sunday?
+    end
 end
 

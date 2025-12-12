@@ -5,6 +5,10 @@ class SalaryStructure < ApplicationRecord
   validates :effective_from, presence: true, if: -> { persisted? || effective_from.present? }
   validate :no_overlapping_periods
 
+  # Before save, ensure allowances contains the sum of other allowances + bonus
+  # This ensures the database always stores the combined value
+  before_save :combine_allowances_and_bonus
+
   # Check if two date ranges overlap
   # Two periods [from_A, upto_A] and [from_B, upto_B] overlap if:
   # from_B <= upto_A AND from_A <= upto_B
@@ -35,6 +39,16 @@ class SalaryStructure < ApplicationRecord
   end
 
   private
+
+  def combine_allowances_and_bonus
+    # If bonus is present and > 0, combine it with allowances
+    # This handles both new records and updates to old records that still have separate values
+    if bonus.present? && bonus.to_f > 0
+      self.allowances = (allowances.to_f || 0) + bonus.to_f
+      self.bonus = 0
+    end
+    # If bonus is 0 or nil, allowances should already contain the total (from frontend)
+  end
 
   def no_overlapping_periods
     return unless employee_id && effective_from

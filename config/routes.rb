@@ -227,6 +227,9 @@ Rails.application.routes.draw do
     collection do
       post :process_month
     end
+    member do
+      get :calculation_breakdown
+    end
   end
   resources :attendance_records do
     collection do
