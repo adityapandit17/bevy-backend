@@ -3,10 +3,11 @@ class OffboardingEmployee < ApplicationRecord
   has_many :offboarding_tasks, dependent: :destroy
 
   # Validations
-  validates :employee_id, presence: true, uniqueness: true
+  validates :employee_id, presence: true
   validates :last_working_day, presence: true
   validates :status, presence: true, inclusion: { in: %w[pending in_progress completed cancelled] }
   validates :progress, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
+  validate :single_active_offboarding_per_employee
 
   # Scopes
   scope :active, -> { where(status: [ "pending", "in_progress" ]) }
@@ -117,6 +118,20 @@ class OffboardingEmployee < ApplicationRecord
       update_column(:status, "in_progress") unless status == "in_progress"
     else
       update_column(:status, "pending") unless status == "pending"
+    end
+  end
+
+  # Ensure an employee can have only one non-cancelled offboarding record at a time.
+  # This allows starting a new offboarding if all previous ones were cancelled.
+  def single_active_offboarding_per_employee
+    return if employee_id.blank?
+
+    existing_scope = OffboardingEmployee.where(employee_id: employee_id)
+                                        .where.not(status: "cancelled")
+    existing_scope = existing_scope.where.not(id: id) if persisted?
+
+    if existing_scope.exists?
+      errors.add(:employee_id, "has already been taken")
     end
   end
 end
