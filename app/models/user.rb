@@ -66,14 +66,14 @@
   end
 
   def has_permission?(resource, action)
-    return true if super_admin? # Super admin has all permissions
-
+    # Permission is now always driven by role-permission assignments,
+    # even for Super Admin. If you want "full access" for a role,
+    # grant all permissions to that role via the Role Permissions UI.
     roles.joins(:permissions).where(permissions: { resource: resource, action: action }).exists?
   end
 
   def permissions
-    return Permission.all if super_admin?
-
+    # Combined permissions from all roles for this user
     Permission.joins(role_permissions: :role).where(roles: { id: role_ids }).distinct
   end
 

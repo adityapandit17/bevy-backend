@@ -6,12 +6,14 @@ module Authorization
   def authorize!(resource, action)
     unless current_user&.has_permission?(resource, action)
       render json: { error: "Insufficient permissions" }, status: :forbidden
+      return
     end
   end
 
   def authorize_role!(role_name)
     unless current_user&.has_role?(role_name)
       render json: { error: "Insufficient role permissions" }, status: :forbidden
+      return
     end
   end
 

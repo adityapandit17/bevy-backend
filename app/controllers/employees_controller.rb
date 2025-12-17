@@ -1,5 +1,11 @@
 class EmployeesController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_employee, only: [ :show, :update, :destroy ]
+  before_action :authorize_index!, only: [ :index ]
+  before_action :authorize_show!, only: [ :show ]
+  before_action :authorize_create!, only: [ :create ]
+  before_action :authorize_update!, only: [ :update ]
+  before_action :authorize_destroy!, only: [ :destroy ]
 
   def index
     @employees = Employee.includes(:manager, :department, :direct_reports)
@@ -88,5 +94,25 @@ class EmployeesController < ApplicationController
 
   def employee_params
     params.require(:employee).permit(:first_name, :last_name, :email, :phone, :department_id, :designation, :date_of_joining, :status, :manager_id)
+  end
+
+  def authorize_index!
+    authorize!("employees", "index")
+  end
+
+  def authorize_show!
+    authorize!("employees", "show")
+  end
+
+  def authorize_create!
+    authorize!("employees", "create")
+  end
+
+  def authorize_update!
+    authorize!("employees", "update")
+  end
+
+  def authorize_destroy!
+    authorize!("employees", "destroy")
   end
 end

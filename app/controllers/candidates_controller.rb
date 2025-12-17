@@ -1,5 +1,11 @@
 class CandidatesController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_candidate, only: [ :show, :update, :destroy, :send_email, :archive ]
+  before_action :authorize_index!, only: [ :index ]
+  before_action :authorize_show!, only: [ :show ]
+  before_action :authorize_create!, only: [ :create ]
+  before_action :authorize_update!, only: [ :update ]
+  before_action :authorize_destroy!, only: [ :destroy ]
 
   # GET /candidates
   def index
@@ -159,6 +165,26 @@ class CandidatesController < ApplicationController
 
   def candidate_params
     params.require(:candidate).permit(:first_name, :last_name, :date_of_birth, :email, :phone, :position, :department, :experience, :location, :status, :applied_date, :last_contact, :resume, :cover_letter, :notes, :skills, :education, :current_company, :expected_salary, :availability, :archived)
+  end
+
+  def authorize_index!
+    authorize!("candidates", "index")
+  end
+
+  def authorize_show!
+    authorize!("candidates", "show")
+  end
+
+  def authorize_create!
+    authorize!("candidates", "create")
+  end
+
+  def authorize_update!
+    authorize!("candidates", "update")
+  end
+
+  def authorize_destroy!
+    authorize!("candidates", "destroy")
   end
 
   # Legacy format methods kept for backward compatibility if needed

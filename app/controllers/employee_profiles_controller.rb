@@ -1,5 +1,7 @@
 class EmployeeProfilesController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_employee
+  before_action :authorize_employee_profile!
 
   def show
     render json: {
@@ -58,6 +60,14 @@ class EmployeeProfilesController < ApplicationController
   end
 
   private
+
+  def authorize_employee_profile!
+    # Always allow users to view their own profile
+    return if current_user&.employee_id == @employee.id
+
+    # Otherwise require employees.show permission
+    authorize!("employees", "show")
+  end
 
   def set_employee
     @employee = Employee.find(params[:id])

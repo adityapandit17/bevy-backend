@@ -1,5 +1,11 @@
 class AssetsController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_asset, only: [ :show, :update, :destroy ]
+  before_action :authorize_index!, only: [ :index ]
+  before_action :authorize_show!, only: [ :show ]
+  before_action :authorize_create!, only: [ :create ]
+  before_action :authorize_update!, only: [ :update ]
+  before_action :authorize_destroy!, only: [ :destroy ]
 
   # GET /assets
   def index
@@ -246,5 +252,25 @@ class AssetsController < ApplicationController
       status: allocation.status,
       created_at: allocation.created_at
     }
+  end
+
+  def authorize_index!
+    authorize!("assets", "index")
+  end
+
+  def authorize_show!
+    authorize!("assets", "show")
+  end
+
+  def authorize_create!
+    authorize!("assets", "create")
+  end
+
+  def authorize_update!
+    authorize!("assets", "update")
+  end
+
+  def authorize_destroy!
+    authorize!("assets", "destroy")
   end
 end

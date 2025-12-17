@@ -1,6 +1,8 @@
 class AttendanceRecordsController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_attendance_record, only: [ :show, :update, :destroy ]
   before_action :set_employee, only: [ :clock_in, :clock_out ]
+  before_action :authorize_index!, only: [ :index ]
 
   def index
     @attendance_records = AttendanceRecord.includes(:employee, :attendance_sessions)
@@ -476,5 +478,9 @@ class AttendanceRecordsController < ApplicationController
         }
       end
     }
+  end
+
+  def authorize_index!
+    authorize!("attendance_records", "index")
   end
 end
