@@ -4,8 +4,14 @@ class PayrollsController < ApplicationController
 
   def index
     # authorize!("payrolls", "index")
-    @payrolls = Payroll.all
-    render json: @payrolls
+    @payrolls = Payroll.includes(:employee)
+    render json: @payrolls.as_json(
+      include: {
+        employee: {
+          only: [:id, :first_name, :last_name, :employee_code, :department_id]
+        }
+      }
+    )
   end
 
   def show

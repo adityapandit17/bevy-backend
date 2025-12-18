@@ -66,9 +66,19 @@
   end
 
   def has_permission?(resource, action)
-    # Permission is now always driven by role-permission assignments,
-    # even for Super Admin. If you want "full access" for a role,
-    # grant all permissions to that role via the Role Permissions UI.
+    # Permission is driven by role-permission assignments, with a couple of
+    # explicit cross-module allowances for better UX.
+
+    # Any role that can see Payroll / Salary Structures / Attendance / Leave
+    # can also see basic employee information used in those modules.
+    if resource == "employees" && action == "index"
+      helper_modules = %w[payrolls salary_structures attendance_records leave_requests]
+      has_helper_access = roles.joins(:permissions)
+                               .where(permissions: { resource: helper_modules, action: "index" })
+                               .exists?
+      return true if has_helper_access
+    end
+
     roles.joins(:permissions).where(permissions: { resource: resource, action: action }).exists?
   end
 
