@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_10_123000) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_18_110409) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.date "assigned_date"
@@ -532,6 +532,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_10_123000) do
 
   create_table "salary_structures", force: :cascade do |t|
     t.decimal "allowances"
+    t.decimal "annual_ctc", precision: 10, scale: 2, default: "0.0"
     t.decimal "basic"
     t.decimal "bonus", precision: 10, scale: 2, default: "0.0"
     t.datetime "created_at", null: false
@@ -544,6 +545,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_10_123000) do
     t.decimal "hra"
     t.decimal "income_tax", precision: 10, scale: 2, default: "0.0"
     t.string "level"
+    t.decimal "monthly_ctc", precision: 10, scale: 2, default: "0.0"
     t.decimal "pf", precision: 10, scale: 2, default: "0.0"
     t.decimal "professional_tax", precision: 10, scale: 2, default: "0.0"
     t.datetime "updated_at", null: false

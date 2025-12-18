@@ -106,6 +106,54 @@ class PayrollsController < ApplicationController
     monthly = structure&.monthly
     gross_salary = monthly ? monthly.gross : (payroll.gross_salary || 0)
     per_day_rate = total_days > 0 ? (monthly.basic / total_days) : 0
+    
+    # Get earnings and deductions breakdowns
+    earnings_breakdown = payroll.earnings_breakdown || {}
+    deductions_breakdown = payroll.deductions_breakdown || {}
+    
+    # Calculate CTC dynamically: Monthly CTC = Gross Earnings + Total Deductions
+    # Annual CTC = Monthly CTC × 12
+    gross_earnings = begin
+      if earnings_breakdown.is_a?(Hash)
+        # Try to get gross directly, or sum all earnings components
+        if earnings_breakdown["gross"].present?
+          earnings_breakdown["gross"].to_f
+        else
+          # Sum all earnings components as fallback
+          (earnings_breakdown["basic"].to_f || 0) +
+          (earnings_breakdown["hra"].to_f || 0) +
+          (earnings_breakdown["allowances"].to_f || 0) +
+          (earnings_breakdown["bonus"].to_f || 0)
+        end
+      else
+        gross_salary
+      end
+    end
+    
+    total_deductions_amount = begin
+      if deductions_breakdown.is_a?(Hash)
+        # Sum all deduction components EXCEPT leave_deduction
+        # CTC should only include statutory deductions, not leave deductions
+        (deductions_breakdown["pf"].to_f || 0) +
+        (deductions_breakdown["esi"].to_f || 0) +
+        (deductions_breakdown["professional_tax"].to_f || 0) +
+        (deductions_breakdown["income_tax"].to_f || 0)
+        # Note: leave_deduction is explicitly excluded from CTC calculation
+      else
+        # Fallback: calculate from structure (statutory deductions only)
+        if monthly
+          (monthly.pf.to_f || 0) + (monthly.esi.to_f || 0) + 
+          (monthly.professional_tax.to_f || 0) + (monthly.income_tax.to_f || 0)
+        else
+          0
+        end
+      end
+    end
+    
+    # Calculate CTC: Monthly CTC = Gross Earnings + Statutory Deductions (excluding leave deduction)
+    calculated_monthly_ctc = gross_earnings + total_deductions_amount
+    calculated_annual_ctc = calculated_monthly_ctc * 12
+    
     breakdown = {
       payroll: {
         id: payroll.id,
@@ -131,10 +179,12 @@ class PayrollsController < ApplicationController
           else
             payroll.leave_deduction || 0
           end
-        end
+        end,
+        annual_ctc: calculated_annual_ctc,
+        monthly_ctc: calculated_monthly_ctc
       },
-      earnings_breakdown: payroll.earnings_breakdown || {},
-      deductions_breakdown: payroll.deductions_breakdown || {},
+      earnings_breakdown: earnings_breakdown,
+      deductions_breakdown: deductions_breakdown,
       attendance_summary: begin
         present_statuses = ["present", "late", "work_from_home", "early_departure"]
         present_count = day_breakdown.count do |d|

@@ -90,6 +90,8 @@ class SalaryStructuresController < ApplicationController
       :esi,
       :professional_tax,
       :income_tax,
+      :annual_ctc,
+      :monthly_ctc,
       :effective_from,
       :effective_upto
     )

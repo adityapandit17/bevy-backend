@@ -11,6 +11,8 @@ class PayrollBreakdown
     :deductions,
     :gross,
     :net,
+    :annual_ctc,
+    :monthly_ctc,
     :effective_from,
     keyword_init: true
   )
@@ -69,6 +71,8 @@ class PayrollBreakdown
     professional_tax = normalize(@structure.professional_tax, divisor)
     income_tax = normalize(@structure.income_tax, divisor)
     deductions = normalize(@structure.deductions, divisor)
+    annual_ctc = normalize(@structure.annual_ctc, divisor)
+    monthly_ctc = normalize(@structure.monthly_ctc, divisor)
 
     gross = basic + hra + allowances
     statutory = pf + esi + professional_tax + income_tax
@@ -87,6 +91,8 @@ class PayrollBreakdown
       deductions: deductions,
       gross: gross,
       net: net,
+      annual_ctc: annual_ctc,
+      monthly_ctc: monthly_ctc,
       effective_from: @structure.effective_from
     )
   end

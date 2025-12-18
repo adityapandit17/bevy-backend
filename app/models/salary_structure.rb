@@ -8,6 +8,7 @@ class SalaryStructure < ApplicationRecord
   # Before save, ensure allowances contains the sum of other allowances + bonus
   # This ensures the database always stores the combined value
   before_save :combine_allowances_and_bonus
+  before_save :calculate_monthly_ctc
 
   # Check if two date ranges overlap
   # Two periods [from_A, upto_A] and [from_B, upto_B] overlap if:
@@ -48,6 +49,25 @@ class SalaryStructure < ApplicationRecord
       self.bonus = 0
     end
     # If bonus is 0 or nil, allowances should already contain the total (from frontend)
+  end
+
+  def calculate_monthly_ctc
+    # Calculate monthly CTC from annual CTC if annual CTC is provided
+    # Monthly CTC = Annual CTC ÷ 12
+    # Note: Annual CTC should be calculated as Gross Salary + Total Deductions
+    # This is handled on the frontend, but we ensure monthly is calculated here too
+    if annual_ctc.present? && annual_ctc.to_f > 0
+      self.monthly_ctc = (annual_ctc.to_f / 12.0).round(2)
+    elsif annual_ctc.to_f.zero? && monthly_ctc.to_f.zero?
+      # If both are zero, calculate from gross and deductions
+      gross = (basic.to_f || 0) + (hra.to_f || 0) + (allowances.to_f || 0)
+      total_deductions = (pf.to_f || 0) + (esi.to_f || 0) + (professional_tax.to_f || 0) + (income_tax.to_f || 0)
+      calculated_annual_ctc = gross + total_deductions
+      if calculated_annual_ctc > 0
+        self.annual_ctc = calculated_annual_ctc.round(2)
+        self.monthly_ctc = (calculated_annual_ctc / 12.0).round(2)
+      end
+    end
   end
 
   def no_overlapping_periods
@@ -147,6 +167,8 @@ class SalaryStructure < ApplicationRecord
         esi: 0,
         professional_tax: 0,
         income_tax: 0,
+        annual_ctc: 0,
+        monthly_ctc: 0,
         effective_from: month,
         level: nil
       )
@@ -273,6 +295,8 @@ class SalaryStructure < ApplicationRecord
       esi: 0,
       professional_tax: 0,
       income_tax: 0,
+      annual_ctc: 0,
+      monthly_ctc: 0,
       effective_from: month_date,
       level: nil
     )
