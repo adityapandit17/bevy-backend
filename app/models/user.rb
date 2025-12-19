@@ -68,6 +68,7 @@
   def has_permission?(resource, action)
     # Permission is driven by role-permission assignments, with a couple of
     # explicit cross-module allowances for better UX.
+    # All roles (including Super Admin) are treated equally - permissions must be assigned
 
     # Any role that can see Payroll / Salary Structures / Attendance / Leave
     # can also see basic employee information used in those modules.
@@ -79,7 +80,17 @@
       return true if has_helper_access
     end
 
-    roles.joins(:permissions).where(permissions: { resource: resource, action: action }).exists?
+    # Check if any of the user's roles have the specific permission
+    # This works for all roles including Super Admin - they need explicit permissions assigned
+    # Query directly through RolePermission to ensure we get fresh data from the database
+    # Always query fresh from database to avoid stale association cache
+    user_role_ids = UserRole.where(user_id: id).pluck(:role_id)
+    return false if user_role_ids.empty?
+    
+    RolePermission.joins(:role, :permission)
+                  .where(roles: { id: user_role_ids })
+                  .where(permissions: { resource: resource, action: action })
+                  .exists?
   end
 
   def permissions

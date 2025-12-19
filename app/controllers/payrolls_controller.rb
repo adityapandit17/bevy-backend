@@ -230,8 +230,89 @@ class PayrollsController < ApplicationController
 
   def update
     authorize!("payrolls", "update")
+    return if performed? # Stop if authorization already rendered a response
+    
+    # Store original values for comparison
+    original_gross = @payroll.gross_salary.to_f
+    original_earnings_breakdown = @payroll.earnings_breakdown || {}
+    
+    # Get the new gross_salary from params (before update)
+    new_gross_param = params[:payroll][:gross_salary] if params[:payroll] && params[:payroll][:gross_salary]
+    
+    # Update basic fields first (gross_salary, net_salary, leave_deduction, unpaid_days, status)
     if @payroll.update(payroll_params)
-      render json: @payroll
+      # Get the updated gross_salary value
+      new_gross = new_gross_param ? new_gross_param.to_f : @payroll.gross_salary.to_f
+      
+      # Handle gross_salary changes: adjust allowances in earnings_breakdown
+      # Only adjust if gross_salary actually changed
+      if new_gross > 0 && new_gross != original_gross
+        # Calculate the difference in gross salary
+        gross_difference = new_gross - original_gross
+        
+        # Get current earnings breakdown (use updated value or fallback to original)
+        earnings_breakdown = @payroll.earnings_breakdown || original_earnings_breakdown
+        
+        # Ensure earnings_breakdown is a hash with string keys
+        if earnings_breakdown.is_a?(Hash)
+          earnings_breakdown = earnings_breakdown.deep_dup
+          # Normalize keys to strings
+          earnings_breakdown = earnings_breakdown.transform_keys(&:to_s)
+        else
+          earnings_breakdown = {}
+        end
+        
+        # Extract current values from earnings_breakdown
+        # If not present, try to get from salary structure as fallback
+        basic = earnings_breakdown["basic"].to_f
+        hra = earnings_breakdown["hra"].to_f
+        current_allowances = earnings_breakdown["allowances"].to_f
+        bonus = earnings_breakdown["bonus"].to_f || 0
+        
+        # If earnings_breakdown is empty, try to reconstruct from salary structure
+        if basic.zero? && hra.zero? && current_allowances.zero?
+          employee = @payroll.employee
+          month_date = PayrollMonth.parse(@payroll.month)
+          structure = PayrollBreakdown.for_employee(employee, month: month_date)
+          if structure&.monthly
+            monthly = structure.monthly
+            basic = monthly.basic.to_f
+            hra = monthly.hra.to_f
+            current_allowances = monthly.allowances.to_f
+            bonus = 0 # Bonus is included in allowances
+          end
+        end
+        
+        # Lock basic salary and HRA - they should not change
+        # Adjust allowances by the gross difference
+        new_allowances = current_allowances + gross_difference
+        
+        # Ensure allowances don't go negative
+        # Minimum allowances = new_gross - basic - hra - bonus
+        min_allowances = new_gross - basic - hra - bonus
+        new_allowances = [new_allowances, min_allowances].max
+        
+        # Update earnings_breakdown with adjusted values
+        earnings_breakdown["basic"] = basic.round(2)
+        earnings_breakdown["hra"] = hra.round(2)
+        earnings_breakdown["allowances"] = new_allowances.round(2)
+        earnings_breakdown["bonus"] = bonus.round(2)
+        earnings_breakdown["gross"] = new_gross.round(2)
+        
+        # Update the payroll record with adjusted earnings_breakdown
+        @payroll.update_column(:earnings_breakdown, earnings_breakdown)
+      end
+      
+      # Recalculate net_salary if leave_deduction changed or gross_salary changed
+      # Net = Gross - Leave Deduction (statutory deductions are already included in gross)
+      if @payroll.leave_deduction.present?
+        new_net = @payroll.gross_salary.to_f - @payroll.leave_deduction.to_f
+        @payroll.update_column(:net_salary, new_net.round(2))
+      end
+      
+      # Reload to get updated values
+      @payroll.reload
+      render json: @payroll, status: :ok
     else
       render json: { errors: @payroll.errors.full_messages }, status: :unprocessable_entity
     end
@@ -286,7 +367,7 @@ class PayrollsController < ApplicationController
   end
 
   def payroll_params
-    params.require(:payroll).permit(:employee_id, :month, :gross_salary, :net_salary, :status)
+    params.require(:payroll).permit(:employee_id, :month, :gross_salary, :net_salary, :status, :leave_deduction, :unpaid_days)
   end
 
   def calculate_deduction_from_status(status)
