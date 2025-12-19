@@ -310,6 +310,39 @@ class PayrollsController < ApplicationController
         @payroll.update_column(:net_salary, new_net.round(2))
       end
       
+      # Update deductions_breakdown to include the updated leave_deduction
+      # This ensures the updated value is reflected in payroll records, payslip, and calculation breakdown
+      if params[:payroll] && params[:payroll].has_key?(:leave_deduction)
+        deductions_breakdown = @payroll.deductions_breakdown || {}
+        # Ensure deductions_breakdown is a hash with string keys
+        if deductions_breakdown.is_a?(Hash)
+          deductions_breakdown = deductions_breakdown.deep_dup
+          deductions_breakdown = deductions_breakdown.transform_keys(&:to_s)
+        else
+          deductions_breakdown = {}
+        end
+        
+        # Get statutory deductions from existing breakdown or structure
+        if deductions_breakdown.empty? || !deductions_breakdown.key?("pf")
+          employee = @payroll.employee
+          month_date = PayrollMonth.parse(@payroll.month)
+          structure = PayrollBreakdown.for_employee(employee, month: month_date)
+          if structure&.monthly
+            monthly = structure.monthly
+            deductions_breakdown["pf"] = monthly.pf.to_f.round(2)
+            deductions_breakdown["esi"] = monthly.esi.to_f.round(2)
+            deductions_breakdown["professional_tax"] = monthly.professional_tax.to_f.round(2)
+            deductions_breakdown["income_tax"] = monthly.income_tax.to_f.round(2)
+          end
+        end
+        
+        # Update leave_deduction in deductions_breakdown
+        deductions_breakdown["leave_deduction"] = @payroll.leave_deduction.to_f.round(2)
+        
+        # Update the payroll record with updated deductions_breakdown
+        @payroll.update_column(:deductions_breakdown, deductions_breakdown)
+      end
+      
       # Reload to get updated values
       @payroll.reload
       render json: @payroll, status: :ok
