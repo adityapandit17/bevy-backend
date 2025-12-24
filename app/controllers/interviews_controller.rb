@@ -2,7 +2,13 @@
 
 # app/controllers/interviews_controller.rb
 class InterviewsController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_interview, only: [ :show, :update, :destroy ]
+  before_action :authorize_index!, only: [ :index ]
+  before_action :authorize_show!, only: [ :show ]
+  before_action :authorize_create!, only: [ :create ]
+  before_action :authorize_update!, only: [ :update ]
+  before_action :authorize_destroy!, only: [ :destroy ]
 
   # GET /interviews
   def index
@@ -241,5 +247,25 @@ class InterviewsController < ApplicationController
     else
       "#6B7280" # gray
     end
+  end
+
+  def authorize_index!
+    authorize!("interviews", "index")
+  end
+
+  def authorize_show!
+    authorize!("interviews", "show")
+  end
+
+  def authorize_create!
+    authorize!("interviews", "create")
+  end
+
+  def authorize_update!
+    authorize!("interviews", "update")
+  end
+
+  def authorize_destroy!
+    authorize!("interviews", "destroy")
   end
 end

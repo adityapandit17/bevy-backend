@@ -44,9 +44,17 @@ class Permission < ApplicationRecord
       { name: "candidates.show", resource: "candidates", action: "show", description: "View candidate details" },
       { name: "candidates.create", resource: "candidates", action: "create", description: "Create new candidates" },
       { name: "candidates.update", resource: "candidates", action: "update", description: "Update candidate information" },
+      { name: "candidates.destroy", resource: "candidates", action: "destroy", description: "Delete candidates" },
+      { name: "job_openings.index", resource: "job_openings", action: "index", description: "View job openings list" },
+      { name: "job_openings.show", resource: "job_openings", action: "show", description: "View job opening details" },
+      { name: "job_openings.create", resource: "job_openings", action: "create", description: "Create new job openings" },
+      { name: "job_openings.update", resource: "job_openings", action: "update", description: "Update job opening information" },
+      { name: "job_openings.destroy", resource: "job_openings", action: "destroy", description: "Delete job openings" },
       { name: "interviews.index", resource: "interviews", action: "index", description: "View interviews list" },
+      { name: "interviews.show", resource: "interviews", action: "show", description: "View interview details" },
       { name: "interviews.create", resource: "interviews", action: "create", description: "Schedule interviews" },
       { name: "interviews.update", resource: "interviews", action: "update", description: "Update interview details" },
+      { name: "interviews.destroy", resource: "interviews", action: "destroy", description: "Delete interviews" },
 
       # Performance Management
       { name: "performance_reviews.index", resource: "performance_reviews", action: "index", description: "View performance reviews" },

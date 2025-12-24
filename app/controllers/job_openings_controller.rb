@@ -2,7 +2,13 @@
 
 # app/controllers/job_openings_controller.rb
 class JobOpeningsController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_job_opening, only: [ :show, :update, :destroy ]
+  before_action :authorize_index!, only: [ :index ]
+  before_action :authorize_show!, only: [ :show ]
+  before_action :authorize_create!, only: [ :create ]
+  before_action :authorize_update!, only: [ :update ]
+  before_action :authorize_destroy!, only: [ :destroy ]
 
   def index
     @job_openings = JobOpening.includes(:department).all
@@ -61,5 +67,25 @@ class JobOpeningsController < ApplicationController
                   :requirements, :status, :location, :job_type,
                   :vacancies, :salary_min, :salary_max, :experience,
                   :skills, :posted, :applications)
+  end
+
+  def authorize_index!
+    authorize!("job_openings", "index")
+  end
+
+  def authorize_show!
+    authorize!("job_openings", "show")
+  end
+
+  def authorize_create!
+    authorize!("job_openings", "create")
+  end
+
+  def authorize_update!
+    authorize!("job_openings", "update")
+  end
+
+  def authorize_destroy!
+    authorize!("job_openings", "destroy")
   end
 end
