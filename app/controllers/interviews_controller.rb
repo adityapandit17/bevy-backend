@@ -2,6 +2,9 @@
 
 # app/controllers/interviews_controller.rb
 class InterviewsController < ApplicationController
+  # Skip CSRF protection for JSON requests (handled by JWT authentication)
+  skip_before_action :verify_authenticity_token, if: -> { request.format.json? || json_request? }
+  
   before_action :authenticate_user!
   before_action :set_interview, only: [ :show, :update, :destroy ]
   before_action :authorize_index!, only: [ :index ]

@@ -1,4 +1,7 @@
 class EmployeesController < ApplicationController
+  # Skip CSRF protection for JSON requests (handled by JWT authentication)
+  skip_before_action :verify_authenticity_token, if: -> { request.format.json? || json_request? }
+  
   before_action :authenticate_user!
   before_action :set_employee, only: [ :show, :update, :destroy ]
   before_action :authorize_index!, only: [ :index ]
@@ -105,6 +108,8 @@ class EmployeesController < ApplicationController
   end
 
   def authorize_create!
+    # Allow Super Admin to create employees without explicit permission
+    # return true if current_user&.super_admin?
     authorize!("employees", "create")
   end
 
