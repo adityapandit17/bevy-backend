@@ -75,12 +75,23 @@ class AttendanceService
     return unless user
 
     begin
-      user.notifications.create!(
-        notification_type: "attendance",
-        title: "Attendance Marked",
-        message: "Your attendance has been marked for #{record.date.strftime('%B %d, %Y')}.",
-        action_url: "/attendance"
-      )
+      # Check if a notification for attendance has already been created today
+      existing_notification = user.notifications
+                                   .where(notification_type: "attendance")
+                                   .where(title: "Attendance Marked")
+                                   .where("created_at >= ?", Date.today.beginning_of_day)
+                                   .where("created_at <= ?", Date.today.end_of_day)
+                                   .exists?
+
+      # Only create notification if one doesn't already exist for today
+      unless existing_notification
+        user.notifications.create!(
+          notification_type: "attendance",
+          title: "Attendance Marked",
+          message: "Your attendance has been marked for #{record.date.strftime('%B %d, %Y')}.",
+          action_url: "/attendance"
+        )
+      end
     rescue => e
       Rails.logger.error "Failed to create attendance notification for AttendanceRecord #{record.id}: #{e.message}"
     end
