@@ -15,11 +15,30 @@ class EmployeesController < ApplicationController
 
     # Apply search filter
     if params[:search].present?
-      search_term = "%#{params[:search]}%"
-      @employees = @employees.where(
-        "LOWER(employees.first_name) LIKE LOWER(?) OR LOWER(employees.last_name) LIKE LOWER(?) OR LOWER(employees.email) LIKE LOWER(?)",
-        search_term, search_term, search_term
-      )
+      search_term = params[:search].strip
+      # Split search term by spaces to handle full name searches
+      search_parts = search_term.split(/\s+/).reject(&:blank?)
+      
+      if search_parts.length > 1
+        # Multiple words: search for first word in first_name and last word in last_name (or vice versa)
+        first_part = "%#{search_parts.first}%"
+        last_part = "%#{search_parts.last}%"
+        full_term = "%#{search_term}%"
+        
+        @employees = @employees.where(
+          "(LOWER(employees.first_name) LIKE LOWER(?) AND LOWER(employees.last_name) LIKE LOWER(?)) OR " \
+          "(LOWER(employees.first_name) LIKE LOWER(?) AND LOWER(employees.last_name) LIKE LOWER(?)) OR " \
+          "LOWER(employees.email) LIKE LOWER(?)",
+          first_part, last_part, last_part, first_part, full_term
+        )
+      else
+        # Single word: search in first_name, last_name, or email
+        single_term = "%#{search_term}%"
+        @employees = @employees.where(
+          "LOWER(employees.first_name) LIKE LOWER(?) OR LOWER(employees.last_name) LIKE LOWER(?) OR LOWER(employees.email) LIKE LOWER(?)",
+          single_term, single_term, single_term
+        )
+      end
     end
 
     # Apply department filter
