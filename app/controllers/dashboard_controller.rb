@@ -254,7 +254,7 @@ class DashboardController < ApplicationController
     missed_interviews = PendingTask.pending
                                    .by_type("Interview")
                                    .for_employee(employee_id)
-                                   .where("title LIKE ?", "%Interview%")
+                                   .where("title LIKE ?", "%Missed Interview%")
                                    .where("due_date < ?", Date.current)
                                    .count
 
