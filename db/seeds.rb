@@ -2020,3 +2020,244 @@ elsif super_admin_user && super_admin_user.employee_id.present?
 elsif super_admin_user.nil?
   puts "⚠ Super Admin user (admin@hrms.com) not found"
 end
+
+# Create general channels for chat
+puts "Creating general channels..."
+if User.count > 0 && Channel.count == 0
+  # Get the first user (or super admin) as creator
+  creator = super_admin_user || User.first
+
+  # Create general channels
+  general_channels = [
+    {
+      name: "general",
+      channel_type: "channel",
+      is_private: false,
+      description: "General discussions and announcements for everyone",
+      created_by: creator
+    },
+    {
+      name: "random",
+      channel_type: "channel",
+      is_private: false,
+      description: "Random conversations and off-topic discussions",
+      created_by: creator
+    },
+    {
+      name: "announcements",
+      channel_type: "channel",
+      is_private: false,
+      description: "Company-wide announcements and important updates",
+      created_by: creator
+    },
+    {
+      name: "engineering",
+      channel_type: "channel",
+      is_private: false,
+      description: "Engineering team discussions",
+      created_by: creator
+    },
+    {
+      name: "marketing",
+      channel_type: "channel",
+      is_private: false,
+      description: "Marketing team discussions",
+      created_by: creator
+    },
+    {
+      name: "hr",
+      channel_type: "channel",
+      is_private: false,
+      description: "HR team discussions",
+      created_by: creator
+    }
+  ]
+
+  general_channels.each do |channel_data|
+    channel = Channel.find_or_create_by!(name: channel_data[:name]) do |ch|
+      ch.channel_type = channel_data[:channel_type]
+      ch.is_private = channel_data[:is_private]
+      ch.description = channel_data[:description]
+      ch.created_by = channel_data[:created_by]
+    end
+
+    # Add all active users as members
+    User.active.each do |user|
+      ChannelMembership.find_or_create_by!(channel: channel, user: user) do |membership|
+        membership.role = user == creator ? "admin" : "member"
+      end
+    end
+
+    # Add some welcome messages to general channel
+    if channel.name == "general"
+      welcome_messages = [
+        {
+          content: "Welcome to the general channel! This is where we share company-wide updates and have open discussions.",
+          user: creator,
+          created_at: 2.days.ago
+        },
+        {
+          content: "Feel free to introduce yourself and let everyone know what you're working on!",
+          user: creator,
+          created_at: 2.days.ago + 1.hour
+        }
+      ]
+
+      welcome_messages.each do |msg_data|
+        # Check if message already exists
+        existing_msg = Message.where(
+          channel: channel,
+          user: msg_data[:user],
+          content: msg_data[:content]
+        ).first
+
+        unless existing_msg
+          Message.create!(
+            channel: channel,
+            user: msg_data[:user],
+            content: msg_data[:content],
+            created_at: msg_data[:created_at]
+          )
+        end
+      end
+    end
+
+    # Add a welcome message to announcements channel
+    if channel.name == "announcements"
+      existing_announcement = Message.where(
+        channel: channel,
+        user: creator,
+        content: "Welcome to the announcements channel! Important company updates will be posted here."
+      ).first
+
+      unless existing_announcement
+        Message.create!(
+          channel: channel,
+          user: creator,
+          content: "Welcome to the announcements channel! Important company updates will be posted here.",
+          created_at: 1.day.ago
+        )
+      end
+    end
+
+    puts "✓ Created channel: #{channel.name}"
+  end
+
+  puts "Created #{Channel.count} channels"
+  puts "Created #{ChannelMembership.count} channel memberships"
+  puts "Created #{Message.count} messages"
+else
+  puts "Channels already exist or no users found. Skipping channel creation."
+end
+
+# Create general channels for chat
+puts "Creating general channels..."
+if User.count > 0 && Channel.count == 0
+  # Get the first user (or super admin) as creator
+  creator = super_admin_user || User.first
+
+  # Create general channels
+  general_channels = [
+    {
+      name: "general",
+      channel_type: "channel",
+      is_private: false,
+      description: "General discussions and announcements for everyone",
+      created_by: creator
+    },
+    {
+      name: "random",
+      channel_type: "channel",
+      is_private: false,
+      description: "Random conversations and off-topic discussions",
+      created_by: creator
+    },
+    {
+      name: "announcements",
+      channel_type: "channel",
+      is_private: false,
+      description: "Company-wide announcements and important updates",
+      created_by: creator
+    },
+    {
+      name: "engineering",
+      channel_type: "channel",
+      is_private: false,
+      description: "Engineering team discussions",
+      created_by: creator
+    },
+    {
+      name: "marketing",
+      channel_type: "channel",
+      is_private: false,
+      description: "Marketing team discussions",
+      created_by: creator
+    },
+    {
+      name: "hr",
+      channel_type: "channel",
+      is_private: false,
+      description: "HR team discussions",
+      created_by: creator
+    }
+  ]
+
+  general_channels.each do |channel_data|
+    channel = Channel.find_or_create_by!(name: channel_data[:name]) do |ch|
+      ch.channel_type = channel_data[:channel_type]
+      ch.is_private = channel_data[:is_private]
+      ch.description = channel_data[:description]
+      ch.created_by = channel_data[:created_by]
+    end
+
+    # Add all active users as members
+    User.active.each do |user|
+      ChannelMembership.find_or_create_by!(channel: channel, user: user) do |membership|
+        membership.role = user == creator ? "admin" : "member"
+      end
+    end
+
+    # Add some welcome messages to general channel
+    if channel.name == "general"
+      welcome_messages = [
+        {
+          content: "Welcome to the general channel! This is where we share company-wide updates and have open discussions.",
+          user: creator,
+          created_at: 2.days.ago
+        },
+        {
+          content: "Feel free to introduce yourself and let everyone know what you're working on!",
+          user: creator,
+          created_at: 2.days.ago + 1.hour
+        }
+      ]
+
+      welcome_messages.each do |msg_data|
+        Message.find_or_create_by!(
+          channel: channel,
+          user: msg_data[:user],
+          content: msg_data[:content],
+          created_at: msg_data[:created_at]
+        )
+      end
+    end
+
+    # Add a welcome message to announcements channel
+    if channel.name == "announcements"
+      Message.find_or_create_by!(
+        channel: channel,
+        user: creator,
+        content: "Welcome to the announcements channel! Important company updates will be posted here.",
+        created_at: 1.day.ago
+      )
+    end
+
+    puts "✓ Created channel: #{channel.name}"
+  end
+
+  puts "Created #{Channel.count} channels"
+  puts "Created #{ChannelMembership.count} channel memberships"
+  puts "Created #{Message.count} messages"
+else
+  puts "Channels already exist or no users found. Skipping channel creation."
+end

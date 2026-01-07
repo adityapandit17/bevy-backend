@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  channel_type: MyString
+  is_private: false
+  created_by: one
+  description: MyText
+
+two:
+  name: MyString
+  channel_type: MyString
+  is_private: false
+  created_by: two
+  description: MyText

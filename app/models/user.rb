@@ -10,6 +10,10 @@
   has_many :notifications, dependent: :destroy
   belongs_to :employee, optional: true
   has_one :user_preference, dependent: :destroy
+  has_many :channel_memberships, dependent: :destroy
+  has_many :channels, through: :channel_memberships
+  has_many :created_channels, class_name: "Channel", foreign_key: "created_by_id", dependent: :destroy
+  has_many :messages, dependent: :destroy
 
   # Validations
   validates :first_name, presence: true

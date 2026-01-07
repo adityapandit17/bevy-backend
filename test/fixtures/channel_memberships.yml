@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  channel: one
+  user: one
+  role: MyString
+  last_read_at: 2026-01-07 13:01:38
+
+two:
+  channel: two
+  user: two
+  role: MyString
+  last_read_at: 2026-01-07 13:01:38

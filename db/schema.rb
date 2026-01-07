@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_18_110409) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_07_073139) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.date "assigned_date"
@@ -93,6 +93,32 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_18_110409) do
     t.string "status"
     t.datetime "updated_at", null: false
     t.index ["archived"], name: "index_candidates_on_archived"
+  end
+
+  create_table "channel_memberships", force: :cascade do |t|
+    t.integer "channel_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "last_read_at"
+    t.string "role", default: "member", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["channel_id", "user_id"], name: "index_channel_memberships_on_channel_id_and_user_id", unique: true
+    t.index ["channel_id"], name: "index_channel_memberships_on_channel_id"
+    t.index ["user_id"], name: "index_channel_memberships_on_user_id"
+  end
+
+  create_table "channels", force: :cascade do |t|
+    t.string "channel_type", default: "channel", null: false
+    t.datetime "created_at", null: false
+    t.integer "created_by_id", null: false
+    t.text "description"
+    t.boolean "is_private", default: false, null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["channel_type", "name"], name: "index_channels_on_channel_type_and_name"
+    t.index ["channel_type"], name: "index_channels_on_channel_type"
+    t.index ["created_by_id"], name: "index_channels_on_created_by_id"
+    t.index ["name"], name: "index_channels_on_name"
   end
 
   create_table "companies", force: :cascade do |t|
@@ -347,6 +373,18 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_18_110409) do
     t.string "performed_by"
     t.datetime "updated_at", null: false
     t.index ["asset_id"], name: "index_maintenance_records_on_asset_id"
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.integer "channel_id", null: false
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.datetime "edited_at"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["channel_id", "created_at"], name: "index_messages_on_channel_id_and_created_at"
+    t.index ["channel_id"], name: "index_messages_on_channel_id"
+    t.index ["user_id"], name: "index_messages_on_user_id"
   end
 
   create_table "notifications", force: :cascade do |t|
@@ -661,6 +699,9 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_18_110409) do
   add_foreign_key "assets", "employees"
   add_foreign_key "attendance_records", "employees"
   add_foreign_key "attendance_sessions", "attendance_records"
+  add_foreign_key "channel_memberships", "channels"
+  add_foreign_key "channel_memberships", "users"
+  add_foreign_key "channels", "users", column: "created_by_id"
   add_foreign_key "digital_signatures", "employees"
   add_foreign_key "digital_signatures", "policy_documents"
   add_foreign_key "employee_benefits", "employees"
@@ -674,6 +715,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_18_110409) do
   add_foreign_key "leave_requests", "users", column: "manager_approved_by_id"
   add_foreign_key "leave_requests", "users", column: "rejected_by_id"
   add_foreign_key "maintenance_records", "assets"
+  add_foreign_key "messages", "channels"
+  add_foreign_key "messages", "users"
   add_foreign_key "notifications", "users"
   add_foreign_key "offboarding_employees", "employees"
   add_foreign_key "offboarding_tasks", "offboarding_employees"

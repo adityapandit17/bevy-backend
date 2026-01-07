@@ -20,6 +20,19 @@ Rails.application.routes.draw do
       get "auth/me", to: "auth#me"
       post "auth/validate", to: "auth#validate"
       post "auth/change_password", to: "auth#change_password"
+
+      # Chat API routes
+      resources :channels, only: [:index, :show, :create, :update, :destroy] do
+        member do
+          post :add_members
+          delete "remove_member/:user_id", to: "channels#remove_member", as: :remove_member
+          get :messages
+        end
+        collection do
+          post :create_direct
+        end
+        resources :messages, only: [:index, :show, :create, :update, :destroy]
+      end
     end
     
     # Asset Management API - moved here to avoid conflict with Propshaft /assets route
@@ -360,6 +373,9 @@ Rails.application.routes.draw do
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   get "up" => "rails/health#show", as: :rails_health_check
+
+  # ActionCable WebSocket endpoint
+  mount ActionCable.server => "/cable"
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

@@ -2,11 +2,15 @@ class ApplicationController < ActionController::Base
   include Authorization
   include JwtAuthenticatable
 
-  protect_from_forgery with: :null_session, if: -> { request.format.json? }
-
-  # Skip CSRF protection for specific controllers
+  # Skip CSRF protection entirely for API endpoints and JSON requests
   skip_before_action :verify_authenticity_token, if: -> {
-    controller_name.in?([ "leave_requests", "attendance_records" ]) && request.format.json?
+    request.path.start_with?("/api/") || request.format.json?
+  }
+  
+  # Only enable CSRF protection for non-API, non-JSON requests
+  # In development, CSRF protection is disabled entirely
+  protect_from_forgery with: :exception, unless: -> {
+    Rails.env.development? || request.path.start_with?("/api/") || request.format.json?
   }
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
@@ -27,16 +31,20 @@ class ApplicationController < ActionController::Base
   end
 
   def authenticate_user!
+    # For API/JSON requests, JWT authentication is handled by authenticate_user_from_token!
+    # So we just need to check if current_user is set
+    return if @current_user.present? && request.format.json?
+    
     unless current_user
-      # For JSON requests, always return JSON error (handled by JwtAuthenticatable)
+      # For JSON requests, always return JSON error
       if json_request?
-        render json: { error: "Authentication required" }, status: :unauthorized
+        render json: { success: false, error: "Authentication required" }, status: :unauthorized
       else
         # Handle case where Devise routes might not be available
         if respond_to?(:new_user_session_path)
           redirect_to new_user_session_path
         else
-          render json: { error: "Authentication required" }, status: :unauthorized
+          render json: { success: false, error: "Authentication required" }, status: :unauthorized
         end
       end
     end
