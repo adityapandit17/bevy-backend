@@ -3,6 +3,7 @@ class Channel < ApplicationRecord
   has_many :channel_memberships, dependent: :destroy
   has_many :users, through: :channel_memberships
   has_many :messages, dependent: :destroy
+  has_many :huddles, dependent: :destroy
 
   validates :name, presence: true
   validates :channel_type, presence: true, inclusion: { in: %w[channel direct group] }

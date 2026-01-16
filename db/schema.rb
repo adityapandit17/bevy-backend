@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_07_073139) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_07_075446) do
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
     t.date "assigned_date"
@@ -259,6 +259,33 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_07_073139) do
     t.index ["priority"], name: "index_helpdesk_tickets_on_priority"
     t.index ["requester_id"], name: "index_helpdesk_tickets_on_requester_id"
     t.index ["status"], name: "index_helpdesk_tickets_on_status"
+  end
+
+  create_table "huddle_participants", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "huddle_id", null: false
+    t.datetime "joined_at"
+    t.datetime "left_at"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["huddle_id", "user_id"], name: "index_huddle_participants_on_huddle_id_and_user_id", unique: true
+    t.index ["huddle_id"], name: "index_huddle_participants_on_huddle_id"
+    t.index ["user_id"], name: "index_huddle_participants_on_user_id"
+  end
+
+  create_table "huddles", force: :cascade do |t|
+    t.integer "channel_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "ended_at"
+    t.datetime "started_at", null: false
+    t.integer "started_by_id", null: false
+    t.string "status", default: "active", null: false
+    t.datetime "updated_at", null: false
+    t.index ["channel_id", "status"], name: "index_huddles_on_channel_id_and_status"
+    t.index ["channel_id"], name: "index_huddles_on_channel_id"
+    t.index ["started_at"], name: "index_huddles_on_started_at"
+    t.index ["started_by_id"], name: "index_huddles_on_started_by_id"
+    t.index ["status"], name: "index_huddles_on_status"
   end
 
   create_table "interviews", force: :cascade do |t|
@@ -708,6 +735,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_07_073139) do
   add_foreign_key "employee_documents", "employees"
   add_foreign_key "employee_trainings", "employees"
   add_foreign_key "employees", "departments"
+  add_foreign_key "huddle_participants", "huddles"
+  add_foreign_key "huddle_participants", "users"
+  add_foreign_key "huddles", "channels"
+  add_foreign_key "huddles", "users", column: "started_by_id"
   add_foreign_key "interviews", "candidates"
   add_foreign_key "job_openings", "departments"
   add_foreign_key "leave_requests", "employees"

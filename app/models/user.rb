@@ -14,6 +14,9 @@
   has_many :channels, through: :channel_memberships
   has_many :created_channels, class_name: "Channel", foreign_key: "created_by_id", dependent: :destroy
   has_many :messages, dependent: :destroy
+  has_many :started_huddles, class_name: "Huddle", foreign_key: "started_by_id", dependent: :destroy
+  has_many :huddle_participants, dependent: :destroy
+  has_many :huddles, through: :huddle_participants
 
   # Validations
   validates :first_name, presence: true

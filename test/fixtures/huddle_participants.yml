@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  huddle: one
+  user: one
+  joined_at: 2026-01-07 13:24:46
+  left_at: 2026-01-07 13:24:46
+
+two:
+  huddle: two
+  user: two
+  joined_at: 2026-01-07 13:24:46
+  left_at: 2026-01-07 13:24:46

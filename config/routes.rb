@@ -32,6 +32,12 @@ Rails.application.routes.draw do
           post :create_direct
         end
         resources :messages, only: [:index, :show, :create, :update, :destroy]
+        resources :huddles, only: [:index, :show, :create, :destroy] do
+          member do
+            post :join
+            post :leave
+          end
+        end
       end
     end
     
