@@ -129,16 +129,31 @@ class CallChannel < ApplicationCable::Channel
   def handle_ice_candidate(data)
     call_id = data["callId"]
     candidate = data["candidate"]
+    from_user_id = data["from"]&.dig("id") || current_user.id
+    to_user_id = data["to"]&.dig("id")
     
-    # Broadcast ICE candidate to the other participant
-    # In a real implementation, you'd track call participants
-    ActionCable.server.broadcast(
-      "call_#{call_id}",
-      {
-        type: "ice-candidate",
-        callId: call_id,
-        candidate: candidate
-      }
-    )
+    Rails.logger.info "ICE candidate received: call_id=#{call_id}, from_user_id=#{from_user_id}, to_user_id=#{to_user_id}, current_user_id=#{current_user.id}"
+    
+    # Verify the ICE candidate is from the current user
+    unless from_user_id == current_user.id
+      Rails.logger.warn "ICE candidate rejected: from_user_id (#{from_user_id}) != current_user.id (#{current_user.id})"
+      return
+    end
+    
+    # Broadcast ICE candidate to the other participant (to_user_id)
+    if to_user_id
+      Rails.logger.info "Broadcasting ICE candidate to user_#{to_user_id}_calls"
+      ActionCable.server.broadcast(
+        "user_#{to_user_id}_calls",
+        {
+          type: "ice-candidate",
+          callId: call_id,
+          candidate: candidate
+        }
+      )
+      Rails.logger.info "ICE candidate broadcasted successfully"
+    else
+      Rails.logger.warn "No to_user_id provided for ICE candidate"
+    end
   end
 end
