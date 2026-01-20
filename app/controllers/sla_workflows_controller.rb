@@ -1,4 +1,4 @@
-class SLAWorkflowsController < ApplicationController
+class SlaWorkflowsController < ApplicationController
   before_action :set_workflow, only: [ :show, :update, :destroy ]
 
   def index
