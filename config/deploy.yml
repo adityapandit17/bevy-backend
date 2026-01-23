@@ -93,7 +93,7 @@ builder:
 # Use a different ssh user than root
 ssh:
   user: ubuntu
-  keys: [~/.ssh/hrms-2.pem]
+  keys: [~/.ssh/bevyhr.pem]
 
 # Use accessory services (secrets come from .kamal/secrets).
 # accessories:
