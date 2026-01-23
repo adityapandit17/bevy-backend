@@ -23,7 +23,7 @@ test:
 production:
   primary:
     <<: *default
-    database: bevyhr_production
+    database: <%= ENV["POSTGRES_DATABASE"] %>
     username: <%= ENV["POSTGRES_USERNAME"] %>
     password: <%= ENV["POSTGRES_PASSWORD"] %>
     host: <%= ENV["POSTGRES_HOST"] %>
