@@ -1,7 +1,10 @@
 class UpdateUsersForDevise < ActiveRecord::Migration[8.0]
   def change
-    # Rename password_digest to encrypted_password
-    rename_column :users, :password_digest, :encrypted_password
+    # Rename password_digest to encrypted_password only if password_digest exists
+    # (The users table was created with encrypted_password, so this may not be needed)
+    if column_exists?(:users, :password_digest) && !column_exists?(:users, :encrypted_password)
+      rename_column :users, :password_digest, :encrypted_password
+    end
 
     # Add Devise fields if they don't exist
     add_column :users, :reset_password_token, :string unless column_exists?(:users, :reset_password_token)
