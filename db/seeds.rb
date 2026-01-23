@@ -530,7 +530,8 @@ end
 # Create candidates
 candidates = [
   {
-    name: "Sarah Wilson",
+    first_name: "Sarah",
+    last_name: "Wilson",
     email: "sarah.wilson@email.com",
     phone: "+91 65432 10987",
     position: "Senior Frontend Developer",
@@ -550,7 +551,8 @@ candidates = [
     availability: "2 weeks notice"
   },
   {
-    name: "David Brown",
+    first_name: "David",
+    last_name: "Brown",
     email: "david.brown@email.com",
     phone: "+91 54321 09876",
     position: "Product Manager",
@@ -570,7 +572,8 @@ candidates = [
     availability: "1 month notice"
   },
   {
-    name: "Lisa Chen",
+    first_name: "Lisa",
+    last_name: "Chen",
     email: "lisa.chen@email.com",
     phone: "+91 43210 98765",
     position: "Product Designer",
@@ -590,7 +593,8 @@ candidates = [
     availability: "Immediate"
   },
   {
-    name: "Michael Rodriguez",
+    first_name: "Michael",
+    last_name: "Rodriguez",
     email: "michael.rodriguez@email.com",
     phone: "+91 32109 87654",
     position: "Marketing Specialist",
@@ -610,7 +614,8 @@ candidates = [
     availability: "3 weeks notice"
   },
   {
-    name: "Jennifer Kim",
+    first_name: "Jennifer",
+    last_name: "Kim",
     email: "jennifer.kim@email.com",
     phone: "+91 21098 76543",
     position: "HR Business Partner",
@@ -630,7 +635,8 @@ candidates = [
     availability: "1 month notice"
   },
   {
-    name: "Robert Johnson",
+    first_name: "Robert",
+    last_name: "Johnson",
     email: "robert.johnson@email.com",
     phone: "+91 10987 65432",
     position: "Financial Analyst",
@@ -650,7 +656,8 @@ candidates = [
     availability: "2 weeks notice"
   },
   {
-    name: "Amanda Davis",
+    first_name: "Amanda",
+    last_name: "Davis",
     email: "amanda.davis@email.com",
     phone: "+91 09876 54321",
     position: "Sales Development Representative",
@@ -670,7 +677,8 @@ candidates = [
     availability: "Immediate"
   },
   {
-    name: "Kevin Park",
+    first_name: "Kevin",
+    last_name: "Park",
     email: "kevin.park@email.com",
     phone: "+91 98765 43210",
     position: "DevOps Engineer",
@@ -690,7 +698,8 @@ candidates = [
     availability: "1 month notice"
   },
   {
-    name: "Maria Garcia",
+    first_name: "Maria",
+    last_name: "Garcia",
     email: "maria.garcia@email.com",
     phone: "+91 87654 32109",
     position: "Operations Coordinator",
