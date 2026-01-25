@@ -103,13 +103,8 @@ module Api
       # Calculate average asset age safely (SQLite compatible)
       assets_with_dates = Asset.where.not(purchase_date: nil)
       if assets_with_dates.exists?
-        # Use SQLite-compatible date calculation: (julianday('now') - julianday(purchase_date)) / 365.25
-        # For PostgreSQL, this would be: EXTRACT(YEAR FROM AGE(CURRENT_DATE, purchase_date))
-        if ActiveRecord::Base.connection.adapter_name == 'SQLite'
-          average_age = assets_with_dates.average("(julianday('now') - julianday(purchase_date)) / 365.25")
-        else
-          average_age = assets_with_dates.average("EXTRACT(YEAR FROM AGE(CURRENT_DATE, purchase_date))")
-        end
+        # PostgreSQL: Calculate average age in years
+        average_age = assets_with_dates.average("EXTRACT(YEAR FROM AGE(CURRENT_DATE, purchase_date))")
         average_age = average_age ? average_age.round(1) : 0.0
       else
         average_age = 0.0

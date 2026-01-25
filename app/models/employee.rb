@@ -52,15 +52,15 @@ class Employee < ApplicationRecord
   scope :by_designation, ->(designation) { where(designation: designation) }
   scope :recent_hires, -> { where("date_of_joining >= ?", 3.months.ago) }
   scope :long_term, -> { where("date_of_joining <= ?", 2.years.ago) }
-  scope :birthday_today, -> { where("strftime('%m-%d', date_of_birth) = ?", Date.current.strftime("%m-%d")) }
+  scope :birthday_today, -> { where("TO_CHAR(date_of_birth, 'MM-DD') = ?", Date.current.strftime("%m-%d")) }
   scope :birthday_this_week, -> {
     start_of_week = Date.current.beginning_of_week
     end_of_week = Date.current.end_of_week
-    where("strftime('%m-%d', date_of_birth) BETWEEN ? AND ?",
+    where("TO_CHAR(date_of_birth, 'MM-DD') BETWEEN ? AND ?",
           start_of_week.strftime("%m-%d"), end_of_week.strftime("%m-%d"))
   }
   scope :birthday_this_month, -> {
-    where("strftime('%m', date_of_birth) = ?", Date.current.strftime("%m"))
+    where("TO_CHAR(date_of_birth, 'MM') = ?", Date.current.strftime("%m"))
   }
 
   # Helper methods

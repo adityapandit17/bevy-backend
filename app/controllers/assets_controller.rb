@@ -120,11 +120,8 @@ class AssetsController < ApplicationController
         average_asset_age: begin
           assets_with_dates = Asset.where.not(purchase_date: nil)
           if assets_with_dates.exists?
-            if ActiveRecord::Base.connection.adapter_name == 'SQLite'
-              avg = assets_with_dates.average("(julianday('now') - julianday(purchase_date)) / 365.25")
-            else
-              avg = assets_with_dates.average("EXTRACT(YEAR FROM AGE(CURRENT_DATE, purchase_date))")
-            end
+            # PostgreSQL: Calculate average age in years
+            avg = assets_with_dates.average("EXTRACT(YEAR FROM AGE(CURRENT_DATE, purchase_date))")
             avg ? avg.round(1) : 0.0
           else
             0.0

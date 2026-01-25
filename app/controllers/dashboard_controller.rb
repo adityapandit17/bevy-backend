@@ -170,7 +170,7 @@ class DashboardController < ApplicationController
     (1..7).each do |day_offset|
       date = Date.current + day_offset.days
       birthdays_on_date = Employee.active.where(
-        "strftime('%m-%d', date_of_birth) = ?",
+        "TO_CHAR(date_of_birth, 'MM-DD') = ?",
         date.strftime("%m-%d")
       ).includes(:department)
 
