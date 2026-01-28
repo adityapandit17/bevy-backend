@@ -21,7 +21,7 @@ test:
 
 # Store production database in PostgreSQL
 production:
-  primary:
+  primary: &production_primary
     <<: *default
     database: <%= ENV["POSTGRES_DATABASE"] %>
     username: <%= ENV["POSTGRES_USERNAME"] %>
@@ -29,11 +29,11 @@ production:
     host: <%= ENV["POSTGRES_HOST"] %>
 
   cache:
-    <<: *default
+    <<: *production_primary
     database: bevyhr_production_cache
   queue:
-    <<: *default
+    <<: *production_primary
     database: bevyhr_production_queue
   cable:
-    <<: *default
+    <<: *production_primary
     database: bevyhr_production_cable
