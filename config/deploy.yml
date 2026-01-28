@@ -9,7 +9,7 @@ image: bevyhr/bevyhr_backend
 # Deploy to these servers.
 servers:
   web:
-    - 3.110.102.217
+    - 15.206.125.58
   # job:
   #   hosts:
   #     - 192.168.0.1
@@ -55,10 +55,10 @@ env:
 
     # Match this to any external database server to configure Active Record correctly
     # Use hrms_backend-db for a db accessory server on same machine via local kamal docker network.
-    POSTGRES_USERNAME: postgres
-    POSTGRES_PASSWORD: kc58a2IWDwG#
-    POSTGRES_HOST: database-1.c1044484apae.ap-south-1.rds.amazonaws.com
-    POSTGRES_DATABASE: bevyhr_production
+    POSTGRES_USERNAME: <%= ENV["POSTGRES_USERNAME"] %>
+    POSTGRES_PASSWORD: <%= ENV["POSTGRES_PASSWORD"] %>
+    POSTGRES_HOST: <%= ENV["POSTGRES_HOST"] %>
+    POSTGRES_DATABASE: <%= ENV["POSTGRES_DATABASE"] %>
 
     # Log everything from Rails
     # RAILS_LOG_LEVEL: debug

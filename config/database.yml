@@ -2,10 +2,14 @@ default: &default
   adapter: postgresql
   encoding: unicode
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  host: <%= ENV.fetch("DB_HOST", "localhost") %>
-  port: <%= ENV.fetch("DB_PORT", 5432) %>
-  username: rails
-  password: rails
+  # host: <%= ENV.fetch("DB_HOST", "localhost") %>
+  # port: <%= ENV.fetch("DB_PORT", 5432) %>
+  # username: rails
+  # password: rails
+  database: <%= ENV["POSTGRES_DATABASE"] %>
+  username: <%= ENV["POSTGRES_USERNAME"] %>
+  password: <%= ENV["POSTGRES_PASSWORD"] %>
+  host: <%= ENV["POSTGRES_HOST"] %>
 
 development:
   primary:
@@ -27,13 +31,12 @@ production:
     username: <%= ENV["POSTGRES_USERNAME"] %>
     password: <%= ENV["POSTGRES_PASSWORD"] %>
     host: <%= ENV["POSTGRES_HOST"] %>
-
-  cache:
-    <<: *production_primary
+  cache: &production_cache
+    <<: *default
     database: bevyhr_production_cache
-  queue:
-    <<: *production_primary
+  queue: &production_queue
+    <<: *default
     database: bevyhr_production_queue
-  cable:
-    <<: *production_primary
+  cable: &production_cable
+    <<: *default
     database: bevyhr_production_cable
