@@ -9,7 +9,7 @@ image: bevyhr/bevyhr_backend
 # Deploy to these servers.
 servers:
   web:
-    - 13.233.176.36
+    - 13.205.97.162
   # job:
   #   hosts:
   #     - 192.168.0.1
@@ -19,9 +19,9 @@ servers:
 # Remove this section when using multiple web servers and ensure you terminate SSL at your load balancer.
 #
 # Note: If using Cloudflare, set encryption mode in SSL/TLS setting to "Full" to enable CF-to-app encryption.
-proxy:
-  ssl: true
-  host: api.bevyhr.com
+# proxy:
+#   ssl: true
+#   host: api.bevyhr.com
   # Proxy connects to your container on port 80 by default.
   # app_port: 3000
 
