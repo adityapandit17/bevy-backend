@@ -8,7 +8,7 @@ class TimesheetsControllerTest < ActionDispatch::IntegrationTest
       employee_id: @employee.id,
       date: Date.current,
       hours: 8.0,
-      project: "HRMS Development",
+      project: "BevyHR Development",
       task: "Implementing test suites for controllers",
       status: "pending"
     }

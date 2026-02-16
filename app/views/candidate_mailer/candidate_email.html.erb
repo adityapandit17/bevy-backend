@@ -27,10 +27,12 @@
         border-bottom: 2px solid #10b981;
       }
       .logo {
-        font-size: 24px;
-        font-weight: bold;
-        color: #10b981;
         margin-bottom: 10px;
+      }
+      .logo img {
+        height: 48px;
+        width: auto;
+        object-fit: contain;
       }
       .content {
         margin-bottom: 30px;
@@ -74,7 +76,9 @@
   <body>
     <div class="container">
       <div class="header">
-        <div class="logo">🏢 HRMS Pro</div>
+        <div class="logo">
+          <img src="<%= Rails.application.config.action_mailer.asset_host || request.base_url %>/bevyhr-logo.png" alt="BevyHR Logo" style="height: 48px; width: auto;" />
+        </div>
         <h1 style="font-size: 24px; color: #1f2937; margin: 10px 0;"><%= @subject %></h1>
       </div>
 
@@ -106,11 +110,11 @@
 
         <p>Best regards,<br>
         <%= @sender_name %><br>
-        HRMS Pro Recruitment Team</p>
+        BevyHR Recruitment Team</p>
       </div>
 
       <div class="footer">
-        <p>This email was sent by HRMS Pro - Human Resource Management System</p>
+        <p>This email was sent by BevyHR - Human Resource Management System</p>
         <p>If you have any questions, please contact our HR department.</p>
       </div>
     </div>

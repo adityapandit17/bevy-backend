@@ -1,5 +1,5 @@
 class WelcomeMailer < ApplicationMailer
-  default from: "noreply@hrms.com"
+  default from: "noreply@bevyhr.com"
 
   def welcome_email(employee, invitation_token)
     @employee = employee
@@ -11,7 +11,7 @@ class WelcomeMailer < ApplicationMailer
 
     mail(
       to: @employee.email,
-      subject: "Welcome to HRMS - Complete Your Account Setup"
+      subject: "Welcome to BevyHR - Complete Your Account Setup"
     )
   end
 
@@ -25,7 +25,7 @@ class WelcomeMailer < ApplicationMailer
 
     mail(
       to: @user.email,
-      subject: "You've been invited to join HRMS"
+      subject: "You've been invited to join BevyHR"
     )
   end
 end

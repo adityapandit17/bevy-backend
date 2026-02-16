@@ -1,6 +1,6 @@
-# HRMS Backend Test Suite
+# BevyHR Backend Test Suite
 
-This directory contains comprehensive tests for the HRMS (Human Resource Management System) backend application. The test suite covers all major components including models, controllers, and integration workflows.
+This directory contains comprehensive tests for the BevyHR (Human Resource Management System) backend application. The test suite covers all major components including models, controllers, and integration workflows.
 
 ## Test Structure
 
@@ -102,7 +102,7 @@ test/
 
 ### Run All Tests
 ```bash
-cd hrms-backend
+cd backend
 bin/rails test
 ```
 
