@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_07_075446) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_20_094027) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -574,6 +574,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_07_075446) do
     t.index ["status"], name: "index_policy_documents_on_status"
   end
 
+  create_table "recognitions", force: :cascade do |t|
+    t.string "category"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.bigint "given_by_id", null: false
+    t.bigint "received_by_id", null: false
+    t.string "recognition_type", null: false
+    t.string "status", default: "active"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_recognitions_on_created_at"
+    t.index ["given_by_id"], name: "index_recognitions_on_given_by_id"
+    t.index ["received_by_id"], name: "index_recognitions_on_received_by_id"
+    t.index ["recognition_type"], name: "index_recognitions_on_recognition_type"
+    t.index ["status"], name: "index_recognitions_on_status"
+  end
+
   create_table "role_permissions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "permission_id", null: false
@@ -754,6 +771,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_07_075446) do
   add_foreign_key "pending_tasks", "employees", column: "assigned_to_id"
   add_foreign_key "performance_goals", "employees"
   add_foreign_key "performance_reviews", "employees"
+  add_foreign_key "recognitions", "employees", column: "received_by_id"
+  add_foreign_key "recognitions", "users", column: "given_by_id"
   add_foreign_key "role_permissions", "permissions"
   add_foreign_key "role_permissions", "roles"
   add_foreign_key "salary_structures", "departments"
