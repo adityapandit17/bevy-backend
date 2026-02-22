@@ -33,6 +33,7 @@ class Employee < ApplicationRecord
   validates :date_of_joining, presence: true
   # validates :date_of_birth, presence: true
   validates :status, presence: true, inclusion: { in: %w[active inactive terminated probation onboarding] }
+  validates :badge_level, inclusion: { in: %w[rockstar ninja champion expert pro rookie], allow_nil: true }
 
   enum :status, {
     active: "active",
@@ -278,5 +279,34 @@ class Employee < ApplicationRecord
     return "Not set" unless date_of_birth
 
     date_of_birth.strftime("%B %d")
+  end
+
+  # Badge level methods
+  def self.badge_levels
+    %w[rockstar ninja champion expert pro rookie]
+  end
+
+  def badge_level_label
+    return nil unless badge_level
+    badge_level.titleize
+  end
+
+  def badge_level_color
+    case badge_level
+    when "rockstar"
+      "purple"
+    when "ninja"
+      "indigo"
+    when "champion"
+      "gold"
+    when "expert"
+      "blue"
+    when "pro"
+      "green"
+    when "rookie"
+      "gray"
+    else
+      "gray"
+    end
   end
 end

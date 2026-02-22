@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_20_094027) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -209,6 +209,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_094027) do
   end
 
   create_table "employees", force: :cascade do |t|
+    t.string "badge_level"
     t.datetime "created_at", null: false
     t.date "date_of_birth"
     t.date "date_of_joining"
@@ -221,6 +222,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_094027) do
     t.string "phone"
     t.string "status"
     t.datetime "updated_at", null: false
+    t.index ["badge_level"], name: "index_employees_on_badge_level"
     t.index ["department_id"], name: "index_employees_on_department_id"
     t.index ["email"], name: "index_employees_on_email", unique: true
     t.index ["manager_id"], name: "index_employees_on_manager_id"

@@ -1,12 +1,12 @@
 class EmployeeSerializer < Panko::Serializer
   # Basic attributes
   attributes :id, :first_name, :last_name, :email, :phone, :designation,
-             :date_of_joining, :date_of_birth, :status, :created_at, :updated_at
+             :date_of_joining, :date_of_birth, :status, :badge_level, :created_at, :updated_at
 
   # Computed attributes
   attributes :name, :full_name, :initials, :avatar_url, :department_name,
              :status_label, :status_color, :tenure_summary, :formatted_hire_date,
-             :manager_name, :direct_reports_count
+             :manager_name, :direct_reports_count, :badge_level_label, :badge_level_color
 
   # Associations
   has_one :department, serializer: DepartmentSerializer
@@ -55,5 +55,13 @@ class EmployeeSerializer < Panko::Serializer
 
   def direct_reports_count
     object.direct_reports.count
+  end
+
+  def badge_level_label
+    object.badge_level_label
+  end
+
+  def badge_level_color
+    object.badge_level_color
   end
 end
