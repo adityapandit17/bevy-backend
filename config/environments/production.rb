@@ -89,4 +89,26 @@ Rails.application.configure do
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
   config.active_storage.variant_processor = :disabled
   
+  # Action Cable configuration for production
+  config.action_cable.disable_request_forgery_protection = true
+  
+  # Allow Action Cable connections from frontend domain
+  # Default to bevyhr.com, can be overridden via ACTION_CABLE_ALLOWED_ORIGINS env var
+  frontend_domain = ENV.fetch("FRONTEND_DOMAIN", "bevyhr.com")
+  default_origins = [
+    "https://#{frontend_domain}",
+    "https://www.#{frontend_domain}",
+    "http://#{frontend_domain}",
+    "http://www.#{frontend_domain}"
+  ]
+  
+  allowed_origins_env = ENV.fetch("ACTION_CABLE_ALLOWED_ORIGINS", nil)
+  origins_to_use = allowed_origins_env ? allowed_origins_env.split(",").map(&:strip) : default_origins
+  
+  config.action_cable.allowed_request_origins = origins_to_use.map do |origin|
+    # Escape special regex characters and create pattern
+    escaped = origin.gsub(".", "\\.").gsub("*", ".*")
+    Regexp.new("^https?:\\/\\/#{escaped}$")
+  end
+  
 end
