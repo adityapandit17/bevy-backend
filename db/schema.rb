@@ -15,10 +15,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
   enable_extension "pg_catalog.plpgsql"
 
   create_table "asset_allocations", force: :cascade do |t|
-    t.bigint "asset_id", null: false
+    t.integer "asset_id", null: false
     t.date "assigned_date"
     t.datetime "created_at", null: false
-    t.bigint "employee_id", null: false
+    t.integer "employee_id", null: false
     t.text "notes"
     t.date "return_date"
     t.string "status"
@@ -34,7 +34,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.datetime "created_at", null: false
     t.decimal "current_value"
     t.string "department"
-    t.bigint "employee_id"
+    t.integer "employee_id"
     t.date "last_maintenance"
     t.string "location"
     t.string "model"
@@ -53,7 +53,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
   create_table "attendance_records", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.date "date"
-    t.bigint "employee_id", null: false
+    t.integer "employee_id", null: false
     t.string "status"
     t.datetime "updated_at", null: false
     t.decimal "working_hours"
@@ -62,7 +62,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
   end
 
   create_table "attendance_sessions", force: :cascade do |t|
-    t.bigint "attendance_record_id", null: false
+    t.integer "attendance_record_id", null: false
     t.datetime "check_in"
     t.datetime "check_out"
     t.datetime "created_at", null: false
@@ -99,12 +99,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
   end
 
   create_table "channel_memberships", force: :cascade do |t|
-    t.bigint "channel_id", null: false
+    t.integer "channel_id", null: false
     t.datetime "created_at", null: false
     t.datetime "last_read_at"
     t.string "role", default: "member", null: false
     t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
+    t.integer "user_id", null: false
     t.index ["channel_id", "user_id"], name: "index_channel_memberships_on_channel_id_and_user_id", unique: true
     t.index ["channel_id"], name: "index_channel_memberships_on_channel_id"
     t.index ["user_id"], name: "index_channel_memberships_on_user_id"
@@ -113,7 +113,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
   create_table "channels", force: :cascade do |t|
     t.string "channel_type", default: "channel", null: false
     t.datetime "created_at", null: false
-    t.bigint "created_by_id", null: false
+    t.integer "created_by_id", null: false
     t.text "description"
     t.boolean "is_private", default: false, null: false
     t.string "name", null: false
@@ -145,9 +145,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
   create_table "digital_signatures", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "device_info"
-    t.bigint "employee_id", null: false
+    t.integer "employee_id", null: false
     t.string "ip_address"
-    t.bigint "policy_document_id", null: false
+    t.integer "policy_document_id", null: false
     t.string "signature_type"
     t.date "signed_date"
     t.string "status", default: "pending"
@@ -165,7 +165,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.decimal "cost"
     t.string "coverage"
     t.datetime "created_at", null: false
-    t.bigint "employee_id", null: false
+    t.integer "employee_id", null: false
     t.date "end_date"
     t.string "name"
     t.string "provider"
@@ -178,7 +178,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
   create_table "employee_documents", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "document_type"
-    t.bigint "employee_id", null: false
+    t.integer "employee_id", null: false
     t.date "expiry_date"
     t.string "file_path"
     t.string "file_size"
@@ -194,7 +194,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.string "certificate"
     t.decimal "cost"
     t.datetime "created_at", null: false
-    t.bigint "employee_id", null: false
+    t.integer "employee_id", null: false
     t.date "end_date"
     t.integer "hours", default: 0
     t.string "name"
@@ -213,19 +213,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.datetime "created_at", null: false
     t.date "date_of_birth"
     t.date "date_of_joining"
-    t.bigint "department_id", null: false
+    t.integer "department_id", null: false
     t.string "designation"
     t.string "email"
     t.string "first_name"
     t.string "last_name"
-    t.bigint "manager_id"
+    t.integer "manager_id"
     t.string "phone"
     t.string "status"
     t.datetime "updated_at", null: false
     t.index ["badge_level"], name: "index_employees_on_badge_level"
     t.index ["department_id"], name: "index_employees_on_department_id"
     t.index ["email"], name: "index_employees_on_email", unique: true
-    t.index ["manager_id"], name: "index_employees_on_manager_id"
   end
 
   create_table "events", force: :cascade do |t|
@@ -269,22 +268,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
 
   create_table "huddle_participants", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.bigint "huddle_id", null: false
+    t.integer "huddle_id", null: false
     t.datetime "joined_at"
     t.datetime "left_at"
     t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
+    t.integer "user_id", null: false
     t.index ["huddle_id", "user_id"], name: "index_huddle_participants_on_huddle_id_and_user_id", unique: true
     t.index ["huddle_id"], name: "index_huddle_participants_on_huddle_id"
     t.index ["user_id"], name: "index_huddle_participants_on_user_id"
   end
 
   create_table "huddles", force: :cascade do |t|
-    t.bigint "channel_id", null: false
+    t.integer "channel_id", null: false
     t.datetime "created_at", null: false
     t.datetime "ended_at"
     t.datetime "started_at", null: false
-    t.bigint "started_by_id", null: false
+    t.integer "started_by_id", null: false
     t.string "status", default: "active", null: false
     t.datetime "updated_at", null: false
     t.index ["channel_id", "status"], name: "index_huddles_on_channel_id_and_status"
@@ -295,7 +294,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
   end
 
   create_table "interviews", force: :cascade do |t|
-    t.bigint "candidate_id", null: false
+    t.integer "candidate_id", null: false
     t.datetime "created_at", null: false
     t.text "feedback"
     t.string "interview_type"
@@ -312,7 +311,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
   create_table "job_openings", force: :cascade do |t|
     t.integer "applications"
     t.datetime "created_at", null: false
-    t.bigint "department_id", null: false
+    t.integer "department_id", null: false
     t.text "description"
     t.string "experience"
     t.string "job_type"
@@ -327,6 +326,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.datetime "updated_at", null: false
     t.integer "vacancies"
     t.index ["department_id"], name: "index_job_openings_on_department_id"
+  end
+
+  create_table "jwt_denylists", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "exp"
+    t.string "jti"
+    t.datetime "updated_at", null: false
+    t.index ["jti"], name: "index_jwt_denylists_on_jti", unique: true
   end
 
   create_table "knowledge_articles", force: :cascade do |t|
@@ -364,19 +371,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.datetime "created_at", null: false
     t.integer "days"
     t.string "emergency_contact"
-    t.bigint "employee_id", null: false
+    t.integer "employee_id", null: false
     t.date "end_date"
     t.boolean "half_day"
     t.string "half_day_period"
     t.text "handover_notes"
     t.datetime "hr_approved_at"
-    t.bigint "hr_approved_by_id"
+    t.integer "hr_approved_by_id"
     t.string "leave_type"
     t.datetime "manager_approved_at"
-    t.bigint "manager_approved_by_id"
+    t.integer "manager_approved_by_id"
     t.text "reason"
     t.datetime "rejected_at"
-    t.bigint "rejected_by_id"
+    t.integer "rejected_by_id"
     t.text "rejected_reason"
     t.date "start_date"
     t.string "status"
@@ -388,7 +395,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
   end
 
   create_table "maintenance_records", force: :cascade do |t|
-    t.bigint "asset_id", null: false
+    t.integer "asset_id", null: false
     t.decimal "cost"
     t.datetime "created_at", null: false
     t.text "description"
@@ -401,12 +408,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
   end
 
   create_table "messages", force: :cascade do |t|
-    t.bigint "channel_id", null: false
+    t.integer "channel_id", null: false
     t.text "content", null: false
     t.datetime "created_at", null: false
     t.datetime "edited_at"
     t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
+    t.integer "user_id", null: false
     t.index ["channel_id", "created_at"], name: "index_messages_on_channel_id_and_created_at"
     t.index ["channel_id"], name: "index_messages_on_channel_id"
     t.index ["user_id"], name: "index_messages_on_user_id"
@@ -420,7 +427,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.boolean "read", default: false, null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
+    t.integer "user_id", null: false
     t.index ["created_at"], name: "index_notifications_on_created_at"
     t.index ["notification_type"], name: "index_notifications_on_notification_type"
     t.index ["user_id", "read"], name: "index_notifications_on_user_id_and_read"
@@ -430,7 +437,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
   create_table "offboarding_employees", force: :cascade do |t|
     t.string "assigned_to"
     t.datetime "created_at", null: false
-    t.bigint "employee_id", null: false
+    t.integer "employee_id", null: false
     t.date "last_working_day"
     t.text "notes"
     t.integer "progress"
@@ -449,7 +456,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.text "documents"
     t.date "due_date"
     t.boolean "is_completed"
-    t.bigint "offboarding_employee_id", null: false
+    t.integer "offboarding_employee_id", null: false
     t.string "priority"
     t.string "title"
     t.datetime "updated_at", null: false
@@ -458,7 +465,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
 
   create_table "onboarding_employees", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.bigint "employee_id", null: false
+    t.integer "employee_id", null: false
     t.text "notes"
     t.integer "progress"
     t.date "start_date"
@@ -475,7 +482,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.text "documents"
     t.date "due_date"
     t.boolean "is_completed"
-    t.bigint "onboarding_employee_id", null: false
+    t.integer "onboarding_employee_id", null: false
     t.string "priority"
     t.string "title"
     t.datetime "updated_at", null: false
@@ -486,7 +493,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.datetime "created_at", null: false
     t.json "deductions_breakdown", default: {}
     t.json "earnings_breakdown", default: {}
-    t.bigint "employee_id", null: false
+    t.integer "employee_id", null: false
     t.decimal "gross_salary"
     t.decimal "leave_deduction", precision: 12, scale: 2
     t.string "month"
@@ -502,12 +509,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
   end
 
   create_table "pending_tasks", force: :cascade do |t|
-    t.bigint "assigned_to_id"
+    t.integer "assigned_to_id"
     t.datetime "created_at", null: false
     t.date "due_date"
     t.string "priority", default: "medium"
     t.string "status", default: "pending"
-    t.bigint "taskable_id", null: false
+    t.integer "taskable_id", null: false
     t.string "taskable_type", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
@@ -523,7 +530,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.datetime "created_at", null: false
     t.text "description"
     t.date "due_date"
-    t.bigint "employee_id", null: false
+    t.integer "employee_id", null: false
     t.integer "progress"
     t.string "status"
     t.string "target"
@@ -537,7 +544,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.text "areas_for_improvement"
     t.text "comments"
     t.datetime "created_at", null: false
-    t.bigint "employee_id", null: false
+    t.integer "employee_id", null: false
     t.text "goals"
     t.string "period"
     t.decimal "rating"
@@ -595,8 +602,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
 
   create_table "role_permissions", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.bigint "permission_id", null: false
-    t.bigint "role_id", null: false
+    t.integer "permission_id", null: false
+    t.integer "role_id", null: false
     t.datetime "updated_at", null: false
     t.index ["permission_id"], name: "index_role_permissions_on_permission_id"
     t.index ["role_id"], name: "index_role_permissions_on_role_id"
@@ -617,10 +624,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.decimal "bonus", precision: 10, scale: 2, default: "0.0"
     t.datetime "created_at", null: false
     t.decimal "deductions"
-    t.bigint "department_id"
+    t.integer "department_id"
     t.date "effective_from"
     t.date "effective_upto"
-    t.bigint "employee_id", null: false
+    t.integer "employee_id", null: false
     t.decimal "esi", precision: 10, scale: 2, default: "0.0"
     t.decimal "hra"
     t.decimal "income_tax", precision: 10, scale: 2, default: "0.0"
@@ -665,7 +672,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.string "approved_by"
     t.datetime "created_at", null: false
     t.date "date"
-    t.bigint "employee_id", null: false
+    t.integer "employee_id", null: false
     t.decimal "hours"
     t.text "notes"
     t.string "project"
@@ -688,15 +695,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.string "theme", default: "light"
     t.string "timezone", default: "UTC"
     t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
+    t.integer "user_id", null: false
     t.index ["user_id"], name: "index_user_preferences_on_user_id", unique: true
   end
 
   create_table "user_roles", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.bigint "role_id", null: false
+    t.integer "role_id", null: false
     t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
+    t.integer "user_id", null: false
     t.index ["role_id"], name: "index_user_roles_on_role_id"
     t.index ["user_id"], name: "index_user_roles_on_user_id"
   end
@@ -705,9 +712,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.datetime "created_at", null: false
     t.datetime "current_sign_in_at"
     t.string "current_sign_in_ip"
-    t.string "email", default: "", null: false
-    t.bigint "employee_id"
-    t.string "encrypted_password", default: "", null: false
+    t.string "email", null: false
+    t.integer "employee_id"
+    t.string "encrypted_password", null: false
     t.string "first_name", null: false
     t.datetime "invitation_accepted_at"
     t.datetime "invitation_created_at"
@@ -715,7 +722,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
     t.datetime "invitation_sent_at"
     t.string "invitation_token"
     t.integer "invitations_count", default: 0
-    t.bigint "invited_by_id"
+    t.integer "invited_by_id"
     t.string "invited_by_type"
     t.datetime "last_login_at"
     t.string "last_name", null: false
@@ -750,7 +757,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_115658) do
   add_foreign_key "employee_documents", "employees"
   add_foreign_key "employee_trainings", "employees"
   add_foreign_key "employees", "departments"
-  add_foreign_key "employees", "employees", column: "manager_id"
   add_foreign_key "huddle_participants", "huddles"
   add_foreign_key "huddle_participants", "users"
   add_foreign_key "huddles", "channels"

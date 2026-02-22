@@ -115,15 +115,38 @@ class CallChannel < ApplicationCable::Channel
 
   def handle_call_end(data)
     call_id = data["callId"]
+    from_user_id = data["from"]&.dig("id") || current_user.id
+    to_user_id = data["to"]&.dig("id")
     
-    # Broadcast call end to all participants
-    ActionCable.server.broadcast(
-      "call_#{call_id}",
-      {
-        type: "call-end",
-        callId: call_id
-      }
-    )
+    Rails.logger.info "Call end received: call_id=#{call_id}, from_user_id=#{from_user_id}, to_user_id=#{to_user_id}, current_user_id=#{current_user.id}"
+    
+    # Broadcast call end to the other participant
+    if to_user_id && to_user_id != current_user.id
+      Rails.logger.info "Broadcasting call end to user_#{to_user_id}_calls"
+      ActionCable.server.broadcast(
+        "user_#{to_user_id}_calls",
+        {
+          type: "call-end",
+          callId: call_id,
+          from: data["from"],
+          to: data["to"]
+        }
+      )
+      Rails.logger.info "Call end broadcasted successfully"
+    end
+    
+    # Also broadcast to the sender's channel (in case they need it)
+    if from_user_id == current_user.id && to_user_id
+      ActionCable.server.broadcast(
+        "user_#{from_user_id}_calls",
+        {
+          type: "call-end",
+          callId: call_id,
+          from: data["from"],
+          to: data["to"]
+        }
+      )
+    end
   end
 
   def handle_ice_candidate(data)
