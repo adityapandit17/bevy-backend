@@ -101,29 +101,49 @@ class CallChannel < ApplicationCable::Channel
 
   def handle_call_reject(data)
     call_id = data["callId"]
-    
-    # Broadcast rejection to all participants
-    # In a real implementation, you'd track call participants
-    ActionCable.server.broadcast(
-      "call_#{call_id}",
-      {
-        type: "call-reject",
-        callId: call_id
-      }
-    )
+    from_user_id = data["from"]&.dig("id")
+    to_user_id = data["to"]&.dig("id")
+
+    # Notify the caller (the other participant) so their UI shows "Call Declined"
+    other_user_id = if from_user_id == current_user.id
+      to_user_id
+    elsif to_user_id == current_user.id
+      from_user_id
+    end
+
+    if other_user_id
+      ActionCable.server.broadcast(
+        "user_#{other_user_id}_calls",
+        {
+          type: "call-reject",
+          callId: call_id
+        }
+      )
+    end
   end
 
   def handle_call_end(data)
     call_id = data["callId"]
-    
-    # Broadcast call end to all participants
-    ActionCable.server.broadcast(
-      "call_#{call_id}",
-      {
-        type: "call-end",
-        callId: call_id
-      }
-    )
+    from_user_id = data["from"]&.dig("id")
+    to_user_id = data["to"]&.dig("id")
+
+    # Broadcast call end to the OTHER participant (they subscribe to user_#{id}_calls)
+    # The sender is current_user; notify the other side so their UI ends the call too
+    other_user_id = if from_user_id == current_user.id
+      to_user_id
+    elsif to_user_id == current_user.id
+      from_user_id
+    end
+
+    if other_user_id
+      ActionCable.server.broadcast(
+        "user_#{other_user_id}_calls",
+        {
+          type: "call-end",
+          callId: call_id
+        }
+      )
+    end
   end
 
   def handle_ice_candidate(data)
