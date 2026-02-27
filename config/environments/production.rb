@@ -89,6 +89,11 @@ Rails.application.configure do
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
   config.active_storage.variant_processor = :disabled
   
+  # Allow cross-origin requests from frontend (bevyhr.com) to API (api.bevyhr.com).
+  # Without this, Rails rejects requests where Origin header doesn't match request host.
+  # Safe for JWT-authenticated API; we don't rely on cookie-based CSRF for API requests.
+  config.action_controller.forgery_protection_origin_check = false
+
   # Action Cable configuration for production
   config.action_cable.disable_request_forgery_protection = true
   
