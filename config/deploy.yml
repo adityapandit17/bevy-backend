@@ -50,7 +50,7 @@ env:
     SOLID_QUEUE_IN_PUMA: true
     POSTGRES_USER: "bevyhr"
     POSTGRES_DB: "bevyhr_production"
-    DB_HOST: "13.205.97.162"
+    DB_HOST: bevyhr_backend-postgres
 
     # Set number of processes dedicated to Solid Queue (default: 1)
     # JOB_CONCURRENCY: 3
