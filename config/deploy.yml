@@ -49,6 +49,7 @@ env:
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
     SOLID_QUEUE_IN_PUMA: true
 
+
     # Set number of processes dedicated to Solid Queue (default: 1)
     # JOB_CONCURRENCY: 3
 
@@ -61,6 +62,9 @@ env:
     POSTGRES_PASSWORD: <%= ENV["POSTGRES_PASSWORD"] %>
     POSTGRES_HOST: <%= ENV["POSTGRES_HOST"] %>
     POSTGRES_DATABASE: <%= ENV["POSTGRES_DATABASE"] %>
+    POSTGRES_USER: bevyhr
+    POSTGRES_DB: bevyhr_production
+    DB_HOST: bevyhr-postgres
 
     # Log everything from Rails
     # RAILS_LOG_LEVEL: debug
@@ -127,3 +131,16 @@ ssh:
 #     port: 6379
 #     directories:
 #       - data:/data
+
+accessories:
+  postgres:
+    image: postgres:17
+    host: 13.205.97.162
+    env:
+      clear:
+        POSTGRES_USER: bevyhr
+        POSTGRES_DB: bevyhr_production
+      secret:
+        - POSTGRES_PASSWORD
+    directories:
+      - data:/var/lib/postgresql/data
