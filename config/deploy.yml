@@ -62,9 +62,9 @@ env:
     # POSTGRES_PASSWORD: <%= ENV["POSTGRES_PASSWORD"] %>
     # POSTGRES_HOST: <%= ENV["POSTGRES_HOST"] %>
     # POSTGRES_DATABASE: <%= ENV["POSTGRES_DATABASE"] %>
-    POSTGRES_USER: bevyhr
-    POSTGRES_DB: bevyhr_production
-    DB_HOST: 13.205.97.162
+    POSTGRES_USER: "bevyhr"
+    POSTGRES_DB: "bevyhr_production"
+    DB_HOST: "13.205.97.162"
 
     # Log everything from Rails
     # RAILS_LOG_LEVEL: debug
