@@ -40,10 +40,10 @@ registry:
 env:
   secret:
     - RAILS_MASTER_KEY
-    - POSTGRES_USERNAME
+    # - POSTGRES_USERNAME
     - POSTGRES_PASSWORD
-    - POSTGRES_HOST
-    - POSTGRES_DATABASE
+    # - POSTGRES_HOST
+    # - POSTGRES_DATABASE
   clear:
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
@@ -58,10 +58,10 @@ env:
 
     # Match this to any external database server to configure Active Record correctly
     # Use hrms_backend-db for a db accessory server on same machine via local kamal docker network.
-    POSTGRES_USERNAME: <%= ENV["POSTGRES_USERNAME"] %>
-    POSTGRES_PASSWORD: <%= ENV["POSTGRES_PASSWORD"] %>
-    POSTGRES_HOST: <%= ENV["POSTGRES_HOST"] %>
-    POSTGRES_DATABASE: <%= ENV["POSTGRES_DATABASE"] %>
+    # POSTGRES_USERNAME: <%= ENV["POSTGRES_USERNAME"] %>
+    # POSTGRES_PASSWORD: <%= ENV["POSTGRES_PASSWORD"] %>
+    # POSTGRES_HOST: <%= ENV["POSTGRES_HOST"] %>
+    # POSTGRES_DATABASE: <%= ENV["POSTGRES_DATABASE"] %>
     POSTGRES_USER: bevyhr
     POSTGRES_DB: bevyhr_production
     DB_HOST: bevyhr-postgres

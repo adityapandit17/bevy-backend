@@ -6,10 +6,10 @@ default: &default
   # port: <%= ENV.fetch("DB_PORT", 5432) %>
   # username: rails
   # password: rails
-  database: <%= ENV["POSTGRES_DATABASE"] %>
-  username: <%= ENV["POSTGRES_USERNAME"] %>
+  database: <%= ENV["POSTGRES_DB"] %>
+  username: <%= ENV["POSTGRES_USER"] %>
   password: <%= ENV["POSTGRES_PASSWORD"] %>
-  host: <%= ENV["POSTGRES_HOST"] %>
+  host: <%= ENV["DB_HOST"] %>
 
 development:
   primary:
