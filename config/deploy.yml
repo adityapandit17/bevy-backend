@@ -142,5 +142,7 @@ accessories:
         POSTGRES_DB: bevyhr_production
       secret:
         - POSTGRES_PASSWORD
+    files:
+      - db/production_setup.sql:/docker-entrypoint-initdb.d/setup.sql
     directories:
       - data:/var/lib/postgresql/data
