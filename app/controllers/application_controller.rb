@@ -2,15 +2,23 @@ class ApplicationController < ActionController::Base
   include Authorization
   include JwtAuthenticatable
 
-  # Skip CSRF protection entirely for API endpoints and JSON requests
+  # Skip CSRF protection for API endpoints and JSON requests (JWT auth, no cookie-based sessions).
+  # Include Content-Type check: requests with application/json are API clients even when format is */*
   skip_before_action :verify_authenticity_token, if: -> {
-    request.path.start_with?("/api/") || request.format.json?
+    request.path.start_with?("/api/") ||
+    request.format.json? ||
+    request.headers["Accept"]&.include?("application/json") ||
+    request.headers["Content-Type"]&.include?("application/json")
   }
-  
+
   # Only enable CSRF protection for non-API, non-JSON requests
   # In development, CSRF protection is disabled entirely
   protect_from_forgery with: :exception, unless: -> {
-    Rails.env.development? || request.path.start_with?("/api/") || request.format.json?
+    Rails.env.development? ||
+    request.path.start_with?("/api/") ||
+    request.format.json? ||
+    request.headers["Accept"]&.include?("application/json") ||
+    request.headers["Content-Type"]&.include?("application/json")
   }
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
