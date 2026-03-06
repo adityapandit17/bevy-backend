@@ -113,9 +113,9 @@ class PayrollCalculator
 
     # Calculate payable days after deductions
     payable = payable - deductions
-    payable = [payable, 0.to_d].max # Ensure payable is not negative
+    payable = [ payable, 0.to_d ].max # Ensure payable is not negative
     unpaid = BigDecimal(total_days) - payable
-    [payable, unpaid]
+    [ payable, unpaid ]
   end
 
   def attendance_by_date(dates)
@@ -174,4 +174,3 @@ class PayrollCalculator
       date.saturday? || date.sunday?
     end
 end
-

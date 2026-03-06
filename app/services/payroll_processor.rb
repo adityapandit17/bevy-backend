@@ -47,17 +47,17 @@ class PayrollProcessor
     result = calculator.call
 
     payroll = find_or_initialize_payroll(employee)
-    
+
     # Check if payroll was manually edited after processing
     # If updated_at > processed_at, it means the payroll was manually edited
     # We need to reload to get the actual database values (not just what's in memory)
     payroll.reload if !payroll.new_record?
-    
-    manually_edited = !payroll.new_record? && 
-                      payroll.processed_at.present? && 
-                      payroll.updated_at.present? && 
+
+    manually_edited = !payroll.new_record? &&
+                      payroll.processed_at.present? &&
+                      payroll.updated_at.present? &&
                       payroll.updated_at > payroll.processed_at
-    
+
     if manually_edited
       # Preserve manually edited values (gross_salary, net_salary, leave_deduction)
       # Only update fields that are typically not manually edited
@@ -115,4 +115,3 @@ class PayrollProcessor
     Payroll.find_or_initialize_by(employee_id: employee.id, month: PayrollMonth.label(@month))
   end
 end
-

@@ -7,7 +7,7 @@ class Channel < ApplicationRecord
 
   validates :name, presence: true
   validates :channel_type, presence: true, inclusion: { in: %w[channel direct group] }
-  validates :is_private, inclusion: { in: [true, false] }
+  validates :is_private, inclusion: { in: [ true, false ] }
 
   scope :public_channels, -> { where(is_private: false, channel_type: "channel") }
   scope :private_channels, -> { where(is_private: true, channel_type: "channel") }

@@ -67,7 +67,7 @@ class CallChannel < ApplicationCable::Channel
         offer: data["offer"]
       }
     )
-    
+
     Rails.logger.info "Call offer broadcasted successfully to recipient"
   end
 
@@ -151,15 +151,15 @@ class CallChannel < ApplicationCable::Channel
     candidate = data["candidate"]
     from_user_id = data["from"]&.dig("id") || current_user.id
     to_user_id = data["to"]&.dig("id")
-    
+
     Rails.logger.info "ICE candidate received: call_id=#{call_id}, from_user_id=#{from_user_id}, to_user_id=#{to_user_id}, current_user_id=#{current_user.id}"
-    
+
     # Verify the ICE candidate is from the current user
     unless from_user_id == current_user.id
       Rails.logger.warn "ICE candidate rejected: from_user_id (#{from_user_id}) != current_user.id (#{current_user.id})"
       return
     end
-    
+
     # Broadcast ICE candidate to the other participant (to_user_id)
     if to_user_id
       Rails.logger.info "Broadcasting ICE candidate to user_#{to_user_id}_calls"

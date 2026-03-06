@@ -59,7 +59,7 @@ class PayrollBreakdown
 
   def result_for(divisor:)
     return nil if @structure.nil?
-    
+
     basic = normalize(@structure.basic, divisor)
     hra = normalize(@structure.hra, divisor)
     other_allowances = normalize(@structure.allowances, divisor)
@@ -103,4 +103,3 @@ class PayrollBreakdown
     divisor.positive? ? decimal / divisor : decimal
   end
 end
-

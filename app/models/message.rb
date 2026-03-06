@@ -24,7 +24,7 @@ class Message < ApplicationRecord
   def broadcast_message
     # Ensure user association is loaded
     user_record = user
-    
+
     ActionCable.server.broadcast(
       "chat_channel_#{channel_id}",
       {
@@ -33,7 +33,7 @@ class Message < ApplicationRecord
           id: id,
           channel_id: channel_id,
           user_id: user_id,
-          user_name: user_record.name || user_record.email&.split('@')&.first || "Unknown User",
+          user_name: user_record.name || user_record.email&.split("@")&.first || "Unknown User",
           user_email: user_record.email || "",
           content: content,
           edited_at: edited_at&.iso8601,

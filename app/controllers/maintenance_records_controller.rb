@@ -89,21 +89,21 @@ class MaintenanceRecordsController < ApplicationController
     if asset_id.blank?
       return render json: {
         message: "Asset ID is required",
-        errors: ["asset_id parameter is missing"]
+        errors: [ "asset_id parameter is missing" ]
       }, status: :unprocessable_entity
     end
 
     if maintenance_type.blank?
       return render json: {
         message: "Maintenance type is required",
-        errors: ["maintenance_type parameter is missing"]
+        errors: [ "maintenance_type parameter is missing" ]
       }, status: :unprocessable_entity
     end
 
     if scheduled_date.blank?
       return render json: {
         message: "Scheduled date is required",
-        errors: ["scheduled_date parameter is missing"]
+        errors: [ "scheduled_date parameter is missing" ]
       }, status: :unprocessable_entity
     end
 
@@ -113,7 +113,7 @@ class MaintenanceRecordsController < ApplicationController
     rescue ActiveRecord::RecordNotFound
       return render json: {
         message: "Asset not found",
-        errors: ["Asset with ID #{asset_id} does not exist"]
+        errors: [ "Asset with ID #{asset_id} does not exist" ]
       }, status: :not_found
     end
 
@@ -123,7 +123,7 @@ class MaintenanceRecordsController < ApplicationController
     rescue ArgumentError
       return render json: {
         message: "Invalid date format",
-        errors: ["scheduled_date must be a valid date (YYYY-MM-DD)"]
+        errors: [ "scheduled_date must be a valid date (YYYY-MM-DD)" ]
       }, status: :unprocessable_entity
     end
 
@@ -132,7 +132,7 @@ class MaintenanceRecordsController < ApplicationController
     unless valid_types.include?(maintenance_type)
       return render json: {
         message: "Invalid maintenance type",
-        errors: ["maintenance_type must be one of: #{valid_types.join(', ')}"]
+        errors: [ "maintenance_type must be one of: #{valid_types.join(', ')}" ]
       }, status: :unprocessable_entity
     end
 

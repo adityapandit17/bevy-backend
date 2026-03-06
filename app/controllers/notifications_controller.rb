@@ -3,7 +3,7 @@ class NotificationsController < ApplicationController
   # Disable CSRF / origin checks completely here – we rely on JWT auth instead.
   skip_before_action :verify_authenticity_token
 
-  before_action :set_notification, only: [:update, :destroy]
+  before_action :set_notification, only: [ :update, :destroy ]
 
   # GET /notifications
   # Returns the most recent notifications for the current user
@@ -94,5 +94,3 @@ class NotificationsController < ApplicationController
     }
   end
 end
-
-

@@ -12,6 +12,6 @@ class CreateHuddles < ActiveRecord::Migration[8.1]
 
     add_index :huddles, :status
     add_index :huddles, :started_at
-    add_index :huddles, [:channel_id, :status]
+    add_index :huddles, [ :channel_id, :status ]
   end
 end

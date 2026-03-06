@@ -88,7 +88,7 @@ Rails.application.configure do
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
   config.active_storage.variant_processor = :disabled
-  
+
   # Allow cross-origin requests from frontend (bevyhr.com) to API (api.bevyhr.com).
   # Without this, Rails rejects requests where Origin header doesn't match request host.
   # Safe for JWT-authenticated API; we don't rely on cookie-based CSRF for API requests.
@@ -96,7 +96,7 @@ Rails.application.configure do
 
   # Action Cable configuration for production
   config.action_cable.disable_request_forgery_protection = true
-  
+
   # Allow Action Cable connections from frontend domain
   # Default to bevyhr.com, can be overridden via ACTION_CABLE_ALLOWED_ORIGINS env var
   frontend_domain = ENV.fetch("FRONTEND_DOMAIN", "bevyhr.com")
@@ -106,14 +106,13 @@ Rails.application.configure do
     "http://#{frontend_domain}",
     "http://www.#{frontend_domain}"
   ]
-  
+
   allowed_origins_env = ENV.fetch("ACTION_CABLE_ALLOWED_ORIGINS", nil)
   origins_to_use = allowed_origins_env ? allowed_origins_env.split(",").map(&:strip) : default_origins
-  
+
   config.action_cable.allowed_request_origins = origins_to_use.map do |origin|
     # Escape special regex characters and create pattern
     escaped = origin.gsub(".", "\\.").gsub("*", ".*")
     Regexp.new("^https?:\\/\\/#{escaped}$")
   end
-  
 end

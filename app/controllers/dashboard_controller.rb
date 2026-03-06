@@ -66,7 +66,7 @@ class DashboardController < ApplicationController
     activities = []
 
     # Recent employee additions - include both active and onboarding employees
-    recent_employees = Employee.where(status: ["active", "onboarding"])
+    recent_employees = Employee.where(status: [ "active", "onboarding" ])
                               .where("employees.created_at >= ?", 7.days.ago)
                               .order(created_at: :desc)
                               .limit(3)

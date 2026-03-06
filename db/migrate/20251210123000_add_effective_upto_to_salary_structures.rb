@@ -3,4 +3,3 @@ class AddEffectiveUptoToSalaryStructures < ActiveRecord::Migration[7.0]
     add_column :salary_structures, :effective_upto, :date
   end
 end
-

@@ -9,4 +9,3 @@ class AddAdditionalFieldsToSalaryStructures < ActiveRecord::Migration[8.0]
     add_column :salary_structures, :income_tax, :decimal, precision: 10, scale: 2, default: 0
   end
 end
-

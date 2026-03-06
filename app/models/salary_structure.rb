@@ -16,26 +16,26 @@ class SalaryStructure < ApplicationRecord
   # If upto is nil, it means indefinite (ongoing), so it overlaps with any period that starts on or after from
   def self.periods_overlap?(from1, upto1, from2, upto2)
     return false unless from1 && from2
-    
+
     # Convert to dates if strings
     from1 = from1.is_a?(String) ? Date.parse(from1) : from1
     from2 = from2.is_a?(String) ? Date.parse(from2) : from2
     upto1 = upto1.is_a?(String) ? Date.parse(upto1) : upto1 if upto1
     upto2 = upto2.is_a?(String) ? Date.parse(upto2) : upto2 if upto2
-    
+
     # If either period has no end date (indefinite), check if they overlap
     if upto1.nil? && upto2.nil?
       # Both are indefinite - they overlap if they start on the same date or if one starts before the other
-      return true
+      true
     elsif upto1.nil?
       # First period is indefinite - overlaps if from1 <= upto2
-      return from1 <= upto2
+      from1 <= upto2
     elsif upto2.nil?
       # Second period is indefinite - overlaps if from2 <= upto1
-      return from2 <= upto1
+      from2 <= upto1
     else
       # Both have end dates - standard overlap check
-      return from2 <= upto1 && from1 <= upto2
+      from2 <= upto1 && from1 <= upto2
     end
   end
 
@@ -72,28 +72,28 @@ class SalaryStructure < ApplicationRecord
 
   def no_overlapping_periods
     return unless employee_id && effective_from
-    
+
     # Convert effective_from to date if it's a string
     new_from = effective_from.is_a?(String) ? Date.parse(effective_from) : effective_from
     new_upto = effective_upto.is_a?(String) ? Date.parse(effective_upto) : effective_upto if effective_upto
-    
+
     # Validate that effective_upto is after effective_from if both are present
     if new_upto && new_from && new_upto < new_from
       errors.add(:effective_upto, "must be after or equal to effective from date")
       return
     end
-    
+
     # Get all existing structures for this employee (excluding current record if updating)
     existing_structures = employee.salary_structures.where.not(id: id || 0)
-    
+
     # Check for overlaps with each existing structure
     existing_structures.each do |existing|
       existing_from = existing.effective_from
       existing_upto = existing.effective_upto
-      
+
       if self.class.periods_overlap?(new_from, new_upto, existing_from, existing_upto)
-        existing_period = existing_upto ? 
-          "#{existing_from} to #{existing_upto}" : 
+        existing_period = existing_upto ?
+          "#{existing_from} to #{existing_upto}" :
           "#{existing_from} (ongoing)"
         errors.add(:base, "This salary structure period overlaps with an existing structure (Effective from: #{existing_period}). Please choose a different date range.")
         return
@@ -123,13 +123,13 @@ class SalaryStructure < ApplicationRecord
     # Find the latest structure by effective_from date
     latest_structure = existing_structures.max_by { |s| s.effective_from }
     end_date = latest_structure.effective_from
-    
+
     # Ensure we have a valid date
     unless end_date.present?
       # If somehow effective_from is nil, skip this employee
       return []
     end
-    
+
     end_month = Date.new(end_date.year, end_date.month, 1)
 
     # Start from the employee's date of joining
@@ -208,7 +208,7 @@ class SalaryStructure < ApplicationRecord
   # Returns the structure for that month, or a default one if none exists
   def self.for_month(employee, year, month)
     return nil unless employee&.date_of_joining
-    
+
     month_date = Date.new(year, month, 1)
     month_key_str = month_key(month_date)
 
@@ -237,7 +237,7 @@ class SalaryStructure < ApplicationRecord
     if existing_structures.any?
       latest_structure = existing_structures.max_by { |s| s.effective_from }
       end_date = latest_structure.effective_from
-      
+
       if end_date.present?
         end_month = Date.new(end_date.year, end_date.month, 1)
       else

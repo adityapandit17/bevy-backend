@@ -1,7 +1,7 @@
 class Api::V1::ChannelsController < ApplicationController
   skip_before_action :verify_authenticity_token
   before_action :authenticate_user!
-  before_action :set_channel, only: [:show, :update, :destroy, :add_members, :remove_member, :messages]
+  before_action :set_channel, only: [ :show, :update, :destroy, :add_members, :remove_member, :messages ]
 
   # GET /api/v1/channels
   def index
@@ -170,7 +170,7 @@ class Api::V1::ChannelsController < ApplicationController
     # Check if direct message channel already exists
     existing_channel = Channel.direct_messages
                               .joins(:channel_memberships)
-                              .where(channel_memberships: { user_id: [current_user.id, other_user.id] })
+                              .where(channel_memberships: { user_id: [ current_user.id, other_user.id ] })
                               .group("channels.id")
                               .having("COUNT(channel_memberships.id) = 2")
                               .first

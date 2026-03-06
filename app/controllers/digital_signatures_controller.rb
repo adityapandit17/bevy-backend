@@ -67,10 +67,10 @@ class DigitalSignaturesController < ApplicationController
   # POST /digital_signatures/:id/sign
   def sign
     @digital_signature = DigitalSignature.find(params[:id])
-    
+
     # Capture device info from request
     device_info = extract_device_info(request)
-    
+
     if @digital_signature.update(
       status: "signed",
       signed_date: Date.current,
@@ -88,10 +88,10 @@ class DigitalSignaturesController < ApplicationController
   # POST /digital_signatures/send_reminders
   def send_reminders
     pending_signatures = DigitalSignature.pending.includes(:employee, :policy_document)
-    
+
     # Get policy_document_ids if provided
     policy_document_ids = params[:policy_document_ids] || []
-    
+
     if policy_document_ids.any?
       pending_signatures = pending_signatures.where(policy_document_id: policy_document_ids)
     end
@@ -145,7 +145,7 @@ class DigitalSignaturesController < ApplicationController
 
   def extract_device_info(request)
     user_agent = request.user_agent || ""
-    
+
     # Simple device detection
     if user_agent.include?("Chrome")
       browser = "Chrome"
@@ -161,19 +161,18 @@ class DigitalSignaturesController < ApplicationController
 
     os = if user_agent.include?("Windows")
            "Windows"
-         elsif user_agent.include?("Mac")
+    elsif user_agent.include?("Mac")
            "Mac"
-         elsif user_agent.include?("Linux")
+    elsif user_agent.include?("Linux")
            "Linux"
-         elsif user_agent.include?("Android")
+    elsif user_agent.include?("Android")
            "Android"
-         elsif user_agent.include?("iOS")
+    elsif user_agent.include?("iOS")
            "iOS"
-         else
+    else
            "Unknown"
-         end
+    end
 
     "#{browser} on #{os}"
   end
 end
-

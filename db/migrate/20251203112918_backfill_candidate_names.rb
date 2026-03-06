@@ -1,7 +1,7 @@
 class BackfillCandidateNames < ActiveRecord::Migration[8.0]
   def up
     Candidate.reset_column_information
-    
+
     # For candidates with empty first_name and last_name, try to extract from email
     Candidate.where(first_name: '').or(Candidate.where(last_name: '')).or(Candidate.where(first_name: nil)).or(Candidate.where(last_name: nil)).find_each do |candidate|
       # Try to extract name from email (e.g., "sarah.wilson@email.com" -> "Sarah Wilson")
@@ -23,7 +23,7 @@ class BackfillCandidateNames < ActiveRecord::Migration[8.0]
           end
         end
       end
-      
+
       # If still empty, set a default
       if candidate.first_name.blank? && candidate.last_name.blank?
         candidate.update_columns(
@@ -42,4 +42,3 @@ class BackfillCandidateNames < ActiveRecord::Migration[8.0]
     # This migration is not reversible as we don't have the original data
   end
 end
-

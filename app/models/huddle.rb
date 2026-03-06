@@ -26,7 +26,7 @@ class Huddle < ApplicationRecord
         channel_id: channel_id
       }
     )
-    
+
     # Also notify via user channels
     channel.users.each do |member|
       ActionCable.server.broadcast(
@@ -51,7 +51,7 @@ class Huddle < ApplicationRecord
     return unless participant
 
     participant.update!(left_at: Time.current)
-    
+
     # If no active participants, end the huddle
     if huddle_participants.where(left_at: nil).count.zero?
       end!

@@ -8,6 +8,6 @@ class CreateChannelMemberships < ActiveRecord::Migration[8.1]
 
       t.timestamps
     end
-    add_index :channel_memberships, [:channel_id, :user_id], unique: true
+    add_index :channel_memberships, [ :channel_id, :user_id ], unique: true
   end
 end

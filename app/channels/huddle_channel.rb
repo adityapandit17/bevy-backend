@@ -13,7 +13,7 @@ class HuddleChannel < ApplicationCable::Channel
     end
 
     stream_from "huddle_#{huddle_id}"
-    
+
     # Broadcast that user joined the huddle signaling channel
     ActionCable.server.broadcast(
       "huddle_#{huddle_id}",

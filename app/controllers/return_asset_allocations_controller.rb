@@ -1,8 +1,7 @@
 class ReturnAssetAllocationsController < ApplicationController
-
   before_action :set_allocation
-  
-  def update 
+
+  def update
     if @allocation.return_asset(allocation_params[:return_date], allocation_params[:notes])
       render json: {
         message: "Asset returned successfully",
@@ -14,7 +13,7 @@ class ReturnAssetAllocationsController < ApplicationController
         errors: @allocation.errors.full_messages
       }, status: :unprocessable_entity
     end
-  end 
+  end
 
   private
 
@@ -52,5 +51,4 @@ class ReturnAssetAllocationsController < ApplicationController
       updated_at: allocation.updated_at
     }
   end
-
 end

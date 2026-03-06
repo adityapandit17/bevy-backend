@@ -22,7 +22,7 @@ class Candidate < ApplicationRecord
   scope :not_archived, -> { where(archived: false) }
 
   def full_name
-    [first_name, last_name].compact.join(' ').strip
+    [ first_name, last_name ].compact.join(" ").strip
   end
 
   # Backward compatibility method

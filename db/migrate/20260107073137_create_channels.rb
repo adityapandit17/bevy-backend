@@ -11,6 +11,6 @@ class CreateChannels < ActiveRecord::Migration[8.1]
     end
     add_index :channels, :channel_type
     add_index :channels, :name
-    add_index :channels, [:channel_type, :name]
+    add_index :channels, [ :channel_type, :name ]
   end
 end

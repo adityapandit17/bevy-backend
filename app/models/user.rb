@@ -93,7 +93,7 @@
     # Always query fresh from database to avoid stale association cache
     user_role_ids = UserRole.where(user_id: id).pluck(:role_id)
     return false if user_role_ids.empty?
-    
+
     RolePermission.joins(:role, :permission)
                   .where(roles: { id: user_role_ids })
                   .where(permissions: { resource: resource, action: action })

@@ -15,4 +15,3 @@ class Notification < ApplicationRecord
 
   validates :title, :message, :notification_type, presence: true
 end
-

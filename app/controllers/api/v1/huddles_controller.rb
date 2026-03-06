@@ -2,7 +2,7 @@ class Api::V1::HuddlesController < ApplicationController
   skip_before_action :verify_authenticity_token
   before_action :authenticate_user!
   before_action :set_channel
-  before_action :set_huddle, only: [:show, :destroy, :join, :leave]
+  before_action :set_huddle, only: [ :show, :destroy, :join, :leave ]
 
   # GET /api/v1/channels/:channel_id/huddles
   def index
@@ -11,7 +11,7 @@ class Api::V1::HuddlesController < ApplicationController
     end
 
     huddles = @channel.huddles.active.includes(:started_by, :participants)
-    
+
     render json: {
       success: true,
       huddles: huddles.map { |huddle| format_huddle(huddle) }
@@ -58,7 +58,7 @@ class Api::V1::HuddlesController < ApplicationController
 
     if @huddle.save
       @huddle.add_participant(current_user)
-      
+
       # Broadcast huddle started event to all channel members
       ActionCable.server.broadcast(
         "chat_channel_#{@channel.id}",
@@ -67,7 +67,7 @@ class Api::V1::HuddlesController < ApplicationController
           huddle: format_huddle(@huddle)
         }
       )
-      
+
       # Also notify via user channels
       @channel.users.each do |member|
         ActionCable.server.broadcast(

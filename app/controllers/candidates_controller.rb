@@ -1,7 +1,7 @@
 class CandidatesController < ApplicationController
   # Skip CSRF protection for JSON requests (handled by JWT authentication)
   skip_before_action :verify_authenticity_token, if: -> { request.format.json? || json_request? }
-  
+
   before_action :authenticate_user!
   before_action :set_candidate, only: [ :show, :update, :destroy, :send_email, :archive ]
   before_action :authorize_index!, only: [ :index ]

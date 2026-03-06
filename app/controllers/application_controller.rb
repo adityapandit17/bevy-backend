@@ -42,7 +42,7 @@ class ApplicationController < ActionController::Base
     # For API/JSON requests, JWT authentication is handled by authenticate_user_from_token!
     # So we just need to check if current_user is set
     return if @current_user.present? && request.format.json?
-    
+
     unless current_user
       # For JSON requests, always return JSON error
       if json_request?

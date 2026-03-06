@@ -4,4 +4,3 @@ class AddArchivedToCandidates < ActiveRecord::Migration[8.0]
     add_index :candidates, :archived
   end
 end
-

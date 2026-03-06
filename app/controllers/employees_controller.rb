@@ -1,7 +1,7 @@
 class EmployeesController < ApplicationController
   # Skip CSRF protection for JSON requests (handled by JWT authentication)
   skip_before_action :verify_authenticity_token, if: -> { request.format.json? || json_request? }
-  
+
   before_action :authenticate_user!
   before_action :set_employee, only: [ :show, :update, :destroy ]
   before_action :authorize_index!, only: [ :index ]
@@ -18,13 +18,13 @@ class EmployeesController < ApplicationController
       search_term = params[:search].strip
       # Split search term by spaces to handle full name searches
       search_parts = search_term.split(/\s+/).reject(&:blank?)
-      
+
       if search_parts.length > 1
         # Multiple words: search for first word in first_name and last word in last_name (or vice versa)
         first_part = "%#{search_parts.first}%"
         last_part = "%#{search_parts.last}%"
         full_term = "%#{search_term}%"
-        
+
         @employees = @employees.where(
           "(LOWER(employees.first_name) LIKE LOWER(?) AND LOWER(employees.last_name) LIKE LOWER(?)) OR " \
           "(LOWER(employees.first_name) LIKE LOWER(?) AND LOWER(employees.last_name) LIKE LOWER(?)) OR " \
@@ -52,7 +52,7 @@ class EmployeesController < ApplicationController
     # Apply pagination
     page = params[:page].to_i > 0 ? params[:page].to_i : 1
     per_page = params[:per_page].to_i > 0 ? params[:per_page].to_i : 10
-    per_page = [per_page, 100].min # Cap at 100 per page
+    per_page = [ per_page, 100 ].min # Cap at 100 per page
 
     @employees = @employees.order(:first_name, :last_name)
                            .offset((page - 1) * per_page)

@@ -4,7 +4,7 @@
 class JobOpeningsController < ApplicationController
   # Skip CSRF protection for JSON API requests
   skip_before_action :verify_authenticity_token, if: -> { request.format.json? }
-  
+
   before_action :authenticate_user!
   before_action :set_job_opening, only: [ :show, :update, :destroy ]
   before_action :authorize_index!, only: [ :index ]

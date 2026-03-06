@@ -2,7 +2,7 @@ class Api::V1::MessagesController < ApplicationController
   skip_before_action :verify_authenticity_token
   before_action :authenticate_user!
   before_action :set_channel
-  before_action :set_message, only: [:show, :update, :destroy]
+  before_action :set_message, only: [ :show, :update, :destroy ]
 
   # GET /api/v1/channels/:channel_id/messages
   def index

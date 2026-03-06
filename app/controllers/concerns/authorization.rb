@@ -6,11 +6,11 @@ module Authorization
   def authorize!(resource, action)
     # Common solution: Check permissions for all roles
     return false unless current_user
-    
+
     # Check permission - queries the database directly for fresh data
     # The has_permission? method queries UserRole and RolePermission directly, bypassing any cached associations
     has_permission = current_user.has_permission?(resource, action)
-    
+
     unless has_permission
       # Log for debugging - get fresh role data for the log
       user_role_ids = UserRole.where(user_id: current_user.id).pluck(:role_id)
@@ -19,14 +19,14 @@ module Authorization
       render json: { error: "Insufficient permissions" }, status: :forbidden
       return false
     end
-    
+
     true
   end
 
   def authorize_role!(role_name)
     unless current_user&.has_role?(role_name)
       render json: { error: "Insufficient role permissions" }, status: :forbidden
-      return
+      nil
     end
   end
 

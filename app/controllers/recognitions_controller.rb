@@ -1,5 +1,5 @@
 class RecognitionsController < ApplicationController
-  before_action :set_recognition, only: [:show, :update, :destroy]
+  before_action :set_recognition, only: [ :show, :update, :destroy ]
 
   def index
     @recognitions = Recognition.includes(:given_by, :received_by).all
@@ -26,20 +26,20 @@ class RecognitionsController < ApplicationController
 
     render json: @recognitions.as_json(
       include: {
-        given_by: { only: [:id, :email, :first_name, :last_name] },
-        received_by: { only: [:id, :email, :first_name, :last_name, :designation, :department_id] }
+        given_by: { only: [ :id, :email, :first_name, :last_name ] },
+        received_by: { only: [ :id, :email, :first_name, :last_name, :designation, :department_id ] }
       },
-      methods: [:formatted_date, :given_by_name, :received_by_name]
+      methods: [ :formatted_date, :given_by_name, :received_by_name ]
     )
   end
 
   def show
     render json: @recognition.as_json(
       include: {
-        given_by: { only: [:id, :email, :first_name, :last_name] },
-        received_by: { only: [:id, :email, :first_name, :last_name, :designation, :department_id] }
+        given_by: { only: [ :id, :email, :first_name, :last_name ] },
+        received_by: { only: [ :id, :email, :first_name, :last_name, :designation, :department_id ] }
       },
-      methods: [:formatted_date, :given_by_name, :received_by_name]
+      methods: [ :formatted_date, :given_by_name, :received_by_name ]
     )
   end
 
@@ -51,10 +51,10 @@ class RecognitionsController < ApplicationController
     if @recognition.save
       render json: @recognition.as_json(
         include: {
-          given_by: { only: [:id, :email, :first_name, :last_name] },
-          received_by: { only: [:id, :email, :first_name, :last_name, :designation, :department_id] }
+          given_by: { only: [ :id, :email, :first_name, :last_name ] },
+          received_by: { only: [ :id, :email, :first_name, :last_name, :designation, :department_id ] }
         },
-        methods: [:formatted_date, :given_by_name, :received_by_name]
+        methods: [ :formatted_date, :given_by_name, :received_by_name ]
       ), status: :created
     else
       render json: { errors: @recognition.errors.full_messages }, status: :unprocessable_entity
@@ -65,10 +65,10 @@ class RecognitionsController < ApplicationController
     if @recognition.update(recognition_params)
       render json: @recognition.as_json(
         include: {
-          given_by: { only: [:id, :email, :first_name, :last_name] },
-          received_by: { only: [:id, :email, :first_name, :last_name, :designation, :department_id] }
+          given_by: { only: [ :id, :email, :first_name, :last_name ] },
+          received_by: { only: [ :id, :email, :first_name, :last_name, :designation, :department_id ] }
         },
-        methods: [:formatted_date, :given_by_name, :received_by_name]
+        methods: [ :formatted_date, :given_by_name, :received_by_name ]
       )
     else
       render json: { errors: @recognition.errors.full_messages }, status: :unprocessable_entity

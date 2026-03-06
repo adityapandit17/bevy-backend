@@ -28,7 +28,7 @@ class UpdateCandidatesNameFields < ActiveRecord::Migration[8.0]
     # Migrate data back: combine first_name and last_name into name
     Candidate.reset_column_information
     Candidate.find_each do |candidate|
-      full_name = [candidate.first_name, candidate.last_name].compact.join(' ').strip
+      full_name = [ candidate.first_name, candidate.last_name ].compact.join(' ').strip
       candidate.update_columns(name: full_name) if full_name.present?
     end
 
@@ -38,4 +38,3 @@ class UpdateCandidatesNameFields < ActiveRecord::Migration[8.0]
     remove_column :candidates, :date_of_birth
   end
 end
-

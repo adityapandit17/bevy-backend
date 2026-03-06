@@ -22,7 +22,7 @@ Rails.application.routes.draw do
       post "auth/change_password", to: "auth#change_password"
 
       # Chat API routes
-      resources :channels, only: [:index, :show, :create, :update, :destroy] do
+      resources :channels, only: [ :index, :show, :create, :update, :destroy ] do
         member do
           post :add_members
           delete "remove_member/:user_id", to: "channels#remove_member", as: :remove_member
@@ -31,8 +31,8 @@ Rails.application.routes.draw do
         collection do
           post :create_direct
         end
-        resources :messages, only: [:index, :show, :create, :update, :destroy]
-        resources :huddles, only: [:index, :show, :create, :destroy] do
+        resources :messages, only: [ :index, :show, :create, :update, :destroy ]
+        resources :huddles, only: [ :index, :show, :create, :destroy ] do
           member do
             post :join
             post :leave
@@ -40,9 +40,9 @@ Rails.application.routes.draw do
         end
       end
     end
-    
+
     # Asset Management API - moved here to avoid conflict with Propshaft /assets route
-    resources :assets, only: [:index, :show, :create, :update, :destroy] do
+    resources :assets, only: [ :index, :show, :create, :update, :destroy ] do
       collection do
         get :stats
         get :allocations
@@ -338,7 +338,7 @@ Rails.application.routes.draw do
   end
 
   resources :asset_allocations do
-    resource :return_asset_allocation, only: [:update], controller: "return_asset_allocations"
+    resource :return_asset_allocation, only: [ :update ], controller: "return_asset_allocations"
   end
 
   resources :maintenance_records do
@@ -367,7 +367,7 @@ Rails.application.routes.draw do
   resources :knowledge_articles
 
   # Notifications
-  resources :notifications, only: [:index, :update, :destroy] do
+  resources :notifications, only: [ :index, :update, :destroy ] do
     collection do
       patch :mark_all_read
       delete :destroy_all

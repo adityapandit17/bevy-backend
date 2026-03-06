@@ -14,7 +14,7 @@ class PayrollMonth
     cleaned = str.tr("-", " ")
     begin
       parsed = Date.parse(cleaned)
-      return parsed.beginning_of_month
+      parsed.beginning_of_month
     rescue ArgumentError
       raise ArgumentError, "Invalid payroll month: #{value}"
     end
@@ -44,4 +44,3 @@ class PayrollMonth
     !(date.saturday? || date.sunday?)
   end
 end
-
