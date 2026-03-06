@@ -8,8 +8,9 @@ fi
 
 # If running the rails server then create or migrate existing database
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+  export RAILS_ENV=production
   ./bin/rails db:prepare
-  # ./bin/rails db:schema:load:queue
+  ./bin/rails db:schema:load:queue
 fi
 
 exec "${@}"
