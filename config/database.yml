@@ -29,11 +29,11 @@ production:
     password: <%= ENV["POSTGRES_PASSWORD"] %>
     host: <%= ENV["DB_HOST"] %>
   cache: &production_cache
-    <<: *default
+    <<: *production_primary
     database: bevyhr_production_cache
   queue: &production_queue
-    <<: *default
+    <<: *production_primary
     database: bevyhr_production_queue
   cable: &production_cable
-    <<: *default
+    <<: *production_primary
     database: bevyhr_production_cable
