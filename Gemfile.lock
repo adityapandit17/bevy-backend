@@ -425,7 +425,7 @@ DEPENDENCIES
   pry-nav
   puma (>= 5.0)
   rack-cors (~> 3.0)
-  rails (~> 8.1.1)
+  rails (~> 8.1.3)
   rubocop-rails-omakase
   selenium-webdriver
   solid_cable
