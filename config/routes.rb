@@ -69,10 +69,6 @@ Rails.application.routes.draw do
   # Dashboard route
   get "/dashboard", to: "dashboard#index"
 
-
-  # Test route
-  get "/test/auth", to: "test#auth_test"
-
   resources :users do
     member do
       patch :update_roles

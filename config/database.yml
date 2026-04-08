@@ -15,7 +15,7 @@ development:
   queue:
     <<: *default
     database: bevyhr_development_queue
-
+    migrations_paths: db/queue_migrate
 test:
   <<: *default
   database: bevyhr_test
@@ -34,6 +34,7 @@ production:
   queue: &production_queue
     <<: *production_primary
     database: bevyhr_production_queue
+    migrations_paths: db/queue_migrate    
   cable: &production_cable
     <<: *production_primary
     database: bevyhr_production_cable

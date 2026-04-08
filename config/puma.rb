@@ -35,7 +35,15 @@ port ENV.fetch("PORT", 3000)
 plugin :tmp_restart
 
 # Run the Solid Queue supervisor inside of Puma for single-server deployments.
-plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]
+plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"] && Rails.env.production?
+
+# In development on macOS/arm64 we've seen intermittent `pg` segfaults when the
+# supervisor runs in fork mode. Async mode keeps Solid Queue inside the Puma
+# process and avoids the crash.
+if Rails.env.development?
+  plugin :solid_queue
+  solid_queue_mode ENV.fetch("SOLID_QUEUE_SUPERVISOR_MODE", "async").to_sym
+end
 
 # Specify the PID file. Defaults to tmp/pids/server.pid in development.
 # In other environments, only set the PID file if requested.

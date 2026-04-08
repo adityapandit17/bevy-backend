@@ -86,7 +86,13 @@ Rails.application.configure do
     domain: "localhost"
   }
 
-  # Use Solid Queue in Development.
-  config.active_job.queue_adapter = :solid_queue
-  config.solid_queue.connects_to = { database: { writing: :queue } }
+  # In development, default to the in-process async adapter.
+  # If you explicitly opt into Solid Queue (e.g. running with SOLID_QUEUE_IN_PUMA=1),
+  # connect Solid Queue to the separate queue database.
+  #if ENV["SOLID_QUEUE_IN_PUMA"].present? || ENV["SOLID_QUEUE"].present?
+    config.active_job.queue_adapter = :solid_queue
+    config.solid_queue.connects_to = { database: { writing: :queue } }
+  #else
+  #  config.active_job.queue_adapter = :async
+  # end
 end

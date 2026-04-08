@@ -23,6 +23,7 @@ class Employee < ApplicationRecord
   has_many :employee_benefits, dependent: :destroy
   has_many :employee_trainings, dependent: :destroy
   has_many :offboarding_employees, dependent: :destroy
+  has_many :pending_tasks, as: :taskable, dependent: :destroy
 
   # Validations
   validates :first_name, presence: true
