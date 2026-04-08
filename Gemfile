@@ -78,3 +78,6 @@ gem "panko_serializer"
 
 # Load environment variables from .env file
 gem "dotenv-rails"
+
+# Background jobs dashboard
+gem "mission_control-jobs"
