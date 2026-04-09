@@ -26,10 +26,13 @@ class Employee < ApplicationRecord
   has_many :pending_tasks, as: :taskable, dependent: :destroy
 
   # Validations
+  before_validation :normalize_phone
+
   validates :first_name, presence: true
   validates :last_name, presence: true
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :phone, presence: true
+  validate :phone_valid_for_company_country
   validates :designation, presence: true
   validates :date_of_joining, presence: true
   # validates :date_of_birth, presence: true
@@ -309,5 +312,58 @@ class Employee < ApplicationRecord
     else
       "gray"
     end
+  end
+
+  private
+
+  # Normalizes phone numbers to either:
+  # - "+<digits>" (E.164-like) when a leading "+" was provided, or
+  # - "<digits>" when no "+" was provided
+  # and strips spaces/dashes/parentheses.
+  def normalize_phone
+    return if phone.blank?
+
+    raw = phone.to_s.strip
+
+    # Keep leading plus if provided; otherwise strip everything to digits.
+    if raw.start_with?("+")
+      digits = raw.gsub(/\D/, "")
+      self.phone = "+#{digits}"
+      return
+    end
+
+    self.phone = raw.gsub(/\D/, "")
+  end
+
+  def phone_valid_for_company_country
+    return if phone.blank?
+
+    # Single-tenant: company settings come from the first (and only) Company record
+    # Fallback to "IN" so validation is deterministic even if settings aren't saved yet.
+    country = (Company.first&.country_code.presence || "IN").to_s.upcase
+
+    # Phonelib expects ISO3166-1 alpha-2 (e.g. "IN", "US")
+    raw = phone.to_s
+    parsed = Phonelib.parse(raw, country)
+
+    # India-specific tolerance:
+    # - Allow leading 0 (common domestic format) by stripping it
+    # - Allow numbers provided as 91XXXXXXXXXX without leading "+" by converting to +91XXXXXXXXXX
+    if (country == "IN") && (!parsed.valid?)
+      digits = raw.gsub(/\D/, "")
+
+      if digits.length == 11 && digits.start_with?("0")
+        parsed = Phonelib.parse(digits[1..], "IN")
+        self.phone = digits[1..] if parsed.valid?
+      elsif digits.length == 12 && digits.start_with?("91")
+        parsed = Phonelib.parse("+#{digits}", "IN")
+        self.phone = "+#{digits}" if parsed.valid?
+      end
+    end
+
+    errors.add(:phone, "is not a valid phone number for country #{country}") unless parsed&.valid?
+  rescue NameError
+    # If phonelib isn't installed/loaded yet, fail safe with a minimal check
+    errors.add(:phone, "must be a valid phone number")
   end
 end

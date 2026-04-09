@@ -81,3 +81,6 @@ gem "dotenv-rails"
 
 # Background jobs dashboard
 gem "mission_control-jobs"
+
+# Phone number validation (country-aware)
+gem "phonelib"

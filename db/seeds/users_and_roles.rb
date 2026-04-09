@@ -48,6 +48,32 @@ if employee_role
   puts "✓ Employee permissions assigned"
 end
 
+# IT Asset Manager - Asset + allocation + maintenance access
+it_asset_manager = Role.find_by(name: 'IT Asset Manager')
+if it_asset_manager
+  it_asset_permission_names = [
+    'assets.index', 'assets.create', 'assets.update', 'assets.destroy',
+    'asset_allocations.index', 'asset_allocations.create', 'asset_allocations.update', 'asset_allocations.destroy',
+    'maintenance_records.index', 'maintenance_records.create', 'maintenance_records.update', 'maintenance_records.destroy'
+  ]
+  it_asset_permissions = Permission.where(name: it_asset_permission_names)
+  it_asset_manager.permission_ids = it_asset_permissions.pluck(:id)
+  puts "✓ IT Asset Manager permissions assigned"
+end
+
+# IT Support - Helpdesk ticket access (and read-only assets)
+it_support = Role.find_by(name: 'IT Support')
+if it_support
+  it_support_permission_names = [
+    'helpdesk_tickets.index', 'helpdesk_tickets.show', 'helpdesk_tickets.create', 'helpdesk_tickets.update', 'helpdesk_tickets.stats',
+    'ticket_comments.index', 'ticket_comments.create', 'ticket_comments.update',
+    'assets.index', 'asset_allocations.index', 'maintenance_records.index'
+  ]
+  it_support_permissions = Permission.where(name: it_support_permission_names)
+  it_support.permission_ids = it_support_permissions.pluck(:id)
+  puts "✓ IT Support permissions assigned"
+end
+
 # Create a default super admin user
 puts "Creating default super admin user..."
 admin_user = User.find_or_create_by(email: 'admin@hrms.com') do |user|

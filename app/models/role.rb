@@ -29,6 +29,14 @@ class Role < ApplicationRecord
       {
         name: "Employee",
         description: "Self-service portal access"
+      },
+      {
+        name: "IT Asset Manager",
+        description: "Manages company assets and allocations"
+      },
+      {
+        name: "IT Support",
+        description: "Handles IT helpdesk tickets and hardware support"
       }
     ]
 

@@ -57,6 +57,31 @@ class EmployeeTest < ActiveSupport::TestCase
     assert_includes @employee.errors[:phone], "can't be blank"
   end
 
+  test "should reject invalid phone formats" do
+    invalid_phones = [
+      "123",            # too short
+      "abcd",           # non-numeric
+      "+",              # no digits
+      "+12-34",         # too short after normalization
+      "0000000000"      # too short? no, but still digits; keep it as invalid via business rule later if desired
+    ]
+
+    invalid_phones.each do |ph|
+      @employee.phone = ph
+      assert_not @employee.valid?, "#{ph.inspect} should be invalid"
+    end
+  end
+
+  test "should accept and normalize common phone formats" do
+    @employee.phone = "+1 (555) 123-4567"
+    assert @employee.valid?
+    assert_equal "+15551234567", @employee.phone
+
+    @employee.phone = "98765-43210"
+    assert @employee.valid?
+    assert_equal "9876543210", @employee.phone
+  end
+
   test "should require designation" do
     @employee.designation = nil
     assert_not @employee.valid?

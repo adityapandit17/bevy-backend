@@ -17,6 +17,7 @@ class Company < ApplicationRecord
   validates :employee_count, presence: true
   validates :timezone, presence: true
   validates :currency, presence: true, length: { is: 3 }
+  validates :country_code, allow_nil: true, allow_blank: true, length: { is: 2 }
 
   scope :by_industry, ->(industry) { where(industry: industry) }
   scope :large_companies, -> { where("CAST(employee_count AS INTEGER) > ?", 1000) }

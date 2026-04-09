@@ -67,8 +67,27 @@ class Permission < ApplicationRecord
       { name: "assets.index", resource: "assets", action: "index", description: "View assets list" },
       { name: "assets.create", resource: "assets", action: "create", description: "Create new assets" },
       { name: "assets.update", resource: "assets", action: "update", description: "Update asset information" },
+      { name: "assets.destroy", resource: "assets", action: "destroy", description: "Delete assets" },
       { name: "asset_allocations.index", resource: "asset_allocations", action: "index", description: "View asset allocations" },
       { name: "asset_allocations.create", resource: "asset_allocations", action: "create", description: "Allocate assets" },
+      { name: "asset_allocations.update", resource: "asset_allocations", action: "update", description: "Update asset allocations" },
+      { name: "asset_allocations.destroy", resource: "asset_allocations", action: "destroy", description: "Delete asset allocations" },
+      { name: "maintenance_records.index", resource: "maintenance_records", action: "index", description: "View maintenance records" },
+      { name: "maintenance_records.create", resource: "maintenance_records", action: "create", description: "Create maintenance records" },
+      { name: "maintenance_records.update", resource: "maintenance_records", action: "update", description: "Update maintenance records" },
+      { name: "maintenance_records.destroy", resource: "maintenance_records", action: "destroy", description: "Delete maintenance records" },
+
+      # IT Helpdesk
+      { name: "helpdesk_tickets.index", resource: "helpdesk_tickets", action: "index", description: "View helpdesk tickets" },
+      { name: "helpdesk_tickets.show", resource: "helpdesk_tickets", action: "show", description: "View helpdesk ticket details" },
+      { name: "helpdesk_tickets.create", resource: "helpdesk_tickets", action: "create", description: "Create helpdesk tickets" },
+      { name: "helpdesk_tickets.update", resource: "helpdesk_tickets", action: "update", description: "Update helpdesk tickets" },
+      { name: "helpdesk_tickets.destroy", resource: "helpdesk_tickets", action: "destroy", description: "Delete helpdesk tickets" },
+      { name: "helpdesk_tickets.stats", resource: "helpdesk_tickets", action: "stats", description: "View helpdesk ticket stats" },
+      { name: "ticket_comments.index", resource: "ticket_comments", action: "index", description: "View ticket comments" },
+      { name: "ticket_comments.create", resource: "ticket_comments", action: "create", description: "Create ticket comments" },
+      { name: "ticket_comments.update", resource: "ticket_comments", action: "update", description: "Update ticket comments" },
+      { name: "ticket_comments.destroy", resource: "ticket_comments", action: "destroy", description: "Delete ticket comments" },
 
       # Reports
       { name: "reports.index", resource: "reports", action: "index", description: "View reports" },
@@ -86,7 +105,10 @@ class Permission < ApplicationRecord
 
       # Settings
       { name: "settings.index", resource: "settings", action: "index", description: "View settings" },
-      { name: "settings.update", resource: "settings", action: "update", description: "Update settings" }
+      { name: "settings.update", resource: "settings", action: "update", description: "Update settings" },
+
+      # Workspace Seating (UI access)
+      { name: "workspace_seating.index", resource: "workspace_seating", action: "index", description: "View workspace seating map" }
     ]
 
     permissions_data.each do |permission_data|
