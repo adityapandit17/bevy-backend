@@ -90,4 +90,60 @@ if admin_user && super_admin
   puts "✓ Default super admin user created: admin@hrms.com / admin123"
 end
 
+# Create additional default users for role-based testing
+puts "Creating default non-admin users for role-based access..."
+
+def ensure_user_for_employee!(employee_email:, role_name:, password:)
+  employee = Employee.find_by(email: employee_email)
+  role = Role.find_by(name: role_name)
+
+  unless employee
+    puts "⚠ Employee not found for #{employee_email} (skipping user creation)"
+    return
+  end
+
+  unless role
+    puts "⚠ Role not found: #{role_name} (skipping user creation)"
+    return
+  end
+
+  user = User.find_or_create_by!(email: employee.email) do |u|
+    u.first_name = employee.first_name
+    u.last_name = employee.last_name
+    u.password = password
+    u.password_confirmation = password
+    u.status = "active"
+    u.employee_id = employee.id
+  end
+
+  # Ensure linkage & active status even if user existed
+  if user.employee_id != employee.id || user.status != "active"
+    user.update!(employee_id: employee.id, status: "active")
+  end
+
+  user.roles << role unless user.roles.include?(role)
+  puts "✓ #{role_name} user ready: #{user.email} / #{password}"
+end
+
+# HR Manager
+ensure_user_for_employee!(
+  employee_email: "sarah.miller@company.com",
+  role_name: "HR Manager",
+  password: "password123"
+)
+
+# Department Head
+ensure_user_for_employee!(
+  employee_email: "bob.wilson@company.com",
+  role_name: "Department Head",
+  password: "password123"
+)
+
+# Employee
+ensure_user_for_employee!(
+  employee_email: "john.doe@company.com",
+  role_name: "Employee",
+  password: "password123"
+)
+
 puts "User roles and permissions setup completed!"

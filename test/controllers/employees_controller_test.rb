@@ -196,7 +196,9 @@ class EmployeesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     json_response = JSON.parse(@response.body)
-    assert json_response.length >= 10
+    # Index returns paginated {data: [...], pagination: {...}}
+    employees_data = json_response.is_a?(Array) ? json_response : json_response["data"]
+    assert employees_data.length >= 10
   end
 
   test "should handle special characters in employee data" do

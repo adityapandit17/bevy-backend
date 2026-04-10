@@ -4,7 +4,7 @@ one:
   helpdesk_ticket_id: 1
   user_id: 1
   employee_id: 1
-  content: MyText
+  content: I have checked the issue and will escalate to the hardware team
   created_at: 2025-11-20 00:51:42
   updated_at: 2025-11-20 00:51:42
 
@@ -12,6 +12,6 @@ two:
   helpdesk_ticket_id: 1
   user_id: 1
   employee_id: 1
-  content: MyText
-  created_at: 2025-11-20 00:51:42
-  updated_at: 2025-11-20 00:51:42
+  content: Hardware team has been notified and will reach out within 2 hours
+  created_at: 2025-11-20 00:52:42
+  updated_at: 2025-11-20 00:52:42

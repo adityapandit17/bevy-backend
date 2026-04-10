@@ -1,25 +1,25 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
-  category: MyString
-  priority: MyString
-  sla_hours: 1
-  status: MyString
-  tickets_handled: 1
-  avg_resolution_hours: 9.99
-  escalation_levels: MyText
+  name: Standard IT Support SLA
+  category: IT Support
+  priority: medium
+  sla_hours: 8
+  status: active
+  tickets_handled: 45
+  avg_resolution_hours: 6.5
+  escalation_levels: Level 1 - Help Desk, Level 2 - Senior Engineer
   created_at: 2025-11-19 22:04:29
   updated_at: 2025-11-19 22:04:29
 
 two:
-  name: MyString
-  category: MyString
-  priority: MyString
-  sla_hours: 1
-  status: MyString
-  tickets_handled: 1
-  avg_resolution_hours: 9.99
-  escalation_levels: MyText
+  name: Critical HR Issues SLA
+  category: HR
+  priority: high
+  sla_hours: 4
+  status: active
+  tickets_handled: 12
+  avg_resolution_hours: 3.2
+  escalation_levels: Level 1 - HR Staff, Level 2 - HR Manager
   created_at: 2025-11-19 22:04:29
   updated_at: 2025-11-19 22:04:29

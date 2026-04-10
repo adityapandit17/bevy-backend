@@ -1,15 +1,15 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
-  channel_type: MyString
+  name: general
+  channel_type: channel
   is_private: false
   created_by: one
-  description: MyText
+  description: General discussion channel
 
 two:
-  name: MyString
-  channel_type: MyString
+  name: engineering
+  channel_type: channel
   is_private: false
   created_by: two
-  description: MyText
+  description: Engineering team channel

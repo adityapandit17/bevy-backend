@@ -3,11 +3,11 @@
 one:
   channel: one
   user: one
-  role: MyString
+  role: admin
   last_read_at: 2026-01-07 13:01:38
 
 two:
   channel: two
   user: two
-  role: MyString
+  role: member
   last_read_at: 2026-01-07 13:01:38

@@ -368,40 +368,92 @@ module TestHelpers
     end
   end
 
-  # Helper methods for authentication testing
+  # JWT authentication helpers
+
+  # Generate an auth header for the given user (or the default test admin)
+  def auth_headers_for(user = nil)
+    user ||= @auth_user
+    token = JwtService.generate_token(user)
+    { "Authorization" => "Bearer #{token}" }
+  end
+
+  # Create (or find) a super-admin test user with full permissions
+  def find_or_create_test_admin
+    user = User.find_by(email: "test.admin@example.com")
+    unless user
+      user = User.create!(
+        email: "test.admin@example.com",
+        password: "Password123!",
+        first_name: "Test",
+        last_name: "Admin",
+        status: "active"
+      )
+    end
+
+    role = Role.find_or_create_by!(name: "Test Super Admin") do |r|
+      r.description = "Full access role for tests"
+    end
+
+    unless user.roles.include?(role)
+      user.roles << role
+    end
+
+    # Give the role all existing permissions (and create common ones if missing)
+    %w[employees payrolls leave_requests attendance_records assets salary_structures
+       departments events helpdesk_tickets knowledge_articles sla_workflows
+       interviews candidates job_openings onboarding_employees onboarding_tasks
+       performance_reviews performance_goals timesheets employee_documents
+       employee_benefits employee_trainings ticket_comments maintenance_records
+       asset_allocations users roles permissions].each do |resource|
+      %w[index show create update destroy approve].each do |action|
+        perm = Permission.find_or_create_by!(resource: resource, action: action) do |p|
+          p.name = "#{resource}.#{action}"
+          p.description = "#{action.capitalize} #{resource}"
+        end
+        RolePermission.find_or_create_by!(role: role, permission: perm)
+      end
+    end
+
+    user
+  end
+
   def sign_in_user(user)
-    # This would be implemented based on your authentication system
-    # For example, with Devise:
-    # sign_in user
+    token = JwtService.generate_token(user)
+    @auth_headers = { "Authorization" => "Bearer #{token}" }
   end
 
   def sign_out_user
-    # This would be implemented based on your authentication system
-    # For example, with Devise:
-    # sign_out user
+    @auth_headers = {}
   end
 
-  # Helper methods for authorization testing
   def assert_authorized(&block)
-    # This would be implemented based on your authorization system
-    # For example, with Pundit:
-    # assert_not_raises Pundit::NotAuthorizedError do
-    #   block.call
-    # end
+    assert_response_not_equal :unauthorized
   end
 
   def assert_not_authorized(&block)
-    # This would be implemented based on your authorization system
-    # For example, with Pundit:
-    # assert_raises Pundit::NotAuthorizedError do
-    #   block.call
-    # end
+    assert_response :unauthorized
   end
 end
 
-# Include the helpers in test classes
+# Auto-inject JWT auth into all integration (controller) tests
 class ActionDispatch::IntegrationTest
   include TestHelpers
+
+  # BDD-style before_setup: runs before each test's own setup
+  def before_setup
+    super
+    @auth_user = find_or_create_test_admin
+    @auth_headers = auth_headers_for(@auth_user)
+  end
+
+  # Automatically inject auth + JSON accept headers into all HTTP methods
+  %i[get post patch put delete].each do |method|
+    define_method(method) do |path, **kwargs|
+      default_headers = (@auth_headers || {}).merge("Accept" => "application/json")
+      kwargs[:headers] = default_headers.merge(kwargs[:headers] || {})
+      super(path, **kwargs)
+    end
+  end
 end
 
 class ActiveSupport::TestCase

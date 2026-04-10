@@ -4,12 +4,10 @@ one:
   employee: one
   date: 2025-07-29
   status: present
-  check_in: 2025-07-29 09:00:00
-  check_out: 2025-07-29 17:00:00
+  working_hours: 8.0
 
 two:
   employee: two
   date: 2025-07-29
   status: present
-  check_in: 2025-07-29 09:30:00
-  check_out: 2025-07-29 17:30:00
+  working_hours: 7.5

@@ -1,39 +1,39 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
-  asset_type: MyString
-  serial_number: MyString
-  model: MyString
-  brand: MyString
-  purchase_date: 2025-07-30
-  warranty_expiry: 2025-07-30
-  purchase_cost: 9.99
-  current_value: 9.99
-  status: MyString
-  location: MyString
-  department: MyString
-  notes: MyText
-  condition: MyString
-  last_maintenance: 2025-07-30
-  next_maintenance: 2025-07-30
+  name: MacBook Pro 14
+  asset_type: laptop
+  serial_number: SN001234567
+  model: MacBook Pro
+  brand: Apple
+  purchase_date: 2025-01-15
+  warranty_expiry: 2028-01-15
+  purchase_cost: 1999.99
+  current_value: 1799.99
+  status: available
+  location: Head Office
+  department: Engineering
+  notes: Primary development laptop
+  condition: good
+  last_maintenance: 2025-06-01
+  next_maintenance: 2025-12-01
   employee: one
 
 two:
-  name: MyString
-  asset_type: MyString
-  serial_number: MyString
-  model: MyString
-  brand: MyString
-  purchase_date: 2025-07-30
-  warranty_expiry: 2025-07-30
-  purchase_cost: 9.99
-  current_value: 9.99
-  status: MyString
-  location: MyString
-  department: MyString
-  notes: MyText
-  condition: MyString
-  last_maintenance: 2025-07-30
-  next_maintenance: 2025-07-30
+  name: Dell Monitor 27
+  asset_type: desktop
+  serial_number: SN009876543
+  model: UltraSharp 27
+  brand: Dell
+  purchase_date: 2024-08-20
+  warranty_expiry: 2027-08-20
+  purchase_cost: 499.99
+  current_value: 450.00
+  status: assigned
+  location: Head Office
+  department: Marketing
+  notes: Secondary monitor
+  condition: excellent
+  last_maintenance: 2025-03-01
+  next_maintenance: 2025-09-01
   employee: two

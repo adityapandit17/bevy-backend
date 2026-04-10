@@ -346,22 +346,25 @@ class UserPermissionsTest < ActiveSupport::TestCase
     assert_not_includes employees, @super_admin
   end
 
-  test "permission checking is case insensitive" do
-    # Test with different cases
-    assert @super_admin.has_permission?("EMPLOYEES", "INDEX")
-    assert @super_admin.has_permission?("Employees", "Create")
+  test "permission checking is case sensitive - requires lowercase resource and action" do
+    # The permission model stores lowercase resource/action keys - lookups must match exactly
+    assert @super_admin.has_permission?("employees", "index")
+    assert @super_admin.has_permission?("employees", "create")
     assert @super_admin.has_permission?("employees", "update")
+    # Uppercase lookups do NOT match because the DB comparison is exact
+    assert_not @super_admin.has_permission?("EMPLOYEES", "INDEX")
+    assert_not @super_admin.has_permission?("Employees", "Create")
   end
 
   test "permission checking handles non-existent resources gracefully" do
-    # Super admin has all permissions, so this will return true
-    assert @super_admin.has_permission?("nonexistent", "index")
+    # Permissions are strictly role-based; no implicit super-admin bypass
+    assert_not @super_admin.has_permission?("nonexistent", "index")
     assert_not @employee.has_permission?("nonexistent", "create")
   end
 
   test "permission checking handles non-existent actions gracefully" do
-    # Super admin has all permissions, so this will return true
-    assert @super_admin.has_permission?("employees", "nonexistent")
+    # Non-existent actions return false even for super admin
+    assert_not @super_admin.has_permission?("employees", "nonexistent")
     assert_not @employee.has_permission?("employees", "nonexistent")
   end
 

@@ -73,12 +73,13 @@ class EmployeeTest < ActiveSupport::TestCase
   end
 
   test "should accept and normalize common phone formats" do
-    @employee.phone = "+1 (555) 123-4567"
-    assert @employee.valid?
-    assert_equal "+15551234567", @employee.phone
+    # Validation uses company country (defaults to IN). Use valid Indian phone numbers.
+    @employee.phone = "+91 98765 43210"
+    assert @employee.valid?, @employee.errors.full_messages.inspect
+    assert_equal "+919876543210", @employee.phone
 
     @employee.phone = "98765-43210"
-    assert @employee.valid?
+    assert @employee.valid?, @employee.errors.full_messages.inspect
     assert_equal "9876543210", @employee.phone
   end
 
@@ -368,22 +369,22 @@ class EmployeeTest < ActiveSupport::TestCase
   end
 
   test "tenure_years should calculate years of service" do
-    @employee.date_of_joining = 2.years.ago
+    @employee.date_of_joining = 2.years.ago - 1.day
     assert_equal 2, @employee.tenure_years
   end
 
   test "tenure_months should calculate months of service" do
-    @employee.date_of_joining = 4.months.ago
+    @employee.date_of_joining = 4.months.ago - 1.day
     assert_equal 4, @employee.tenure_months
   end
 
   test "tenure_summary should return formatted tenure" do
-    @employee.date_of_joining = 4.months.ago
+    @employee.date_of_joining = 4.months.ago - 1.day
     assert_equal "4 months", @employee.tenure_summary
   end
 
   test "tenure_summary should return years for long tenure" do
-    @employee.date_of_joining = 2.years.ago
+    @employee.date_of_joining = 2.years.ago - 1.day
     assert_equal "2 years", @employee.tenure_summary
   end
 

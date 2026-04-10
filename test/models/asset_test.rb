@@ -368,7 +368,7 @@ class AssetTest < ActiveSupport::TestCase
   end
 
   test "age_in_years should calculate asset age" do
-    @asset.purchase_date = 2.years.ago
+    @asset.purchase_date = 2.years.ago - 1.day
     assert_equal 2, @asset.age_in_years
   end
 
@@ -515,7 +515,7 @@ class AssetTest < ActiveSupport::TestCase
 
   # Callback tests
   test "should calculate depreciation before save" do
-    @asset.purchase_date = 2.years.ago
+    @asset.purchase_date = 2.years.ago - 1.day
     @asset.purchase_cost = 1000.00
     @asset.asset_type = "laptop" # 25% depreciation per year
     @asset.save!

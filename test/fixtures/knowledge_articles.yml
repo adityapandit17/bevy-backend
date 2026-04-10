@@ -1,25 +1,25 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  title: MyString
-  content: MyText
-  category: MyString
-  author: MyString
-  tags: MyText
-  views: 1
-  helpful: 1
-  status: MyString
+  title: How to Request Leave
+  content: Step-by-step guide to requesting leave through the HRMS portal
+  category: HR Policies
+  author: HR Manager
+  tags: leave, hr, policy
+  views: 42
+  helpful: 15
+  status: published
   created_at: 2025-11-19 22:04:30
   updated_at: 2025-11-19 22:04:30
 
 two:
-  title: MyString
-  content: MyText
-  category: MyString
-  author: MyString
-  tags: MyText
-  views: 1
-  helpful: 1
-  status: MyString
+  title: IT Equipment Request Process
+  content: Instructions for requesting new IT equipment and software
+  category: IT Support
+  author: IT Manager
+  tags: it, equipment, request
+  views: 28
+  helpful: 10
+  status: published
   created_at: 2025-11-19 22:04:30
   updated_at: 2025-11-19 22:04:30

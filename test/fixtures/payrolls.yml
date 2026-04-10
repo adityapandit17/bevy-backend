@@ -2,14 +2,14 @@
 
 one:
   employee: one
-  month: MyString
-  gross_salary: 9.99
-  net_salary: 9.99
-  status: MyString
+  month: January
+  gross_salary: 55000.00
+  net_salary: 53000.00
+  status: pending
 
 two:
   employee: two
-  month: MyString
-  gross_salary: 9.99
-  net_salary: 9.99
-  status: MyString
+  month: February
+  gross_salary: 65000.00
+  net_salary: 62000.00
+  status: approved
