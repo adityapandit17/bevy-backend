@@ -1,4 +1,6 @@
 class OnboardingEmployee < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :employee
   has_many :onboarding_tasks, dependent: :destroy
 

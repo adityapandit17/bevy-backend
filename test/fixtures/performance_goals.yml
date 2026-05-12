@@ -1,5 +1,4 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   employee: one
   title: MyString
@@ -8,7 +7,7 @@ one:
   progress: 1
   status: MyString
   due_date: 2025-07-30
-
+  company: one
 two:
   employee: two
   title: MyString
@@ -17,3 +16,4 @@ two:
   progress: 1
   status: MyString
   due_date: 2025-07-30
+  company: two

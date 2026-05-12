@@ -1,23 +1,23 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   candidate: one
   interview_type: video
   scheduled_date: 2025-07-30
-  scheduled_time: 2025-07-30 10:00:00
+  scheduled_time: 2025-07-30 15:30:00.000000000 +05:30
   interviewer: John Interviewer
   status: scheduled
   notes: Technical interview for software engineer position
-  feedback: 
+  feedback:
   rating: 4
-
+  company: one
 two:
   candidate: two
   interview_type: phone
   scheduled_date: 2025-07-30
-  scheduled_time: 2025-07-30 14:00:00
+  scheduled_time: 2025-07-30 19:30:00.000000000 +05:30
   interviewer: Jane Interviewer
   status: completed
   notes: Initial screening interview
   feedback: Good communication skills, strong technical background
   rating: 5
+  company: two

@@ -1,4 +1,6 @@
 class PendingTask < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :taskable, polymorphic: true
   belongs_to :assigned_to, class_name: "Employee", foreign_key: :assigned_to_id, optional: true
 
@@ -51,5 +53,18 @@ class PendingTask < ApplicationRecord
 
   def mark_cancelled!
     update(status: "cancelled")
+  end
+
+  private
+
+  def assign_company_from_current
+    cid =
+      case taskable
+      when Employee, LeaveRequest, Interview
+        taskable.company_id
+      else
+        taskable.try(:company_id)
+      end
+    self.company_id ||= cid || assigned_to&.company_id || Current.company&.id
   end
 end

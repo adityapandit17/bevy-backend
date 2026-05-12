@@ -11,7 +11,7 @@ class EmployeesController < ApplicationController
   before_action :authorize_destroy!, only: [ :destroy ]
 
   def index
-    @employees = Employee.includes(:manager, :department, :direct_reports)
+    @employees = Employee.for_current_company.includes(:manager, :department, :direct_reports)
 
     # Apply search filter
     if params[:search].present?
@@ -109,7 +109,7 @@ class EmployeesController < ApplicationController
   private
 
   def set_employee
-    @employee = Employee.find(params[:id])
+    @employee = find_in_tenant(Employee, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Employee not found" }, status: :not_found
   end

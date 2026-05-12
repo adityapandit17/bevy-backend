@@ -1,5 +1,4 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   name: MacBook Pro 14
   asset_type: laptop
@@ -18,7 +17,7 @@ one:
   last_maintenance: 2025-06-01
   next_maintenance: 2025-12-01
   employee: one
-
+  company: one
 two:
   name: Dell Monitor 27
   asset_type: desktop
@@ -28,7 +27,7 @@ two:
   purchase_date: 2024-08-20
   warranty_expiry: 2027-08-20
   purchase_cost: 499.99
-  current_value: 450.00
+  current_value: 450.0
   status: assigned
   location: Head Office
   department: Marketing
@@ -37,3 +36,4 @@ two:
   last_maintenance: 2025-03-01
   next_maintenance: 2025-09-01
   employee: two
+  company: two

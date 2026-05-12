@@ -2,7 +2,7 @@ class EmployeeTrainingsController < ApplicationController
   before_action :set_employee_training, only: [ :show, :update, :destroy ]
 
   def index
-    @employee_trainings = EmployeeTraining.all
+    @employee_trainings = EmployeeTraining.for_current_company
     render json: @employee_trainings
   end
 
@@ -35,7 +35,7 @@ class EmployeeTrainingsController < ApplicationController
   private
 
   def set_employee_training
-    @employee_training = EmployeeTraining.find(params[:id])
+    @employee_training = find_in_tenant(EmployeeTraining, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Employee training not found" }, status: :not_found
   end

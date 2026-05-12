@@ -30,7 +30,7 @@ class EmployeeDocumentsController < ApplicationController
       return
     end
 
-    @employee_documents = EmployeeDocument.includes(:employee).all
+    @employee_documents = EmployeeDocument.for_current_company.includes(:employee)
     render json: @employee_documents.map { |doc| format_employee_document(doc) }
   end
 
@@ -165,7 +165,7 @@ class EmployeeDocumentsController < ApplicationController
   private
 
   def set_employee_document
-    @employee_document = EmployeeDocument.find(params[:id])
+    @employee_document = find_in_tenant(EmployeeDocument, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Employee document not found" }, status: :not_found
   end

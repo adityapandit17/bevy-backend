@@ -1,13 +1,12 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   asset: one
   employee: one
   assigned_date: 2025-07-30
-  return_date: 
+  return_date:
   notes: Laptop assigned to software engineer
   status: active
-
+  company: one
 two:
   asset: two
   employee: two
@@ -15,3 +14,4 @@ two:
   return_date: 2025-08-30
   notes: Monitor returned after project completion
   status: returned
+  company: two

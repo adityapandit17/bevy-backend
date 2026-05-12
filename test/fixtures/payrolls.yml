@@ -1,15 +1,15 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   employee: one
   month: January
-  gross_salary: 55000.00
-  net_salary: 53000.00
+  gross_salary: 55000.0
+  net_salary: 53000.0
   status: pending
-
+  company: one
 two:
   employee: two
   month: February
-  gross_salary: 65000.00
-  net_salary: 62000.00
+  gross_salary: 65000.0
+  net_salary: 62000.0
   status: approved
+  company: two

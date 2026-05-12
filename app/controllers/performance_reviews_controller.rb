@@ -2,7 +2,7 @@ class PerformanceReviewsController < ApplicationController
   before_action :set_performance_review, only: [ :show, :update, :destroy ]
 
   def index
-    @performance_reviews = PerformanceReview.all
+    @performance_reviews = PerformanceReview.for_current_company
     render json: @performance_reviews
   end
 
@@ -35,7 +35,7 @@ class PerformanceReviewsController < ApplicationController
   private
 
   def set_performance_review
-    @performance_review = PerformanceReview.find(params[:id])
+    @performance_review = find_in_tenant(PerformanceReview, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Performance review not found" }, status: :not_found
   end

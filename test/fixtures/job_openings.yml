@@ -1,5 +1,4 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   title: Senior Software Engineer
   department: one
@@ -13,9 +12,9 @@ one:
   salary_max: 120000
   experience: 5-8 years
   skills: Ruby, Rails, JavaScript, React, PostgreSQL
-  posted: <%= Date.current %>
+  posted: "<%= Date.current %>"
   applications: 0
-
+  company: one
 two:
   title: Marketing Manager
   department: two
@@ -29,5 +28,6 @@ two:
   salary_max: 90000
   experience: 3-5 years
   skills: Digital Marketing, Analytics, Content Creation, Social Media
-  posted: <%= Date.current %>
+  posted: "<%= Date.current %>"
   applications: 0
+  company: two

@@ -2,7 +2,7 @@ class SlaWorkflowsController < ApplicationController
   before_action :set_workflow, only: [ :show, :update, :destroy ]
 
   def index
-    @workflows = SlaWorkflow.all
+    @workflows = SlaWorkflow.for_current_company
 
     # Apply filters
     @workflows = @workflows.by_category(params[:category]) if params[:category].present?
@@ -50,7 +50,7 @@ class SlaWorkflowsController < ApplicationController
   private
 
   def set_workflow
-    @workflow = SlaWorkflow.find(params[:id])
+    @workflow = find_in_tenant(SlaWorkflow, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Workflow not found" }, status: :not_found
   end

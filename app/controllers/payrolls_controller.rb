@@ -4,7 +4,7 @@ class PayrollsController < ApplicationController
 
   def index
     # authorize!("payrolls", "index")
-    @payrolls = Payroll.includes(:employee)
+    @payrolls = Payroll.for_current_company.includes(:employee)
     render json: @payrolls.as_json(
       include: {
         employee: {
@@ -20,7 +20,7 @@ class PayrollsController < ApplicationController
   end
 
   def calculation_breakdown
-    payroll = Payroll.find(params[:id])
+    payroll = find_in_tenant(Payroll, params[:id])
     employee = payroll.employee
 
     # Parse the month from payroll
@@ -363,7 +363,7 @@ class PayrollsController < ApplicationController
     month = params[:month] || Date.current
     preview = ActiveModel::Type::Boolean.new.cast(params[:preview])
 
-    result = PayrollProcessor.new(month: month, preview: preview).call
+    result = PayrollProcessor.new(month: month, preview: preview, company_id: Current.company.id).call
 
     render json: {
       month: PayrollMonth.label(month),
@@ -381,7 +381,7 @@ class PayrollsController < ApplicationController
   private
 
   def set_payroll
-    @payroll = Payroll.find(params[:id])
+    @payroll = find_in_tenant(Payroll, params[:id])
   rescue ActiveRecord::RecordNotFound
     head :not_found
   end

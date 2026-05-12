@@ -1,5 +1,4 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   employee: one
   name: Health Insurance
@@ -9,8 +8,8 @@ one:
   start_date: 2025-07-30
   end_date: 2026-07-30
   status: active
-  cost: 500.00
-
+  cost: 500.0
+  company: one
 two:
   employee: two
   name: Dental Insurance
@@ -20,4 +19,5 @@ two:
   start_date: 2025-07-30
   end_date: 2026-07-30
   status: active
-  cost: 150.00
+  cost: 150.0
+  company: two

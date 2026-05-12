@@ -1,4 +1,5 @@
 class Employee < ApplicationRecord
+  belongs_to :company
   belongs_to :department
   has_one :user, dependent: :destroy
 
@@ -27,10 +28,13 @@ class Employee < ApplicationRecord
 
   # Validations
   before_validation :normalize_phone
+  before_validation :assign_company_from_department, on: :create
 
   validates :first_name, presence: true
   validates :last_name, presence: true
-  validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :email, presence: true, uniqueness: { scope: :company_id }, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :company_id, presence: true, on: :create
+  validate :department_matches_company, if: -> { department_id.present? && company_id.present? }
   validates :phone, presence: true
   validate :phone_valid_for_company_country
   validates :designation, presence: true
@@ -48,6 +52,13 @@ class Employee < ApplicationRecord
   }, default: "onboarding"
 
   # Scopes
+  scope :for_current_company, -> {
+    if Current.company
+      where(company_id: Current.company.id)
+    else
+      none
+    end
+  }
   scope :active, -> { where(status: "active") }
   scope :inactive, -> { where(status: "inactive") }
   scope :terminated, -> { where(status: "terminated") }
@@ -316,6 +327,19 @@ class Employee < ApplicationRecord
 
   private
 
+  def assign_company_from_department
+    if department_id.present? && department
+      self.company_id ||= department.company_id
+    end
+    self.company_id ||= Current.company&.id
+  end
+
+  def department_matches_company
+    return if department&.company_id == company_id
+
+    errors.add(:department_id, "must belong to the same workspace as the employee")
+  end
+
   # Normalizes phone numbers to either:
   # - "+<digits>" (E.164-like) when a leading "+" was provided, or
   # - "<digits>" when no "+" was provided
@@ -338,9 +362,8 @@ class Employee < ApplicationRecord
   def phone_valid_for_company_country
     return if phone.blank?
 
-    # Single-tenant: company settings come from the first (and only) Company record
-    # Fallback to "IN" so validation is deterministic even if settings aren't saved yet.
-    country = (Company.first&.country_code.presence || "IN").to_s.upcase
+    # Prefer this employee's tenant company; fallback for legacy paths.
+    country = (company&.country_code.presence || Company.first&.country_code.presence || "IN").to_s.upcase
 
     # Phonelib expects ISO3166-1 alpha-2 (e.g. "IN", "US")
     raw = phone.to_s

@@ -2,7 +2,7 @@ class HelpdeskTicketsController < ApplicationController
   before_action :set_ticket, only: [ :show, :update, :destroy ]
 
   def index
-    @tickets = HelpdeskTicket.includes(:assigned_to, :requester).all
+    @tickets = HelpdeskTicket.for_current_company.includes(:assigned_to, :requester)
 
     # Apply filters
     @tickets = @tickets.by_priority(params[:priority]) if params[:priority].present?
@@ -85,7 +85,7 @@ class HelpdeskTicketsController < ApplicationController
   private
 
   def set_ticket
-    @ticket = HelpdeskTicket.find(params[:id])
+    @ticket = find_in_tenant(HelpdeskTicket, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Ticket not found" }, status: :not_found
   end

@@ -1,19 +1,19 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   asset: one
   maintenance_date: 2025-07-30
   maintenance_type: routine
   description: Regular maintenance check
-  cost: 150.00
+  cost: 150.0
   performed_by: John Technician
   next_maintenance: 2025-08-30
-
+  company: one
 two:
   asset: two
   maintenance_date: 2025-07-30
   maintenance_type: repair
   description: Fixed hardware issue
-  cost: 300.00
+  cost: 300.0
   performed_by: Jane Engineer
   next_maintenance: 2025-09-30
+  company: two

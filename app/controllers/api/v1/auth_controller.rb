@@ -25,6 +25,7 @@ class Api::V1::AuthController < ApplicationController
       # Update last login time
       user.update_last_login!
 
+      ws = workspace_payload(user)
       render_success({
         token: token,
         user: {
@@ -38,7 +39,7 @@ class Api::V1::AuthController < ApplicationController
           permissions: user.permissions.pluck(:resource, :action).map { |r, a| "#{r}:#{a}" },
           last_login_at: user.last_login_at,
           employee_id: user.employee_id
-        }
+        }.merge(ws)
       })
     else
       render_error("Invalid email or password", :unauthorized)
@@ -59,6 +60,7 @@ class Api::V1::AuthController < ApplicationController
     # Generate a new token for the current user
     token = JwtService.generate_token(current_user)
 
+    ws = workspace_payload(current_user)
     render_success({
       token: token,
       user: {
@@ -72,12 +74,31 @@ class Api::V1::AuthController < ApplicationController
         permissions: current_user.permissions.pluck(:resource, :action).map { |r, a| "#{r}:#{a}" },
         last_login_at: current_user.last_login_at,
         employee_id: current_user.employee_id
-      }
+      }.merge(ws)
     })
   end
 
   # GET /api/v1/auth/me
   def me
+    header_cid = request.headers["X-Company-Id"].to_s.strip.presence&.to_i
+    header_code = request.headers["X-Company-Code"].to_s.strip.presence
+
+    active_company =
+      if header_cid.present? && header_cid.positive?
+        Company.find_by(id: header_cid)
+      elsif header_code.present?
+        Company.where("LOWER(code) = ?", header_code.downcase).first
+      end
+    active_company = nil if active_company && !current_user.can_access_company?(active_company)
+
+    default_co = current_user.default_company_for_session
+    current_co = active_company || default_co
+
+    ws = workspace_payload(current_user).merge(
+      current_company_id: current_co&.id,
+      current_company: current_co && { id: current_co.id, name: current_co.name, code: current_co.code }
+    )
+
     render_success({
       user: {
         id: current_user.id,
@@ -92,7 +113,7 @@ class Api::V1::AuthController < ApplicationController
         created_at: current_user.created_at,
         updated_at: current_user.updated_at,
         employee_id: current_user.employee_id
-      }
+      }.merge(ws)
     })
   end
 
@@ -158,6 +179,18 @@ class Api::V1::AuthController < ApplicationController
   end
 
   private
+
+  def workspace_payload(user)
+    companies = user.accessible_companies.select(:id, :name, :code).map do |c|
+      { id: c.id, name: c.name, code: c.code }
+    end
+    default_c = user.default_company_for_session
+    {
+      companies: companies,
+      current_company_id: default_c&.id,
+      current_company: default_c && { id: default_c.id, name: default_c.name, code: default_c.code }
+    }
+  end
 
   def render_success(data, status = :ok)
     render json: {

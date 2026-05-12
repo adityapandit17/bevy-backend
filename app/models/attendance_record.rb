@@ -1,4 +1,6 @@
 class AttendanceRecord < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :employee
   has_many :attendance_sessions, dependent: :destroy
 
@@ -145,6 +147,10 @@ class AttendanceRecord < ApplicationRecord
   end
 
   private
+
+  def assign_company_from_current
+    self.company_id ||= employee&.company_id || Current.company&.id
+  end
 
   def update_working_hours_from_sessions
     # Update working_hours from sessions - always recalculate to ensure accuracy

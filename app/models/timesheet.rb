@@ -1,4 +1,6 @@
 class Timesheet < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :employee
 
   # Validations

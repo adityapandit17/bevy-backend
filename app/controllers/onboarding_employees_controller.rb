@@ -1,9 +1,9 @@
 class OnboardingEmployeesController < ApplicationController
-  before_action :set_onboarding_employee, only: [ :show, :update, :destroy ]
+  before_action :set_onboarding_employee, only: [ :show, :update, :destroy, :send_welcome_email ]
 
   # GET /onboarding_employees
   def index
-    @onboarding_employees = OnboardingEmployee.includes(:employee, :onboarding_tasks)
+    @onboarding_employees = OnboardingEmployee.for_current_company.includes(:employee, :onboarding_tasks)
 
     # Apply filters
     @onboarding_employees = @onboarding_employees.by_status(params[:status]) if params[:status].present?
@@ -49,19 +49,19 @@ class OnboardingEmployeesController < ApplicationController
   # GET /onboarding_employees/stats
   def stats
     stats = {
-      active_onboarding: OnboardingEmployee.active.size,
-      completed_this_month: OnboardingEmployee.completed.where("updated_at >= ?", 1.month.ago).size,
-      completed_this_week: OnboardingEmployee.completed.where("updated_at >= ?", 1.week.ago).size,
-      total_onboarding: OnboardingEmployee.count,
-      pending_status: OnboardingEmployee.pending.size,
-      in_progress_status: OnboardingEmployee.in_progress.size,
-      completed_total: OnboardingEmployee.completed.size,
-      pending_tasks: OnboardingTask.pending.size,
-      completed_tasks: OnboardingTask.where(is_completed: true).size,
-      total_tasks: OnboardingTask.count,
-      documents_pending: OnboardingTask.where("documents IS NOT NULL AND documents != ''").pending.size,
-      overdue_tasks: OnboardingTask.where("due_date < ? AND is_completed = ?", Date.current, false).size,
-      due_soon_tasks: OnboardingTask.where("due_date BETWEEN ? AND ? AND is_completed = ?", Date.current, 3.days.from_now, false).size
+      active_onboarding: OnboardingEmployee.for_current_company.active.size,
+      completed_this_month: OnboardingEmployee.for_current_company.completed.where("updated_at >= ?", 1.month.ago).size,
+      completed_this_week: OnboardingEmployee.for_current_company.completed.where("updated_at >= ?", 1.week.ago).size,
+      total_onboarding: OnboardingEmployee.for_current_company.count,
+      pending_status: OnboardingEmployee.for_current_company.pending.size,
+      in_progress_status: OnboardingEmployee.for_current_company.in_progress.size,
+      completed_total: OnboardingEmployee.for_current_company.completed.size,
+      pending_tasks: OnboardingTask.for_current_company.pending.size,
+      completed_tasks: OnboardingTask.for_current_company.where(is_completed: true).size,
+      total_tasks: OnboardingTask.for_current_company.count,
+      documents_pending: OnboardingTask.for_current_company.where("documents IS NOT NULL AND documents != ''").pending.size,
+      overdue_tasks: OnboardingTask.for_current_company.where("due_date < ? AND is_completed = ?", Date.current, false).size,
+      due_soon_tasks: OnboardingTask.for_current_company.where("due_date BETWEEN ? AND ? AND is_completed = ?", Date.current, 3.days.from_now, false).size
     }
 
     render json: stats
@@ -88,7 +88,6 @@ class OnboardingEmployeesController < ApplicationController
 
   # POST /onboarding_employees/:id/send_welcome_email
   def send_welcome_email
-    @onboarding_employee = OnboardingEmployee.find(params[:id])
     employee = @onboarding_employee.employee
 
     # Check if user already exists
@@ -120,7 +119,9 @@ class OnboardingEmployeesController < ApplicationController
   private
 
   def set_onboarding_employee
-    @onboarding_employee = OnboardingEmployee.find(params[:id])
+    @onboarding_employee = find_in_tenant(OnboardingEmployee, params[:id])
+  rescue ActiveRecord::RecordNotFound
+    head :not_found
   end
 
   def onboarding_employee_params

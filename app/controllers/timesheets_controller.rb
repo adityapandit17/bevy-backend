@@ -2,7 +2,7 @@ class TimesheetsController < ApplicationController
   before_action :set_timesheet, only: [ :show, :update, :destroy ]
 
   def index
-    @timesheets = Timesheet.all
+    @timesheets = Timesheet.for_current_company
     render json: @timesheets
   end
 
@@ -35,7 +35,7 @@ class TimesheetsController < ApplicationController
   private
 
   def set_timesheet
-    @timesheet = Timesheet.find(params[:id])
+    @timesheet = find_in_tenant(Timesheet, params[:id])
   rescue ActiveRecord::RecordNotFound
     head :not_found
   end

@@ -1,4 +1,6 @@
 class OffboardingTask < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :offboarding_employee
 
   # Validations
@@ -116,6 +118,10 @@ class OffboardingTask < ApplicationRecord
   end
 
   private
+
+  def assign_company_from_current
+    self.company_id ||= offboarding_employee&.company_id || Current.company&.id
+  end
 
   def set_completed_date
     if is_completed? && completed_date.nil?

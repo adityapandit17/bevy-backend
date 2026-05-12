@@ -1,4 +1,6 @@
 class HelpdeskTicket < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :assigned_to, class_name: "Employee", foreign_key: :assigned_to_id, optional: true
   belongs_to :requester, class_name: "Employee", foreign_key: :requester_id, optional: true
   has_many :ticket_comments, dependent: :destroy

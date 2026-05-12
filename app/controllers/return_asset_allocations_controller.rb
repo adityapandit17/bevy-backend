@@ -18,7 +18,7 @@ class ReturnAssetAllocationsController < ApplicationController
   private
 
   def set_allocation
-    @allocation = AssetAllocation.find(params[:asset_allocation_id])
+    @allocation = find_in_tenant(AssetAllocation, params[:asset_allocation_id])
   rescue ActiveRecord::RecordNotFound
     render json: { message: "Allocation not found" }, status: :not_found
   end

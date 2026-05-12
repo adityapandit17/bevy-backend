@@ -1,4 +1,6 @@
 class SlaWorkflow < ApplicationRecord
+  include BelongsToTenant
+
   # Validations
   validates :name, presence: true
   validates :priority, inclusion: { in: %w[low medium high] }

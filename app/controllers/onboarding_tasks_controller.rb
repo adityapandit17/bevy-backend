@@ -58,7 +58,7 @@ class OnboardingTasksController < ApplicationController
 
   # PATCH /onboarding_tasks/:id/toggle
   def toggle
-    @onboarding_task = OnboardingTask.find(params[:id])
+    @onboarding_task = find_in_tenant(OnboardingTask, params[:id])
     @onboarding_task.update(is_completed: !@onboarding_task.is_completed)
 
     # Update the onboarding employee's progress
@@ -82,7 +82,7 @@ class OnboardingTasksController < ApplicationController
   private
 
   def set_onboarding_task
-    @onboarding_task = OnboardingTask.find(params[:id])
+    @onboarding_task = find_in_tenant(OnboardingTask, params[:id])
   end
 
   def onboarding_task_params

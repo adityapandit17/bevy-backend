@@ -1,5 +1,4 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   onboarding_employee: one
   title: Complete HR Paperwork
@@ -10,7 +9,7 @@ one:
   assigned_to: HR Manager
   is_completed: false
   documents: Employment contract, Tax forms, Benefits enrollment
-
+  company: one
 two:
   onboarding_employee: two
   title: IT Setup
@@ -21,3 +20,4 @@ two:
   assigned_to: IT Support
   is_completed: false
   documents: Computer setup checklist, Access request form
+  company: two

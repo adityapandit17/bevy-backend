@@ -1,25 +1,25 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   title: Team All-Hands Meeting
   description: Monthly company-wide meeting
   event_type: meeting
-  start_time: 2025-11-20 09:00:00
-  end_time: 2025-11-20 10:00:00
+  start_time: 2025-11-20 14:30:00.000000000 +05:30
+  end_time: 2025-11-20 15:30:00.000000000 +05:30
   location: Conference Room A
   organizer_id: 1
   status: scheduled
-  created_at: 2025-11-20 01:05:55
-  updated_at: 2025-11-20 01:05:55
-
+  created_at: 2025-11-20 06:35:55.000000000 +05:30
+  updated_at: 2025-11-20 06:35:55.000000000 +05:30
+  company: one
 two:
   title: Rails Training Workshop
   description: Advanced Rails development techniques
   event_type: workshop
-  start_time: 2025-11-21 14:00:00
-  end_time: 2025-11-21 17:00:00
+  start_time: 2025-11-21 19:30:00.000000000 +05:30
+  end_time: 2025-11-21 22:30:00.000000000 +05:30
   location: Training Room
   organizer_id: 1
   status: scheduled
-  created_at: 2025-11-20 01:05:55
-  updated_at: 2025-11-20 01:05:55
+  created_at: 2025-11-20 06:35:55.000000000 +05:30
+  updated_at: 2025-11-20 06:35:55.000000000 +05:30
+  company: two

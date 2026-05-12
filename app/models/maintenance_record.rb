@@ -1,4 +1,6 @@
 class MaintenanceRecord < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :asset
 
   # Validations
@@ -112,6 +114,10 @@ class MaintenanceRecord < ApplicationRecord
   end
 
   private
+
+  def assign_company_from_current
+    self.company_id ||= asset&.company_id || Current.company&.id
+  end
 
   def set_next_maintenance
     return if next_maintenance.present?

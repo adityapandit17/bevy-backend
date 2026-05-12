@@ -2,7 +2,7 @@ class RecognitionsController < ApplicationController
   before_action :set_recognition, only: [ :show, :update, :destroy ]
 
   def index
-    @recognitions = Recognition.includes(:given_by, :received_by).all
+    @recognitions = Recognition.for_current_company.includes(:given_by, :received_by)
 
     # Filtering
     @recognitions = @recognitions.by_type(params[:recognition_type]) if params[:recognition_type].present?
@@ -83,7 +83,7 @@ class RecognitionsController < ApplicationController
   private
 
   def set_recognition
-    @recognition = Recognition.find(params[:id])
+    @recognition = find_in_tenant(Recognition, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Recognition not found" }, status: :not_found
   end

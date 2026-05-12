@@ -12,7 +12,7 @@ class CandidatesController < ApplicationController
 
   # GET /candidates
   def index
-    @candidates = Candidate.includes(:interviews, :next_interview)
+    @candidates = Candidate.for_current_company.includes(:interviews, :next_interview)
 
     # Filter by archived status (default to not archived unless archive=true)
     if params[:archived] == "true"
@@ -78,7 +78,7 @@ class CandidatesController < ApplicationController
 
   # PATCH /candidates/:id/update_status
   def update_status
-    @candidate = Candidate.find(params[:id])
+    @candidate = find_in_tenant(Candidate, params[:id])
     new_status = params[:status]
 
     if @candidate.update(status: new_status, last_contact: Date.current)
@@ -90,7 +90,7 @@ class CandidatesController < ApplicationController
 
   # PATCH /candidates/:id/archive
   def archive
-    @candidate = Candidate.find(params[:id])
+    @candidate = find_in_tenant(Candidate, params[:id])
     if @candidate.update(archived: true)
       render json: CandidateSerializer.new.serialize(@candidate)
     else
@@ -101,16 +101,16 @@ class CandidatesController < ApplicationController
   # GET /candidates/stats
   def stats
     stats = {
-      total_applications: Candidate.count,
-      active_candidates: Candidate.active.size,
-      interviews_this_week: Interview.this_week.size,
-      offers_extended: Candidate.where(status: "offered").size,
-      hired_this_month: Candidate.where(status: "hired", applied_date: 1.month.ago..Date.current).size
+      total_applications: Candidate.for_current_company.count,
+      active_candidates: Candidate.for_current_company.active.size,
+      interviews_this_week: Interview.for_current_company.this_week.size,
+      offers_extended: Candidate.for_current_company.where(status: "offered").size,
+      hired_this_month: Candidate.for_current_company.where(status: "hired", applied_date: 1.month.ago..Date.current).size
     }
 
     # Pipeline breakdown
     pipeline = {}
-    Candidate.group(:status).size.each do |status, count|
+    Candidate.for_current_company.group(:status).size.each do |status, count|
       pipeline[status] = count
     end
     stats[:pipeline] = pipeline
@@ -123,7 +123,7 @@ class CandidatesController < ApplicationController
     pipeline_data = {}
 
     %w[applied screening interview technical final offered hired rejected].each do |status|
-      candidates = Candidate.by_status(status).includes(:interviews)
+      candidates = Candidate.for_current_company.by_status(status).includes(:interviews)
       pipeline_data[status] = {
         count: candidates.size,
         candidates: Panko::ArraySerializer.new(candidates, each_serializer: CandidateSerializer).to_a
@@ -163,7 +163,7 @@ class CandidatesController < ApplicationController
   private
 
   def set_candidate
-    @candidate = Candidate.find(params[:id])
+    @candidate = find_in_tenant(Candidate, params[:id])
   end
 
   def candidate_params

@@ -7,6 +7,31 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
+# --- Multitenancy: default workspace companies (subdomain codes: bevy.lvh.me, bis.lvh.me) ---
+puts "Setting up seed workspace companies..."
+$seed_company = Company.find_or_create_by!(code: "BEVY") do |c|
+  c.name = "BevyHR Demo"
+  c.industry = "Technology"
+  c.employee_count = "50"
+  c.timezone = "Asia/Kolkata"
+  c.currency = "INR"
+  c.country_code = "IN"
+end
+$seed_company.update!(country_code: "IN") if $seed_company.country_code.blank?
+
+$seed_company_bis = Company.find_or_create_by!(code: "BIS") do |c|
+  c.name = "Bis Demo"
+  c.industry = "General"
+  c.employee_count = "10"
+  c.timezone = "Asia/Kolkata"
+  c.currency = "INR"
+  c.country_code = "IN"
+end
+$seed_company_bis.update!(country_code: "IN") if $seed_company_bis.country_code.blank?
+
+Current.company = $seed_company
+Current.user = nil
+
 # Create departments if they don't exist
 departments = [
   { name: "Engineering" },
@@ -20,7 +45,7 @@ departments = [
 ]
 
 departments.each do |dept|
-  Department.find_or_create_by!(name: dept[:name])
+  Department.find_or_create_by!(company_id: $seed_company.id, name: dept[:name])
 end
 
 # Create employees if they don't exist
@@ -31,7 +56,7 @@ employees = [
     last_name: "Doe",
     email: "john.doe@company.com",
     phone: "+91 98765 43210",
-    department_id: Department.find_by(name: "Engineering").id,
+    department_id: Department.find_by(company_id: $seed_company.id, name: "Engineering").id,
     designation: "Senior Software Engineer",
     date_of_joining: Date.current - 30.days,
     date_of_birth: Date.new(1990, 3, 15),
@@ -42,7 +67,7 @@ employees = [
     last_name: "Johnson",
     email: "alice.johnson@company.com",
     phone: "+91 98765 43211",
-    department_id: Department.find_by(name: "Engineering").id,
+    department_id: Department.find_by(company_id: $seed_company.id, name: "Engineering").id,
     designation: "Software Engineer",
     date_of_joining: Date.current - 20.days,
     status: "active"
@@ -52,7 +77,7 @@ employees = [
     last_name: "Wilson",
     email: "bob.wilson@company.com",
     phone: "+91 98765 43212",
-    department_id: Department.find_by(name: "Engineering").id,
+    department_id: Department.find_by(company_id: $seed_company.id, name: "Engineering").id,
     designation: "Tech Lead",
     date_of_joining: Date.current - 60.days,
     status: "active"
@@ -62,7 +87,7 @@ employees = [
     last_name: "Brown",
     email: "carol.brown@company.com",
     phone: "+91 98765 43213",
-    department_id: Department.find_by(name: "Engineering").id,
+    department_id: Department.find_by(company_id: $seed_company.id, name: "Engineering").id,
     designation: "DevOps Engineer",
     date_of_joining: Date.current - 45.days,
     status: "active"
@@ -74,7 +99,7 @@ employees = [
     last_name: "Smith",
     email: "jane.smith@company.com",
     phone: "+91 87654 32109",
-    department_id: Department.find_by(name: "Marketing").id,
+    department_id: Department.find_by(company_id: $seed_company.id, name: "Marketing").id,
     designation: "Marketing Manager",
     date_of_joining: Date.current - 15.days,
     status: "active"
@@ -84,7 +109,7 @@ employees = [
     last_name: "Lee",
     email: "david.lee@company.com",
     phone: "+91 87654 32110",
-    department_id: Department.find_by(name: "Marketing").id,
+    department_id: Department.find_by(company_id: $seed_company.id, name: "Marketing").id,
     designation: "Content Writer",
     date_of_joining: Date.current - 25.days,
     status: "active"
@@ -94,7 +119,7 @@ employees = [
     last_name: "Davis",
     email: "emma.davis@company.com",
     phone: "+91 87654 32111",
-    department_id: Department.find_by(name: "Marketing").id,
+    department_id: Department.find_by(company_id: $seed_company.id, name: "Marketing").id,
     designation: "Social Media Manager",
     date_of_joining: Date.current - 10.days,
     status: "active"
@@ -106,7 +131,7 @@ employees = [
     last_name: "Johnson",
     email: "mike.johnson@company.com",
     phone: "+91 76543 21098",
-    department_id: Department.find_by(name: "HR").id,
+    department_id: Department.find_by(company_id: $seed_company.id, name: "HR").id,
     designation: "HR Specialist",
     date_of_joining: Date.current - 7.days,
     status: "active"
@@ -116,7 +141,7 @@ employees = [
     last_name: "Miller",
     email: "sarah.miller@company.com",
     phone: "+91 76543 21099",
-    department_id: Department.find_by(name: "HR").id,
+    department_id: Department.find_by(company_id: $seed_company.id, name: "HR").id,
     designation: "HR Manager",
     date_of_joining: Date.current - 90.days,
     status: "active"
@@ -128,7 +153,7 @@ employees = [
     last_name: "Anderson",
     email: "tom.anderson@company.com",
     phone: "+91 65432 10987",
-    department_id: Department.find_by(name: "Finance").id,
+    department_id: Department.find_by(company_id: $seed_company.id, name: "Finance").id,
     designation: "Finance Manager",
     date_of_joining: Date.current - 120.days,
     status: "active"
@@ -138,7 +163,7 @@ employees = [
     last_name: "Garcia",
     email: "lisa.garcia@company.com",
     phone: "+91 65432 10988",
-    department_id: Department.find_by(name: "Finance").id,
+    department_id: Department.find_by(company_id: $seed_company.id, name: "Finance").id,
     designation: "Accountant",
     date_of_joining: Date.current - 35.days,
     status: "active"
@@ -150,7 +175,7 @@ employees = [
     last_name: "Taylor",
     email: "mark.taylor@company.com",
     phone: "+91 54321 09876",
-    department_id: Department.find_by(name: "Sales").id,
+    department_id: Department.find_by(company_id: $seed_company.id, name: "Sales").id,
     designation: "Sales Manager",
     date_of_joining: Date.current - 75.days,
     status: "active"
@@ -160,7 +185,7 @@ employees = [
     last_name: "White",
     email: "rachel.white@company.com",
     phone: "+91 54321 09877",
-    department_id: Department.find_by(name: "Sales").id,
+    department_id: Department.find_by(company_id: $seed_company.id, name: "Sales").id,
     designation: "Sales Executive",
     date_of_joining: Date.current - 40.days,
     status: "active"
@@ -172,7 +197,7 @@ employees = [
     last_name: "Martinez",
     email: "kevin.martinez@company.com",
     phone: "+91 43210 98765",
-    department_id: Department.find_by(name: "Product").id,
+    department_id: Department.find_by(company_id: $seed_company.id, name: "Product").id,
     designation: "Product Manager",
     date_of_joining: Date.current - 50.days,
     status: "active"
@@ -184,7 +209,7 @@ employees = [
     last_name: "Rodriguez",
     email: "amy.rodriguez@company.com",
     phone: "+91 32109 87654",
-    department_id: Department.find_by(name: "Design").id,
+    department_id: Department.find_by(company_id: $seed_company.id, name: "Design").id,
     designation: "UI/UX Designer",
     date_of_joining: Date.current - 30.days,
     status: "active"
@@ -196,15 +221,18 @@ employees = [
     last_name: "Lopez",
     email: "chris.lopez@company.com",
     phone: "+91 21098 76543",
-    department_id: Department.find_by(name: "Operations").id,
+    department_id: Department.find_by(company_id: $seed_company.id, name: "Operations").id,
     designation: "Operations Manager",
     date_of_joining: Date.current - 100.days,
     status: "active"
   }
 ]
 
-employees.each do |emp|
-  Employee.find_or_create_by!(email: emp[:email]) do |employee|
+employees.each_with_index do |raw, idx|
+  # Indian mobiles must start with 6–9 after +91; keep deterministic valid test numbers.
+  phone = format("+9198%08d", 10_000_000 + idx)
+  emp = raw.merge(phone: phone)
+  Employee.find_or_create_by!(company_id: $seed_company.id, email: emp[:email]) do |employee|
     employee.assign_attributes(emp)
     # Add random date of birth (age between 22-55)
     age = rand(22..55)
@@ -233,10 +261,10 @@ salary_data = {
   "Operations Manager" => { basic: 800000, hra: 160000, allowances: 160000, deductions: 38000 }
 }
 
-Employee.all.each do |employee|
+Employee.where(company_id: $seed_company.id).find_each do |employee|
   salary_info = salary_data[employee.designation]
   if salary_info
-    SalaryStructure.find_or_create_by!(employee: employee) do |ss|
+    SalaryStructure.find_or_create_by!(company_id: $seed_company.id, employee: employee) do |ss|
       ss.basic = salary_info[:basic]
       ss.hra = salary_info[:hra]
       ss.allowances = salary_info[:allowances]
@@ -248,7 +276,7 @@ end
 
 # Create payroll records for all employees
 puts "Creating payroll records..."
-Employee.all.each do |employee|
+Employee.where(company_id: $seed_company.id).find_each do |employee|
   salary_structure = employee.salary_structures.first
 
   if salary_structure
@@ -257,6 +285,7 @@ Employee.all.each do |employee|
 
     # Create payroll for current month
     Payroll.find_or_create_by!(
+      company_id: $seed_company.id,
       employee: employee,
       month: Date.current.strftime("%B %Y")
     ) do |payroll|
@@ -267,6 +296,7 @@ Employee.all.each do |employee|
 
     # Create payroll for previous month
     Payroll.find_or_create_by!(
+      company_id: $seed_company.id,
       employee: employee,
       month: 1.month.ago.strftime("%B %Y")
     ) do |payroll|
@@ -279,7 +309,7 @@ end
 
 # Create attendance records for all employees
 puts "Creating attendance records..."
-# Employee.all.each do |employee|
+# Employee.where(company_id: $seed_company.id).find_each do |employee|
 #   # Create attendance records for the last 30 days
 #   (0..29).each do |day_offset|
 #     date = Date.current - day_offset.days
@@ -301,7 +331,7 @@ puts "Creating job openings..."
 job_openings = [
   {
     title: "Senior Frontend Developer",
-    department: Department.find_by(name: "Engineering"),
+    department: Department.find_by(company_id: $seed_company.id, name: "Engineering"),
     description: "We are looking for a Senior Frontend Developer with 5+ years of experience in React, TypeScript, and modern web technologies.",
     requirements: "5+ years React experience, TypeScript, Redux, CSS/SCSS, Git, Agile methodologies",
     skills: "React, TypeScript, JavaScript, HTML, CSS, Redux, Git",
@@ -317,7 +347,7 @@ job_openings = [
   },
   {
     title: "Marketing Specialist",
-    department: Department.find_by(name: "Marketing"),
+    department: Department.find_by(company_id: $seed_company.id, name: "Marketing"),
     description: "Join our marketing team to drive growth and brand awareness through innovative campaigns and strategies.",
     requirements: "3+ years marketing experience, Digital marketing, Content creation, Analytics",
     skills: "Digital Marketing, Content Writing, SEO, Social Media, Analytics, Campaign Management",
@@ -333,7 +363,7 @@ job_openings = [
   },
   {
     title: "HR Business Partner",
-    department: Department.find_by(name: "HR"),
+    department: Department.find_by(company_id: $seed_company.id, name: "HR"),
     description: "Support business growth by providing strategic HR guidance and implementing people programs.",
     requirements: "4+ years HR experience, Employee relations, Performance management, HR policies",
     skills: "HR Management, Employee Relations, Performance Management, HR Policies, Recruitment",
@@ -349,7 +379,7 @@ job_openings = [
   },
   {
     title: "Financial Analyst",
-    department: Department.find_by(name: "Finance"),
+    department: Department.find_by(company_id: $seed_company.id, name: "Finance"),
     description: "Analyze financial data and provide insights to support business decision making.",
     requirements: "2+ years finance experience, Financial modeling, Excel, Accounting principles",
     skills: "Financial Analysis, Excel, Financial Modeling, Accounting, Budgeting, Forecasting",
@@ -365,7 +395,7 @@ job_openings = [
   },
   {
     title: "Sales Development Representative",
-    department: Department.find_by(name: "Sales"),
+    department: Department.find_by(company_id: $seed_company.id, name: "Sales"),
     description: "Generate new business opportunities and build relationships with potential clients.",
     requirements: "1+ years sales experience, Communication skills, CRM experience, Target driven",
     skills: "Sales, CRM, Communication, Lead Generation, Customer Relationship Management",
@@ -381,7 +411,7 @@ job_openings = [
   },
   {
     title: "Product Designer",
-    department: Department.find_by(name: "Design"),
+    department: Department.find_by(company_id: $seed_company.id, name: "Design"),
     description: "Design user-centered products and experiences that delight our customers.",
     requirements: "3+ years design experience, UI/UX design, Design tools, User research",
     skills: "UI Design, UX Design, Figma, Sketch, User Research, Prototyping, Design Systems",
@@ -397,7 +427,7 @@ job_openings = [
   },
   {
     title: "DevOps Engineer",
-    department: Department.find_by(name: "Engineering"),
+    department: Department.find_by(company_id: $seed_company.id, name: "Engineering"),
     description: "Build and maintain our cloud infrastructure and deployment pipelines.",
     requirements: "3+ years DevOps experience, AWS/Azure, Docker, Kubernetes, CI/CD",
     skills: "AWS, Docker, Kubernetes, CI/CD, Terraform, Linux, Python, Monitoring",
@@ -413,7 +443,7 @@ job_openings = [
   },
   {
     title: "Operations Coordinator",
-    department: Department.find_by(name: "Operations"),
+    department: Department.find_by(company_id: $seed_company.id, name: "Operations"),
     description: "Coordinate daily operations and ensure smooth business processes.",
     requirements: "2+ years operations experience, Process improvement, Project management",
     skills: "Operations Management, Process Improvement, Project Management, Data Analysis",
@@ -431,6 +461,7 @@ job_openings = [
 
 job_openings.each do |job_attrs|
   JobOpening.find_or_create_by!(
+    company_id: $seed_company.id,
     title: job_attrs[:title],
     department: job_attrs[:department]
   ) do |job|
@@ -441,14 +472,14 @@ end
 # Create onboarding employees
 onboarding_employees = [
   {
-    employee_id: Employee.find_by(email: "john.doe@company.com").id,
+    employee_id: Employee.find_by(company_id: $seed_company.id, email: "john.doe@company.com").id,
     start_date: Date.current + 5.days,
     status: "in_progress",
     progress: 65,
     notes: "John is progressing well through the onboarding process."
   },
   {
-    employee_id: Employee.find_by(email: "jane.smith@company.com").id,
+    employee_id: Employee.find_by(company_id: $seed_company.id, email: "jane.smith@company.com").id,
     start_date: Date.current + 10.days,
     status: "pending",
     progress: 0,
@@ -457,13 +488,13 @@ onboarding_employees = [
 ]
 
 onboarding_employees.each do |oe|
-  OnboardingEmployee.find_or_create_by!(employee_id: oe[:employee_id]) do |onboarding_employee|
+  OnboardingEmployee.find_or_create_by!(company_id: $seed_company.id, employee_id: oe[:employee_id]) do |onboarding_employee|
     onboarding_employee.assign_attributes(oe)
   end
 end
 
 # Create onboarding tasks for existing onboarding employees
-OnboardingEmployee.all.each do |oe|
+OnboardingEmployee.joins(:employee).where(employees: { company_id: $seed_company.id }).find_each do |oe|
   next if oe.onboarding_tasks.any?
 
   default_tasks = [
@@ -721,7 +752,7 @@ candidates = [
 ]
 
 candidates.each do |candidate_attrs|
-  Candidate.find_or_create_by!(email: candidate_attrs[:email]) do |candidate|
+  Candidate.find_or_create_by!(company_id: $seed_company.id, email: candidate_attrs[:email]) do |candidate|
     candidate.assign_attributes(candidate_attrs)
   end
 end
@@ -729,7 +760,7 @@ end
 # Create interviews
 interviews = [
   {
-    candidate: Candidate.find_by(email: "sarah.wilson@email.com"),
+    candidate: Candidate.find_by(company_id: $seed_company.id, email: "sarah.wilson@email.com"),
     interviewer: "John Doe",
     interview_type: "video",
     scheduled_date: Date.current + 2.days,
@@ -738,7 +769,7 @@ interviews = [
     notes: "Technical assessment focusing on React and JavaScript"
   },
   {
-    candidate: Candidate.find_by(email: "david.brown@email.com"),
+    candidate: Candidate.find_by(company_id: $seed_company.id, email: "david.brown@email.com"),
     interviewer: "Jane Smith",
     interview_type: "video",
     scheduled_date: Date.current + 3.days,
@@ -747,7 +778,7 @@ interviews = [
     notes: "Behavioral interview to assess leadership and communication skills"
   },
   {
-    candidate: Candidate.find_by(email: "lisa.chen@email.com"),
+    candidate: Candidate.find_by(company_id: $seed_company.id, email: "lisa.chen@email.com"),
     interviewer: "Mike Johnson",
     interview_type: "onsite",
     scheduled_date: Date.current - 2.days,
@@ -757,7 +788,7 @@ interviews = [
     notes: "Portfolio review and design challenge discussion"
   },
   {
-    candidate: Candidate.find_by(email: "michael.rodriguez@email.com"),
+    candidate: Candidate.find_by(company_id: $seed_company.id, email: "michael.rodriguez@email.com"),
     interviewer: "Jane Smith",
     interview_type: "video",
     scheduled_date: Date.current + 1.day,
@@ -766,7 +797,7 @@ interviews = [
     notes: "Marketing strategy and campaign planning discussion"
   },
   {
-    candidate: Candidate.find_by(email: "jennifer.kim@email.com"),
+    candidate: Candidate.find_by(company_id: $seed_company.id, email: "jennifer.kim@email.com"),
     interviewer: "Sarah Miller",
     interview_type: "video",
     scheduled_date: Date.current + 4.days,
@@ -775,7 +806,7 @@ interviews = [
     notes: "HR policies and employee relations case study"
   },
   {
-    candidate: Candidate.find_by(email: "robert.johnson@email.com"),
+    candidate: Candidate.find_by(company_id: $seed_company.id, email: "robert.johnson@email.com"),
     interviewer: "Tom Anderson",
     interview_type: "onsite",
     scheduled_date: Date.current + 3.days,
@@ -784,7 +815,7 @@ interviews = [
     notes: "Financial modeling and analysis test"
   },
   {
-    candidate: Candidate.find_by(email: "amanda.davis@email.com"),
+    candidate: Candidate.find_by(company_id: $seed_company.id, email: "amanda.davis@email.com"),
     interviewer: "Mark Taylor",
     interview_type: "video",
     scheduled_date: Date.current + 1.day,
@@ -793,7 +824,7 @@ interviews = [
     notes: "Sales process and CRM experience assessment"
   },
   {
-    candidate: Candidate.find_by(email: "kevin.park@email.com"),
+    candidate: Candidate.find_by(company_id: $seed_company.id, email: "kevin.park@email.com"),
     interviewer: "Bob Wilson",
     interview_type: "video",
     scheduled_date: Date.current + 5.days,
@@ -802,7 +833,7 @@ interviews = [
     notes: "DevOps architecture and cloud infrastructure discussion"
   },
   {
-    candidate: Candidate.find_by(email: "maria.garcia@email.com"),
+    candidate: Candidate.find_by(company_id: $seed_company.id, email: "maria.garcia@email.com"),
     interviewer: "Chris Lopez",
     interview_type: "video",
     scheduled_date: Date.current + 2.days,
@@ -814,6 +845,7 @@ interviews = [
 
 interviews.each do |interview_attrs|
   Interview.find_or_create_by!(
+    company_id: $seed_company.id,
     candidate: interview_attrs[:candidate],
     scheduled_date: interview_attrs[:scheduled_date],
     scheduled_time: interview_attrs[:scheduled_time]
@@ -842,7 +874,7 @@ assets = [
     condition: "excellent",
     last_maintenance: Date.current - 2.months,
     next_maintenance: Date.current + 4.months,
-    employee_id: Employee.find_by(email: "john.doe@company.com").id
+    employee_id: Employee.find_by(company_id: $seed_company.id, email: "john.doe@company.com").id
   },
   {
     name: "MacBook Air M2",
@@ -861,7 +893,7 @@ assets = [
     condition: "excellent",
     last_maintenance: Date.current - 1.month,
     next_maintenance: Date.current + 5.months,
-    employee_id: Employee.find_by(email: "alice.johnson@company.com").id
+    employee_id: Employee.find_by(company_id: $seed_company.id, email: "alice.johnson@company.com").id
   },
   {
     name: "Dell XPS 15",
@@ -880,7 +912,7 @@ assets = [
     condition: "excellent",
     last_maintenance: Date.current - 1.month,
     next_maintenance: Date.current + 5.months,
-    employee_id: Employee.find_by(email: "bob.wilson@company.com").id
+    employee_id: Employee.find_by(company_id: $seed_company.id, email: "bob.wilson@company.com").id
   },
   {
     name: "ThinkPad X1 Carbon",
@@ -899,7 +931,7 @@ assets = [
     condition: "excellent",
     last_maintenance: Date.current - 2.weeks,
     next_maintenance: Date.current + 5.months,
-    employee_id: Employee.find_by(email: "carol.brown@company.com").id
+    employee_id: Employee.find_by(company_id: $seed_company.id, email: "carol.brown@company.com").id
   },
 
   # Marketing Department Assets
@@ -920,7 +952,7 @@ assets = [
     condition: "excellent",
     last_maintenance: Date.current - 1.month,
     next_maintenance: Date.current + 5.months,
-    employee_id: Employee.find_by(email: "jane.smith@company.com").id
+    employee_id: Employee.find_by(company_id: $seed_company.id, email: "jane.smith@company.com").id
   },
   {
     name: "iPad Pro 12.9-inch",
@@ -939,7 +971,7 @@ assets = [
     condition: "excellent",
     last_maintenance: Date.current - 1.week,
     next_maintenance: Date.current + 5.months,
-    employee_id: Employee.find_by(email: "david.lee@company.com").id
+    employee_id: Employee.find_by(company_id: $seed_company.id, email: "david.lee@company.com").id
   },
 
   # HR Department Assets
@@ -978,7 +1010,7 @@ assets = [
     condition: "good",
     last_maintenance: Date.current - 2.months,
     next_maintenance: Date.current + 4.months,
-    employee_id: Employee.find_by(email: "mike.johnson@company.com").id
+    employee_id: Employee.find_by(company_id: $seed_company.id, email: "mike.johnson@company.com").id
   },
 
   # Finance Department Assets
@@ -999,7 +1031,7 @@ assets = [
     condition: "good",
     last_maintenance: Date.current - 4.months,
     next_maintenance: Date.current + 2.months,
-    employee_id: Employee.find_by(email: "tom.anderson@company.com").id
+    employee_id: Employee.find_by(company_id: $seed_company.id, email: "tom.anderson@company.com").id
   },
   {
     name: "HP EliteBook",
@@ -1018,7 +1050,7 @@ assets = [
     condition: "excellent",
     last_maintenance: Date.current - 1.month,
     next_maintenance: Date.current + 5.months,
-    employee_id: Employee.find_by(email: "lisa.garcia@company.com").id
+    employee_id: Employee.find_by(company_id: $seed_company.id, email: "lisa.garcia@company.com").id
   },
 
   # Sales Department Assets
@@ -1039,7 +1071,7 @@ assets = [
     condition: "excellent",
     last_maintenance: Date.current - 1.month,
     next_maintenance: Date.current + 5.months,
-    employee_id: Employee.find_by(email: "mark.taylor@company.com").id
+    employee_id: Employee.find_by(company_id: $seed_company.id, email: "mark.taylor@company.com").id
   },
   {
     name: "Samsung Galaxy S24",
@@ -1058,7 +1090,7 @@ assets = [
     condition: "excellent",
     last_maintenance: Date.current - 2.weeks,
     next_maintenance: Date.current + 5.months,
-    employee_id: Employee.find_by(email: "rachel.white@company.com").id
+    employee_id: Employee.find_by(company_id: $seed_company.id, email: "rachel.white@company.com").id
   },
 
   # Design Department Assets
@@ -1079,7 +1111,7 @@ assets = [
     condition: "excellent",
     last_maintenance: Date.current - 1.month,
     next_maintenance: Date.current + 5.months,
-    employee_id: Employee.find_by(email: "amy.rodriguez@company.com").id
+    employee_id: Employee.find_by(company_id: $seed_company.id, email: "amy.rodriguez@company.com").id
   },
   {
     name: "Wacom Cintiq 22",
@@ -1098,7 +1130,7 @@ assets = [
     condition: "excellent",
     last_maintenance: Date.current - 2.months,
     next_maintenance: Date.current + 4.months,
-    employee_id: Employee.find_by(email: "amy.rodriguez@company.com").id
+    employee_id: Employee.find_by(company_id: $seed_company.id, email: "amy.rodriguez@company.com").id
   },
 
   # Operations Department Assets
@@ -1119,7 +1151,7 @@ assets = [
     condition: "good",
     last_maintenance: Date.current - 3.months,
     next_maintenance: Date.current + 3.months,
-    employee_id: Employee.find_by(email: "chris.lopez@company.com").id
+    employee_id: Employee.find_by(company_id: $seed_company.id, email: "chris.lopez@company.com").id
   },
 
   # Network Infrastructure
@@ -1180,13 +1212,13 @@ assets = [
 ]
 
 assets.each do |asset_attrs|
-  Asset.find_or_create_by!(serial_number: asset_attrs[:serial_number]) do |asset|
+  Asset.find_or_create_by!(company_id: $seed_company.id, serial_number: asset_attrs[:serial_number]) do |asset|
     asset.assign_attributes(asset_attrs)
   end
 end
 
 # Create asset allocations for assigned assets
-Asset.where.not(employee_id: nil).each do |asset|
+Asset.where(company_id: $seed_company.id).where.not(employee_id: nil).each do |asset|
   next if asset.asset_allocations.active.any?
 
   AssetAllocation.create!(
@@ -1201,7 +1233,7 @@ end
 # Create maintenance records
 maintenance_records = [
   {
-    asset: Asset.find_by(serial_number: "MBP2024001"),
+    asset: Asset.find_by(company_id: $seed_company.id, serial_number: "MBP2024001"),
     maintenance_date: Date.current - 2.months,
     maintenance_type: "routine",
     description: "Software updates and hardware inspection",
@@ -1209,7 +1241,7 @@ maintenance_records = [
     performed_by: "IT Team"
   },
   {
-    asset: Asset.find_by(serial_number: "DXP2024003"),
+    asset: Asset.find_by(company_id: $seed_company.id, serial_number: "DXP2024003"),
     maintenance_date: Date.current - 1.month,
     maintenance_type: "repair",
     description: "Paper feed mechanism repair",
@@ -1217,7 +1249,7 @@ maintenance_records = [
     performed_by: "External Vendor"
   },
   {
-    asset: Asset.find_by(serial_number: "DXP2024003"),
+    asset: Asset.find_by(company_id: $seed_company.id, serial_number: "DXP2024003"),
     maintenance_date: Date.current - 2.months,
     maintenance_type: "routine",
     description: "Firmware update and security patches",
@@ -1225,7 +1257,7 @@ maintenance_records = [
     performed_by: "Network Team"
   },
   {
-    asset: Asset.find_by(serial_number: "DXP2024003"),
+    asset: Asset.find_by(company_id: $seed_company.id, serial_number: "DXP2024003"),
     maintenance_date: Date.current - 3.months,
     maintenance_type: "upgrade",
     description: "RAM upgrade to 32GB",
@@ -1236,6 +1268,7 @@ maintenance_records = [
 
 maintenance_records.each do |record_attrs|
   MaintenanceRecord.find_or_create_by!(
+    company_id: $seed_company.id,
     asset: record_attrs[:asset],
     maintenance_date: record_attrs[:maintenance_date],
     maintenance_type: record_attrs[:maintenance_type]
@@ -1247,7 +1280,7 @@ end
 # Create employee documents
 employee_documents = [
   {
-    employee: Employee.find_by(email: "john.doe@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "john.doe@company.com"),
     name: "Employment Contract",
     document_type: "contract",
     upload_date: Date.current - 30.days,
@@ -1257,7 +1290,7 @@ employee_documents = [
     uploaded_by: "HR Manager"
   },
   {
-    employee: Employee.find_by(email: "john.doe@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "john.doe@company.com"),
     name: "Aadhaar Card",
     document_type: "id_proof",
     upload_date: Date.current - 30.days,
@@ -1267,7 +1300,7 @@ employee_documents = [
     uploaded_by: "HR Manager"
   },
   {
-    employee: Employee.find_by(email: "john.doe@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "john.doe@company.com"),
     name: "Resume",
     document_type: "resume",
     upload_date: Date.current - 30.days,
@@ -1277,7 +1310,7 @@ employee_documents = [
     uploaded_by: "HR Manager"
   },
   {
-    employee: Employee.find_by(email: "jane.smith@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "jane.smith@company.com"),
     name: "Employment Contract",
     document_type: "contract",
     upload_date: Date.current - 15.days,
@@ -1287,7 +1320,7 @@ employee_documents = [
     uploaded_by: "HR Manager"
   },
   {
-    employee: Employee.find_by(email: "jane.smith@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "jane.smith@company.com"),
     name: "PAN Card",
     document_type: "id_proof",
     upload_date: Date.current - 15.days,
@@ -1297,7 +1330,7 @@ employee_documents = [
     uploaded_by: "HR Manager"
   },
   {
-    employee: Employee.find_by(email: "mike.johnson@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "mike.johnson@company.com"),
     name: "Employment Contract",
     document_type: "contract",
     upload_date: Date.current - 7.days,
@@ -1307,7 +1340,7 @@ employee_documents = [
     uploaded_by: "HR Manager"
   },
   {
-    employee: Employee.find_by(email: "mike.johnson@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "mike.johnson@company.com"),
     name: "Driving License",
     document_type: "id_proof",
     upload_date: Date.current - 7.days,
@@ -1320,6 +1353,7 @@ employee_documents = [
 
 employee_documents.each do |doc_attrs|
   EmployeeDocument.find_or_create_by!(
+    company_id: $seed_company.id,
     employee: doc_attrs[:employee],
     name: doc_attrs[:name]
   ) do |doc|
@@ -1330,7 +1364,7 @@ end
 # Create performance reviews
 performance_reviews = [
   {
-    employee: Employee.find_by(email: "john.doe@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "john.doe@company.com"),
     period: "Q4 2024",
     rating: 4.2,
     reviewer: "Engineering Manager",
@@ -1341,7 +1375,7 @@ performance_reviews = [
     areas_for_improvement: "Public speaking skills, Documentation practices"
   },
   {
-    employee: Employee.find_by(email: "jane.smith@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "jane.smith@company.com"),
     period: "Q4 2024",
     rating: 4.5,
     reviewer: "Marketing Director",
@@ -1355,6 +1389,7 @@ performance_reviews = [
 
 performance_reviews.each do |review_attrs|
   PerformanceReview.find_or_create_by!(
+    company_id: $seed_company.id,
     employee: review_attrs[:employee],
     period: review_attrs[:period]
   ) do |review|
@@ -1365,7 +1400,7 @@ end
 # Create performance goals
 performance_goals = [
   {
-    employee: Employee.find_by(email: "john.doe@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "john.doe@company.com"),
     title: "Lead Feature Development",
     description: "Take ownership of the new user dashboard feature",
     target: "Complete development and testing by Q2 2025",
@@ -1374,7 +1409,7 @@ performance_goals = [
     due_date: Date.current + 2.months
   },
   {
-    employee: Employee.find_by(email: "john.doe@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "john.doe@company.com"),
     title: "Mentor Junior Developers",
     description: "Provide guidance and support to 2 junior developers",
     target: "Help them complete their first major features",
@@ -1383,7 +1418,7 @@ performance_goals = [
     due_date: Date.current + 3.months
   },
   {
-    employee: Employee.find_by(email: "jane.smith@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "jane.smith@company.com"),
     title: "Increase Brand Awareness",
     description: "Develop and execute campaigns to increase brand visibility",
     target: "Achieve 25% increase in brand recognition",
@@ -1392,7 +1427,7 @@ performance_goals = [
     due_date: Date.current + 4.months
   },
   {
-    employee: Employee.find_by(email: "jane.smith@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "jane.smith@company.com"),
     title: "Launch New Campaign",
     description: "Plan and launch 2 new marketing campaigns",
     target: "Successfully launch campaigns with measurable results",
@@ -1404,6 +1439,7 @@ performance_goals = [
 
 performance_goals.each do |goal_attrs|
   PerformanceGoal.find_or_create_by!(
+    company_id: $seed_company.id,
     employee: goal_attrs[:employee],
     title: goal_attrs[:title]
   ) do |goal|
@@ -1414,7 +1450,7 @@ end
 # Create timesheets
 timesheets = [
   {
-    employee: Employee.find_by(email: "john.doe@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "john.doe@company.com"),
     date: Date.current - 1.day,
     hours: 8.5,
     project: "User Dashboard",
@@ -1424,7 +1460,7 @@ timesheets = [
     notes: "Completed user profile component"
   },
   {
-    employee: Employee.find_by(email: "john.doe@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "john.doe@company.com"),
     date: Date.current - 2.days,
     hours: 8.0,
     project: "User Dashboard",
@@ -1434,7 +1470,7 @@ timesheets = [
     notes: "Implemented user data API endpoints"
   },
   {
-    employee: Employee.find_by(email: "jane.smith@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "jane.smith@company.com"),
     date: Date.current - 1.day,
     hours: 8.0,
     project: "Q1 Campaign",
@@ -1444,7 +1480,7 @@ timesheets = [
     notes: "Finalized campaign strategy and budget"
   },
   {
-    employee: Employee.find_by(email: "jane.smith@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "jane.smith@company.com"),
     date: Date.current - 2.days,
     hours: 7.5,
     project: "Brand Awareness",
@@ -1454,7 +1490,7 @@ timesheets = [
     notes: "Created social media content calendar"
   },
   {
-    employee: Employee.find_by(email: "mike.johnson@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "mike.johnson@company.com"),
     date: Date.current - 1.day,
     hours: 8.0,
     project: "HR Processes",
@@ -1466,6 +1502,7 @@ timesheets = [
 
 timesheets.each do |timesheet_attrs|
   Timesheet.find_or_create_by!(
+    company_id: $seed_company.id,
     employee: timesheet_attrs[:employee],
     date: timesheet_attrs[:date],
     project: timesheet_attrs[:project]
@@ -1477,7 +1514,7 @@ end
 # Create employee benefits
 employee_benefits = [
   {
-    employee: Employee.find_by(email: "john.doe@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "john.doe@company.com"),
     name: "Health Insurance",
     benefit_type: "health_insurance",
     provider: "Max Bupa",
@@ -1488,7 +1525,7 @@ employee_benefits = [
     cost: 2500.00
   },
   {
-    employee: Employee.find_by(email: "john.doe@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "john.doe@company.com"),
     name: "Life Insurance",
     benefit_type: "life_insurance",
     provider: "LIC",
@@ -1499,7 +1536,7 @@ employee_benefits = [
     cost: 500.00
   },
   {
-    employee: Employee.find_by(email: "jane.smith@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "jane.smith@company.com"),
     name: "Health Insurance",
     benefit_type: "health_insurance",
     provider: "Max Bupa",
@@ -1510,7 +1547,7 @@ employee_benefits = [
     cost: 1500.00
   },
   {
-    employee: Employee.find_by(email: "jane.smith@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "jane.smith@company.com"),
     name: "Dental Insurance",
     benefit_type: "dental_insurance",
     provider: "Dental Care Plus",
@@ -1521,7 +1558,7 @@ employee_benefits = [
     cost: 800.00
   },
   {
-    employee: Employee.find_by(email: "mike.johnson@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "mike.johnson@company.com"),
     name: "Health Insurance",
     benefit_type: "health_insurance",
     provider: "Max Bupa",
@@ -1535,6 +1572,7 @@ employee_benefits = [
 
 employee_benefits.each do |benefit_attrs|
   EmployeeBenefit.find_or_create_by!(
+    company_id: $seed_company.id,
     employee: benefit_attrs[:employee],
     name: benefit_attrs[:name]
   ) do |benefit|
@@ -1545,7 +1583,7 @@ end
 # Create employee trainings
 employee_trainings = [
   {
-    employee: Employee.find_by(email: "john.doe@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "john.doe@company.com"),
     name: "Advanced React Development",
     training_type: "technical",
     provider: "Udemy",
@@ -1557,7 +1595,7 @@ employee_trainings = [
     skills: "React Hooks, Context API, Performance Optimization"
   },
   {
-    employee: Employee.find_by(email: "john.doe@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "john.doe@company.com"),
     name: "Leadership Skills",
     training_type: "soft_skills",
     provider: "Internal Training",
@@ -1569,7 +1607,7 @@ employee_trainings = [
     skills: "Team Management, Communication, Decision Making"
   },
   {
-    employee: Employee.find_by(email: "jane.smith@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "jane.smith@company.com"),
     name: "Digital Marketing Certification",
     training_type: "certification",
     provider: "Google Digital Garage",
@@ -1581,7 +1619,7 @@ employee_trainings = [
     skills: "SEO, SEM, Social Media Marketing, Analytics"
   },
   {
-    employee: Employee.find_by(email: "jane.smith@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "jane.smith@company.com"),
     name: "Data Analysis for Marketing",
     training_type: "technical",
     provider: "Coursera",
@@ -1593,7 +1631,7 @@ employee_trainings = [
     skills: "Excel, Google Analytics, Data Visualization"
   },
   {
-    employee: Employee.find_by(email: "mike.johnson@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "mike.johnson@company.com"),
     name: "HR Compliance Training",
     training_type: "compliance",
     provider: "SHRM",
@@ -1608,6 +1646,7 @@ employee_trainings = [
 
 employee_trainings.each do |training_attrs|
   EmployeeTraining.find_or_create_by!(
+    company_id: $seed_company.id,
     employee: training_attrs[:employee],
     name: training_attrs[:name]
   ) do |training|
@@ -1618,7 +1657,7 @@ end
 # Create leave requests
 leave_requests = [
   {
-    employee: Employee.find_by(email: "john.doe@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "john.doe@company.com"),
     leave_type: "annual",
     start_date: Date.current + 1.week,
     end_date: Date.current + 1.week + 4.days,
@@ -1626,7 +1665,7 @@ leave_requests = [
     status: "approved"
   },
   {
-    employee: Employee.find_by(email: "jane.smith@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "jane.smith@company.com"),
     leave_type: "sick",
     start_date: Date.current - 3.days,
     end_date: Date.current - 1.day,
@@ -1634,7 +1673,7 @@ leave_requests = [
     status: "approved"
   },
   {
-    employee: Employee.find_by(email: "mike.johnson@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "mike.johnson@company.com"),
     leave_type: "personal",
     start_date: Date.current + 2.weeks,
     end_date: Date.current + 2.weeks + 1.day,
@@ -1645,6 +1684,7 @@ leave_requests = [
 
 leave_requests.each do |leave_attrs|
   LeaveRequest.find_or_create_by!(
+    company_id: $seed_company.id,
     employee: leave_attrs[:employee],
     start_date: leave_attrs[:start_date],
     end_date: leave_attrs[:end_date]
@@ -1659,7 +1699,7 @@ puts "Creating offboarding employees..."
 # Create offboarding employees
 offboarding_employees = [
   {
-    employee: Employee.find_by(email: "john.doe@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "john.doe@company.com"),
     last_working_day: Date.current + 5.days,
     status: "in_progress",
     progress: 65,
@@ -1668,7 +1708,7 @@ offboarding_employees = [
     start_date: Date.current - 10.days
   },
   {
-    employee: Employee.find_by(email: "jane.smith@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "jane.smith@company.com"),
     last_working_day: Date.current + 15.days,
     status: "pending",
     progress: 0,
@@ -1677,7 +1717,7 @@ offboarding_employees = [
     start_date: Date.current - 2.days
   },
   {
-    employee: Employee.find_by(email: "mike.johnson@company.com"),
+    employee: Employee.find_by(company_id: $seed_company.id, email: "mike.johnson@company.com"),
     last_working_day: Date.current - 5.days,
     status: "completed",
     progress: 100,
@@ -1688,7 +1728,10 @@ offboarding_employees = [
 ]
 
 offboarding_employees.each do |offboarding_data|
-  offboarding_employee = OffboardingEmployee.find_or_create_by!(employee: offboarding_data[:employee]) do |oe|
+  offboarding_employee = OffboardingEmployee.find_or_create_by!(
+    company_id: $seed_company.id,
+    employee: offboarding_data[:employee]
+  ) do |oe|
     oe.assign_attributes(offboarding_data.except(:employee))
   end
 
@@ -1787,8 +1830,8 @@ puts "Created #{LeaveRequest.count} leave requests"
 
 # Create Helpdesk Tickets
 puts "Creating helpdesk tickets..."
-if Employee.count > 0
-  hr_dept = Department.find_by(name: "HR")
+if Employee.where(company_id: $seed_company.id).exists?
+  hr_dept = Department.find_by(company_id: $seed_company.id, name: "HR")
   hr_employees = hr_dept ? hr_dept.employees : Employee.limit(3)
 
   helpdesk_tickets = [
@@ -1799,7 +1842,7 @@ if Employee.count > 0
       priority: "high",
       status: "open",
       assigned_to_id: hr_employees.first&.id,
-      requester_id: Employee.where.not(id: hr_employees.map(&:id)).first&.id,
+      requester_id: Employee.where(company_id: $seed_company.id).where.not(id: hr_employees.map(&:id)).first&.id,
       sla_hours: 24,
       sla_status: "on-track",
       channel: "email",
@@ -1812,7 +1855,7 @@ if Employee.count > 0
       priority: "medium",
       status: "in-progress",
       assigned_to_id: hr_employees.second&.id,
-      requester_id: Employee.where.not(id: hr_employees.map(&:id)).second&.id,
+      requester_id: Employee.where(company_id: $seed_company.id).where.not(id: hr_employees.map(&:id)).second&.id,
       sla_hours: 48,
       sla_status: "on-track",
       channel: "portal",
@@ -1825,7 +1868,7 @@ if Employee.count > 0
       priority: "low",
       status: "pending",
       assigned_to_id: hr_employees.first&.id,
-      requester_id: Employee.where.not(id: hr_employees.map(&:id)).third&.id,
+      requester_id: Employee.where(company_id: $seed_company.id).where.not(id: hr_employees.map(&:id)).third&.id,
       sla_hours: 72,
       sla_status: "on-track",
       channel: "system",
@@ -1838,7 +1881,7 @@ if Employee.count > 0
       priority: "medium",
       status: "open",
       assigned_to_id: hr_employees.first&.id,
-      requester_id: Employee.where.not(id: hr_employees.map(&:id)).fourth&.id,
+      requester_id: Employee.where(company_id: $seed_company.id).where.not(id: hr_employees.map(&:id)).fourth&.id,
       sla_hours: 48,
       sla_status: "on-track",
       channel: "email",
@@ -1851,7 +1894,7 @@ if Employee.count > 0
       priority: "high",
       status: "resolved",
       assigned_to_id: hr_employees.first&.id,
-      requester_id: Employee.where.not(id: hr_employees.map(&:id)).fifth&.id,
+      requester_id: Employee.where(company_id: $seed_company.id).where.not(id: hr_employees.map(&:id)).fifth&.id,
       sla_hours: 24,
       sla_status: "on-track",
       channel: "portal",
@@ -1860,7 +1903,7 @@ if Employee.count > 0
   ]
 
   helpdesk_tickets.each do |ticket_data|
-    HelpdeskTicket.find_or_create_by!(title: ticket_data[:title]) do |ticket|
+    HelpdeskTicket.find_or_create_by!(company_id: $seed_company.id, title: ticket_data[:title]) do |ticket|
       ticket.assign_attributes(ticket_data)
       ticket.created_at = rand(1..10).days.ago
     end
@@ -1929,7 +1972,7 @@ sla_workflows = [
 ]
 
 sla_workflows.each do |workflow_data|
-  SlaWorkflow.find_or_create_by!(name: workflow_data[:name]) do |workflow|
+  SlaWorkflow.find_or_create_by!(company_id: $seed_company.id, name: workflow_data[:name]) do |workflow|
     workflow.assign_attributes(workflow_data)
   end
 end
@@ -1995,7 +2038,7 @@ knowledge_articles = [
 ]
 
 knowledge_articles.each do |article_data|
-  KnowledgeArticle.find_or_create_by!(title: article_data[:title]) do |article|
+  KnowledgeArticle.find_or_create_by!(company_id: $seed_company.id, title: article_data[:title]) do |article|
     article.assign_attributes(article_data)
   end
 end
@@ -2010,9 +2053,9 @@ load Rails.root.join('db', 'seeds', 'users_and_roles.rb')
 puts "Creating employee for Super Admin user..."
 super_admin_user = User.find_by(email: 'admin@hrms.com')
 if super_admin_user && super_admin_user.employee_id.nil?
-  hr_department = Department.find_by(name: "HR") || Department.first
+  hr_department = Department.find_by(company_id: $seed_company.id, name: "HR") || Department.first
 
-  employee = Employee.find_or_create_by!(email: super_admin_user.email) do |emp|
+  employee = Employee.find_or_create_by!(company_id: $seed_company.id, email: super_admin_user.email) do |emp|
     emp.first_name = super_admin_user.first_name
     emp.last_name = super_admin_user.last_name
     emp.phone = "+91 00000 00000"
@@ -2083,7 +2126,11 @@ if User.count > 0 && Channel.count == 0
   ]
 
   general_channels.each do |channel_data|
-    channel = Channel.find_or_create_by!(name: channel_data[:name]) do |ch|
+    channel = Channel.find_or_create_by!(
+      company_id: $seed_company.id,
+      channel_type: channel_data[:channel_type],
+      name: channel_data[:name]
+    ) do |ch|
       ch.channel_type = channel_data[:channel_type]
       ch.is_private = channel_data[:is_private]
       ch.description = channel_data[:description]
@@ -2147,118 +2194,6 @@ if User.count > 0 && Channel.count == 0
           created_at: 1.day.ago
         )
       end
-    end
-
-    puts "✓ Created channel: #{channel.name}"
-  end
-
-  puts "Created #{Channel.count} channels"
-  puts "Created #{ChannelMembership.count} channel memberships"
-  puts "Created #{Message.count} messages"
-else
-  puts "Channels already exist or no users found. Skipping channel creation."
-end
-
-# Create general channels for chat
-puts "Creating general channels..."
-if User.count > 0 && Channel.count == 0
-  # Get the first user (or super admin) as creator
-  creator = super_admin_user || User.first
-
-  # Create general channels
-  general_channels = [
-    {
-      name: "general",
-      channel_type: "channel",
-      is_private: false,
-      description: "General discussions and announcements for everyone",
-      created_by: creator
-    },
-    {
-      name: "random",
-      channel_type: "channel",
-      is_private: false,
-      description: "Random conversations and off-topic discussions",
-      created_by: creator
-    },
-    {
-      name: "announcements",
-      channel_type: "channel",
-      is_private: false,
-      description: "Company-wide announcements and important updates",
-      created_by: creator
-    },
-    {
-      name: "engineering",
-      channel_type: "channel",
-      is_private: false,
-      description: "Engineering team discussions",
-      created_by: creator
-    },
-    {
-      name: "marketing",
-      channel_type: "channel",
-      is_private: false,
-      description: "Marketing team discussions",
-      created_by: creator
-    },
-    {
-      name: "hr",
-      channel_type: "channel",
-      is_private: false,
-      description: "HR team discussions",
-      created_by: creator
-    }
-  ]
-
-  general_channels.each do |channel_data|
-    channel = Channel.find_or_create_by!(name: channel_data[:name]) do |ch|
-      ch.channel_type = channel_data[:channel_type]
-      ch.is_private = channel_data[:is_private]
-      ch.description = channel_data[:description]
-      ch.created_by = channel_data[:created_by]
-    end
-
-    # Add all active users as members
-    User.active.each do |user|
-      ChannelMembership.find_or_create_by!(channel: channel, user: user) do |membership|
-        membership.role = user == creator ? "admin" : "member"
-      end
-    end
-
-    # Add some welcome messages to general channel
-    if channel.name == "general"
-      welcome_messages = [
-        {
-          content: "Welcome to the general channel! This is where we share company-wide updates and have open discussions.",
-          user: creator,
-          created_at: 2.days.ago
-        },
-        {
-          content: "Feel free to introduce yourself and let everyone know what you're working on!",
-          user: creator,
-          created_at: 2.days.ago + 1.hour
-        }
-      ]
-
-      welcome_messages.each do |msg_data|
-        Message.find_or_create_by!(
-          channel: channel,
-          user: msg_data[:user],
-          content: msg_data[:content],
-          created_at: msg_data[:created_at]
-        )
-      end
-    end
-
-    # Add a welcome message to announcements channel
-    if channel.name == "announcements"
-      Message.find_or_create_by!(
-        channel: channel,
-        user: creator,
-        content: "Welcome to the announcements channel! Important company updates will be posted here.",
-        created_at: 1.day.ago
-      )
     end
 
     puts "✓ Created channel: #{channel.name}"

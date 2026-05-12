@@ -2,7 +2,7 @@ class OffboardingEmployeesController < ApplicationController
   before_action :set_offboarding_employee, only: [ :show, :update, :destroy, :update_status ]
 
   def index
-    @offboarding_employees = OffboardingEmployee.includes(:employee, :offboarding_tasks)
+    @offboarding_employees = OffboardingEmployee.for_current_company.includes(:employee, :offboarding_tasks)
 
     # Apply filters
     @offboarding_employees = @offboarding_employees.where(status: params[:status]) if params[:status].present?
@@ -58,19 +58,19 @@ class OffboardingEmployeesController < ApplicationController
   end
 
   def stats
-    total_offboarding = OffboardingEmployee.count
-    active_offboarding = OffboardingEmployee.active.size
-    completed_offboarding = OffboardingEmployee.completed.size
-    pending_offboarding = OffboardingEmployee.pending.size
-    cancelled_offboarding = OffboardingEmployee.cancelled.size
+    total_offboarding = OffboardingEmployee.for_current_company.count
+    active_offboarding = OffboardingEmployee.for_current_company.active.size
+    completed_offboarding = OffboardingEmployee.for_current_company.completed.size
+    pending_offboarding = OffboardingEmployee.for_current_company.pending.size
+    cancelled_offboarding = OffboardingEmployee.for_current_company.cancelled.size
 
     # Calculate average duration
-    completed_offboardings = OffboardingEmployee.completed
+    completed_offboardings = OffboardingEmployee.for_current_company.completed
     avg_duration = completed_offboardings.any? ?
       (completed_offboardings.sum(&:duration_days).to_f / completed_offboardings.size).round : 0
 
     # Task category breakdown
-    task_categories = OffboardingTask.group(:category).size
+    task_categories = OffboardingTask.for_current_company.group(:category).size
 
     render json: {
       total_offboarding: total_offboarding,
@@ -87,7 +87,9 @@ class OffboardingEmployeesController < ApplicationController
   private
 
   def set_offboarding_employee
-    @offboarding_employee = OffboardingEmployee.find(params[:id])
+    @offboarding_employee = find_in_tenant(OffboardingEmployee, params[:id])
+  rescue ActiveRecord::RecordNotFound
+    head :not_found
   end
 
   def offboarding_employee_params

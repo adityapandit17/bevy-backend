@@ -1,4 +1,6 @@
 class AttendanceSession < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :attendance_record
 
   before_save :calculate_session_hours
@@ -22,6 +24,10 @@ class AttendanceSession < ApplicationRecord
   end
 
   private
+
+  def assign_company_from_current
+    self.company_id ||= attendance_record&.company_id || Current.company&.id
+  end
 
   def update_attendance_record_working_hours
     # Update the parent attendance record's working_hours whenever a session is saved

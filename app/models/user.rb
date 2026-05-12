@@ -1,4 +1,4 @@
- class User < ApplicationRecord
+class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :invitable, :database_authenticatable, :registerable,
@@ -7,6 +7,8 @@
   # Associations
   has_many :user_roles, dependent: :destroy
   has_many :roles, through: :user_roles
+  has_many :company_memberships, dependent: :destroy
+  has_many :companies, through: :company_memberships
   has_many :notifications, dependent: :destroy
   belongs_to :employee, optional: true
   has_one :user_preference, dependent: :destroy
@@ -70,6 +72,29 @@
 
   def has_role?(role_name)
     roles.exists?(name: role_name)
+  end
+
+  def can_access_company?(company)
+    return true if super_admin?
+
+    company_memberships.active.exists?(company_id: company.id)
+  end
+
+  # Companies this user may work in (for auth/me + login payloads)
+  def accessible_companies
+    return Company.order(:name) if super_admin?
+
+    companies.merge(CompanyMembership.active).distinct.order(:name)
+  end
+
+  def default_company_for_session
+    if super_admin?
+      return Company.order(:id).first if company_memberships.active.none?
+
+      return company_memberships.active.first!.company
+    end
+
+    company_memberships.active.first&.company || employee&.company
   end
 
   def has_permission?(resource, action)
@@ -140,4 +165,4 @@
   def downcase_email
     self.email = email.downcase if email.present?
   end
- end
+end

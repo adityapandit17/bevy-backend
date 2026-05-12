@@ -3,7 +3,7 @@ class LeaveRequestsController < ApplicationController
   # before_action :authenticate_user!
 
   def index
-    @leave_requests = LeaveRequest.includes(:employee)
+    @leave_requests = LeaveRequest.for_current_company.includes(:employee)
 
     # For regular employees (not HR/Admin), filter by their employee_id
     is_admin_or_hr = current_user&.has_role?("Super Admin") ||
@@ -230,7 +230,7 @@ class LeaveRequestsController < ApplicationController
       start_of_year = Date.new(year, 1, 1)
       end_of_year = Date.new(year, 12, 31)
 
-      requests = LeaveRequest.where(start_date: start_of_year..end_of_year)
+      requests = LeaveRequest.for_current_company.where(start_date: start_of_year..end_of_year)
 
       stats = {
         total_requests: requests.size,
@@ -249,7 +249,7 @@ class LeaveRequestsController < ApplicationController
   # Get approvers for an employee (manager, HR)
   def approvers
     employee_id = params[:employee_id]
-    employee = Employee.find_by(id: employee_id)
+    employee = Employee.for_current_company.find_by(id: employee_id)
     if employee
       render json: approvers_for(employee)
     else
@@ -264,7 +264,7 @@ class LeaveRequestsController < ApplicationController
     employee_id = current_user.employee.id
 
     # Get pending tasks for leave requests assigned to this employee
-    pending_tasks = PendingTask.pending
+    pending_tasks = PendingTask.for_current_company.pending
                                 .by_type("LeaveRequest")
                                 .for_employee(employee_id)
                                 .includes(taskable: { employee: :department })
@@ -279,7 +279,7 @@ class LeaveRequestsController < ApplicationController
 
     # Only show all pending leaves if user is HR/Admin AND has no direct reports
     if is_admin_or_hr && !has_direct_reports && pending_tasks.empty?
-      pending_tasks = PendingTask.pending
+      pending_tasks = PendingTask.for_current_company.pending
                                   .by_type("LeaveRequest")
                                   .joins("INNER JOIN leave_requests ON pending_tasks.taskable_id = leave_requests.id")
                                   .joins("INNER JOIN employees ON leave_requests.employee_id = employees.id")
@@ -302,7 +302,7 @@ class LeaveRequestsController < ApplicationController
   private
 
   def set_leave_request
-    @leave_request = LeaveRequest.find(params[:id])
+    @leave_request = find_in_tenant(LeaveRequest, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Leave request not found" }, status: :not_found
   end
@@ -325,7 +325,7 @@ class LeaveRequestsController < ApplicationController
   def overlapping_requests_exist?
     return false unless @leave_request.employee_id && @leave_request.start_date && @leave_request.end_date
 
-    existing_requests = LeaveRequest.where(employee_id: @leave_request.employee_id)
+    existing_requests = LeaveRequest.for_current_company.where(employee_id: @leave_request.employee_id)
                                   .where.not(id: @leave_request.id)
                                   .where(status: [ "pending", "approved" ])
 

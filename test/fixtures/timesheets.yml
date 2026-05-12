@@ -1,5 +1,4 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   employee: one
   date: 2025-07-30
@@ -9,7 +8,7 @@ one:
   status: MyString
   approved_by: MyString
   notes: MyText
-
+  company: one
 two:
   employee: two
   date: 2025-07-30
@@ -19,3 +18,4 @@ two:
   status: MyString
   approved_by: MyString
   notes: MyText
+  company: two

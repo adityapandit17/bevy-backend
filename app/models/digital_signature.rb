@@ -1,4 +1,6 @@
 class DigitalSignature < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :policy_document
   belongs_to :employee
 
@@ -48,6 +50,10 @@ class DigitalSignature < ApplicationRecord
   end
 
   private
+
+  def assign_company_from_current
+    self.company_id ||= employee&.company_id || policy_document&.company_id || Current.company&.id
+  end
 
   def set_signature_type_if_signed
     if status == "signed" && signature_type.blank?

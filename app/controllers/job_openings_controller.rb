@@ -14,7 +14,7 @@ class JobOpeningsController < ApplicationController
   before_action :authorize_destroy!, only: [ :destroy ]
 
   def index
-    @job_openings = JobOpening.includes(:department).all
+    @job_openings = JobOpening.for_current_company.includes(:department)
 
     if params[:search].present?
       @job_openings = @job_openings.search(params[:search])
@@ -59,7 +59,7 @@ class JobOpeningsController < ApplicationController
   end
 
   def set_job_opening
-    @job_opening = JobOpening.find(params[:id])
+    @job_opening = find_in_tenant(JobOpening, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Job opening not found" }, status: :not_found
   end

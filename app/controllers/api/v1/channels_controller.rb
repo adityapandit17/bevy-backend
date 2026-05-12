@@ -5,7 +5,7 @@ class Api::V1::ChannelsController < ApplicationController
 
   # GET /api/v1/channels
   def index
-    channels = current_user.channels.includes(:created_by, :messages, :users)
+    channels = current_user.channels.merge(Channel.for_current_company).includes(:created_by, :messages, :users)
                           .order(updated_at: :desc)
 
     # Filter by type if provided
@@ -168,7 +168,7 @@ class Api::V1::ChannelsController < ApplicationController
     return render json: { success: false, error: "User not found" }, status: :not_found unless other_user
 
     # Check if direct message channel already exists
-    existing_channel = Channel.direct_messages
+    existing_channel = Channel.for_current_company.direct_messages
                               .joins(:channel_memberships)
                               .where(channel_memberships: { user_id: [ current_user.id, other_user.id ] })
                               .group("channels.id")
@@ -202,7 +202,7 @@ class Api::V1::ChannelsController < ApplicationController
   private
 
   def set_channel
-    @channel = Channel.find(params[:id])
+    @channel = find_in_tenant(Channel, params[:id])
   end
 
   def channel_params

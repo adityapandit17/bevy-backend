@@ -1,4 +1,6 @@
 class OnboardingTask < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :onboarding_employee
 
   validates :title, presence: true
@@ -42,5 +44,11 @@ class OnboardingTask < ApplicationRecord
 
   def documents_list=(docs)
     self.documents = docs.is_a?(Array) ? docs.join(", ") : docs
+  end
+
+  private
+
+  def assign_company_from_current
+    self.company_id ||= onboarding_employee&.company_id || Current.company&.id
   end
 end

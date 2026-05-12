@@ -1,4 +1,6 @@
 class SalaryStructure < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :employee
 
   # Validations
@@ -40,6 +42,10 @@ class SalaryStructure < ApplicationRecord
   end
 
   private
+
+  def assign_company_from_current
+    self.company_id ||= employee&.company_id || Current.company&.id
+  end
 
   def combine_allowances_and_bonus
     # If bonus is present and > 0, combine it with allowances

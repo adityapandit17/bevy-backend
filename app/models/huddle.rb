@@ -1,4 +1,6 @@
 class Huddle < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :channel
   belongs_to :started_by, class_name: "User"
   has_many :huddle_participants, dependent: :destroy
@@ -60,5 +62,11 @@ class Huddle < ApplicationRecord
 
   def active_participants
     huddle_participants.where(left_at: nil).includes(:user)
+  end
+
+  private
+
+  def assign_company_from_current
+    self.company_id ||= channel&.company_id || Current.company&.id
   end
 end

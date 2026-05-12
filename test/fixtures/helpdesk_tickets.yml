@@ -1,5 +1,4 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   title: Laptop not booting
   description: My laptop doesn't start after the latest update
@@ -12,9 +11,9 @@ one:
   sla_status: on-track
   channel: portal
   tags: hardware, laptop
-  created_at: 2025-11-19 22:04:28
-  updated_at: 2025-11-19 22:04:28
-
+  created_at: 2025-11-20 03:34:28.000000000 +05:30
+  updated_at: 2025-11-20 03:34:28.000000000 +05:30
+  company: one
 two:
   title: Payroll discrepancy
   description: My November payroll amount appears incorrect
@@ -27,5 +26,6 @@ two:
   sla_status: on-track
   channel: email
   tags: payroll, hr
-  created_at: 2025-11-19 22:04:28
-  updated_at: 2025-11-19 22:04:28
+  created_at: 2025-11-20 03:34:28.000000000 +05:30
+  updated_at: 2025-11-20 03:34:28.000000000 +05:30
+  company: two

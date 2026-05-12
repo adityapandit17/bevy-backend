@@ -41,7 +41,7 @@ class LeavePoliciesController < ApplicationController
   private
 
   def set_leave_policy
-    @leave_policy = LeavePolicy.find(params[:id])
+    @leave_policy = find_in_tenant(LeavePolicy, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Leave policy not found" }, status: :not_found
   end

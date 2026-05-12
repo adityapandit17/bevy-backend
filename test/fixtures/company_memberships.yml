@@ -1,0 +1,15 @@
+# Links users to companies for multitenancy tests
+one:
+  company: one
+  user: one
+  status: active
+
+two:
+  company: two
+  user: two
+  status: active
+
+admin_one:
+  company: one
+  user: admin
+  status: active

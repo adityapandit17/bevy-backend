@@ -1,4 +1,6 @@
 class JobOpening < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :department
 
   validates :title, presence: true, length: { minimum: 5, maximum: 100 }
@@ -133,5 +135,11 @@ class JobOpening < ApplicationRecord
 
   def display_title
     "#{title} - #{location}"
+  end
+
+  private
+
+  def assign_company_from_current
+    self.company_id ||= department&.company_id || Current.company&.id
   end
 end

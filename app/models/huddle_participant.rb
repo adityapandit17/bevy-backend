@@ -1,4 +1,6 @@
 class HuddleParticipant < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :huddle
   belongs_to :user
 

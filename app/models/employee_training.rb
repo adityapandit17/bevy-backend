@@ -1,4 +1,6 @@
 class EmployeeTraining < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :employee
 
   # Validations

@@ -8,7 +8,7 @@ class NotificationsController < ApplicationController
   # GET /notifications
   # Returns the most recent notifications for the current user
   def index
-    notifications = current_user.notifications.order(created_at: :desc).limit(100)
+    notifications = current_user.notifications.merge(Notification.for_current_company).order(created_at: :desc).limit(100)
 
     render json: notifications.map { |n| format_notification(n) }
   rescue => e
@@ -40,13 +40,13 @@ class NotificationsController < ApplicationController
 
   # PATCH /notifications/mark_all_read
   def mark_all_read
-    current_user.notifications.unread.update_all(read: true, updated_at: Time.current)
+    current_user.notifications.merge(Notification.for_current_company).unread.update_all(read: true, updated_at: Time.current)
     head :no_content
   end
 
   # DELETE /notifications/destroy_all
   def destroy_all
-    current_user.notifications.delete_all
+    current_user.notifications.merge(Notification.for_current_company).delete_all
     head :no_content
   end
 
@@ -58,7 +58,7 @@ class NotificationsController < ApplicationController
       return
     end
 
-    @notification = current_user.notifications.find(params[:id])
+    @notification = current_user.notifications.merge(Notification.for_current_company).find(params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Notification not found" }, status: :not_found
   rescue => e

@@ -39,7 +39,7 @@ class InterviewsController < ApplicationController
 
   # POST /interviews
   def create
-    candidate = Candidate.find_by(id: interview_params[:candidate_id])
+    candidate = Candidate.for_current_company.find_by(id: interview_params[:candidate_id])
 
     if candidate&.status == "rejected"
       render json: { errors: [ "Cannot schedule interviews for rejected candidates" ] }, status: :unprocessable_entity
@@ -63,7 +63,7 @@ class InterviewsController < ApplicationController
   def update
     # Check if candidate_id is being changed to a rejected candidate
     if interview_params[:candidate_id].present? && interview_params[:candidate_id] != @interview.candidate_id.to_s
-      new_candidate = Candidate.find_by(id: interview_params[:candidate_id])
+      new_candidate = Candidate.for_current_company.find_by(id: interview_params[:candidate_id])
       if new_candidate&.status == "rejected"
         render json: { errors: [ "Cannot assign interviews to rejected candidates" ] }, status: :unprocessable_entity
         return
@@ -85,7 +85,7 @@ class InterviewsController < ApplicationController
 
   # PATCH /interviews/:id/complete
   def complete
-    @interview = Interview.find(params[:id])
+    @interview = find_in_tenant(Interview, params[:id])
 
     if @interview.update(status: "completed", feedback: params[:feedback], rating: params[:rating])
       render json: format_interview(@interview)
@@ -96,7 +96,7 @@ class InterviewsController < ApplicationController
 
   # PATCH /interviews/:id/cancel
   def cancel
-    @interview = Interview.find(params[:id])
+    @interview = find_in_tenant(Interview, params[:id])
 
     if @interview.update(status: "cancelled", notes: params[:notes])
       render json: format_interview(@interview)
@@ -107,7 +107,7 @@ class InterviewsController < ApplicationController
 
   # PATCH /interviews/:id/no_show
   def no_show
-    @interview = Interview.find(params[:id])
+    @interview = find_in_tenant(Interview, params[:id])
 
     if @interview.update(status: "no_show", notes: params[:notes])
       render json: format_interview(@interview)
@@ -204,7 +204,7 @@ class InterviewsController < ApplicationController
   private
 
   def set_interview
-    @interview = Interview.find(params[:id])
+    @interview = find_in_tenant(Interview, params[:id])
   end
 
   def interview_params

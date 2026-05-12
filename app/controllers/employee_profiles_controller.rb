@@ -70,7 +70,7 @@ class EmployeeProfilesController < ApplicationController
   end
 
   def set_employee
-    @employee = Employee.find(params[:id])
+    @employee = find_in_tenant(Employee, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Employee not found" }, status: :not_found
   end

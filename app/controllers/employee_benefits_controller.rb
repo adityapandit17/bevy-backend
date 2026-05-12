@@ -2,7 +2,7 @@ class EmployeeBenefitsController < ApplicationController
   before_action :set_employee_benefit, only: [ :show, :update, :destroy ]
 
   def index
-    @employee_benefits = EmployeeBenefit.all
+    @employee_benefits = EmployeeBenefit.for_current_company
     render json: @employee_benefits
   end
 
@@ -35,7 +35,7 @@ class EmployeeBenefitsController < ApplicationController
   private
 
   def set_employee_benefit
-    @employee_benefit = EmployeeBenefit.find(params[:id])
+    @employee_benefit = find_in_tenant(EmployeeBenefit, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Employee benefit not found" }, status: :not_found
   end

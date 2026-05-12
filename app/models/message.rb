@@ -1,4 +1,6 @@
 class Message < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :channel
   belongs_to :user
 
@@ -20,6 +22,10 @@ class Message < ApplicationRecord
   end
 
   private
+
+  def assign_company_from_current
+    self.company_id ||= channel&.company_id || Current.company&.id
+  end
 
   def broadcast_message
     # Ensure user association is loaded

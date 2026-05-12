@@ -1,4 +1,6 @@
 class AssetAllocation < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :asset
   belongs_to :employee
 
@@ -76,6 +78,10 @@ class AssetAllocation < ApplicationRecord
   end
 
   private
+
+  def assign_company_from_current
+    self.company_id ||= asset&.company_id || Current.company&.id
+  end
 
   def set_assigned_date
     self.assigned_date ||= Date.current

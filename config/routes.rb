@@ -105,6 +105,8 @@ Rails.application.routes.draw do
 
   # Super Admin Routes
   namespace :super_admin do
+    resources :companies, only: [ :index, :show, :create, :update, :destroy ]
+    resources :company_memberships, only: [ :index, :create, :destroy ]
     get :dashboard
     get :system_logs
     get :audit_trails

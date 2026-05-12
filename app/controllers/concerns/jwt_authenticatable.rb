@@ -20,6 +20,9 @@ module JwtAuthenticatable
   end
 
   def should_authenticate?
+    # Legacy cookie-session JSON routes (/sessions) authenticate via session[:user_id], not JWT
+    return false if legacy_session_json_route?
+
     # Authenticate if it's a JSON request and not the login endpoint
     json_request? && !login_endpoint?
   end
@@ -30,6 +33,20 @@ module JwtAuthenticatable
 
   def login_endpoint?
     request.path == "/api/v1/auth/login"
+  end
+
+  # POST /sessions, DELETE /sessions, GET /sessions/current — session-based API (not JWT)
+  def legacy_session_json_route?
+    return false unless json_request?
+
+    case request.path
+    when "/sessions"
+      request.post? || request.delete?
+    when "/sessions/current"
+      request.get?
+    else
+      false
+    end
   end
 
   def authenticate_user_from_token!

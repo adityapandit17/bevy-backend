@@ -209,7 +209,7 @@ class PolicyDocumentsController < ApplicationController
   private
 
   def set_policy_document
-    @policy_document = PolicyDocument.find(params[:id])
+    @policy_document = find_in_tenant(PolicyDocument, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Policy document not found" }, status: :not_found
   end

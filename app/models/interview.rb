@@ -1,4 +1,6 @@
 class Interview < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :candidate
   has_many :pending_tasks, as: :taskable, dependent: :destroy
 
@@ -64,6 +66,10 @@ class Interview < ApplicationRecord
   end
 
   private
+
+  def assign_company_from_current
+    self.company_id ||= candidate&.company_id || Current.company&.id
+  end
 
   def candidate_not_rejected
     if candidate&.status == "rejected"

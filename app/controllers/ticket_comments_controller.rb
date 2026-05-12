@@ -66,7 +66,7 @@ class TicketCommentsController < ApplicationController
   private
 
   def set_ticket
-    @ticket = HelpdeskTicket.find(params[:helpdesk_ticket_id])
+    @ticket = find_in_tenant(HelpdeskTicket, params[:helpdesk_ticket_id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Ticket not found" }, status: :not_found
   end

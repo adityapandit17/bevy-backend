@@ -2,6 +2,10 @@ require "test_helper"
 
 class Api::V1::AuthControllerTest < ActionDispatch::IntegrationTest
   def setup
+    super
+    # Integration tests auto-inject JWT by default; these tests opt in per request.
+    @auth_headers = {}
+
     @user = users(:one) # Assuming you have a user fixture
     @valid_credentials = {
       email: @user.email,

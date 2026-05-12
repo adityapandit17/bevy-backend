@@ -2,7 +2,7 @@ class KnowledgeArticlesController < ApplicationController
   before_action :set_article, only: [ :show, :update, :destroy ]
 
   def index
-    @articles = KnowledgeArticle.all
+    @articles = KnowledgeArticle.for_current_company
 
     # Apply filters
     @articles = @articles.by_category(params[:category]) if params[:category].present?
@@ -55,7 +55,7 @@ class KnowledgeArticlesController < ApplicationController
   private
 
   def set_article
-    @article = KnowledgeArticle.find(params[:id])
+    @article = find_in_tenant(KnowledgeArticle, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Article not found" }, status: :not_found
   end

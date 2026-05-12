@@ -1,4 +1,6 @@
 class Asset < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :employee, optional: true
   has_many :asset_allocations, dependent: :destroy
   has_many :maintenance_records, dependent: :destroy
@@ -6,7 +8,7 @@ class Asset < ApplicationRecord
   # Validations
   validates :name, presence: true
   validates :asset_type, presence: true, inclusion: { in: %w[laptop desktop mobile printer server network other] }
-  validates :serial_number, presence: true, uniqueness: true
+  validates :serial_number, presence: true, uniqueness: { scope: :company_id }
   validates :brand, presence: true
   validates :model, presence: true
   validates :purchase_date, presence: true
@@ -157,6 +159,10 @@ class Asset < ApplicationRecord
   end
 
   private
+
+  def assign_company_from_current
+    self.company_id ||= employee&.company_id || Current.company&.id
+  end
 
   def calculate_depreciation
     return unless purchase_date && purchase_cost

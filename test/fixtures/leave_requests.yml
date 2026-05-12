@@ -1,5 +1,4 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   employee: one
   leave_type: annual
@@ -7,7 +6,7 @@ one:
   end_date: 2025-08-02
   reason: Annual vacation leave
   status: pending
-
+  company: one
 two:
   employee: two
   leave_type: sick
@@ -15,3 +14,4 @@ two:
   end_date: 2025-07-30
   reason: Medical appointment
   status: approved
+  company: two

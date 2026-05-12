@@ -158,7 +158,7 @@ class Api::V1::HuddlesController < ApplicationController
   private
 
   def set_channel
-    @channel = Channel.find(params[:channel_id])
+    @channel = find_in_tenant(Channel, params[:channel_id])
   end
 
   def set_huddle

@@ -1,13 +1,13 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   channel: one
   user: one
   content: MyText
-  edited_at: 2026-01-07 13:01:39
-
+  edited_at: 2026-01-07 18:31:39.000000000 +05:30
+  company: one
 two:
   channel: two
   user: two
   content: MyText
-  edited_at: 2026-01-07 13:01:39
+  edited_at: 2026-01-07 18:31:39.000000000 +05:30
+  company: two

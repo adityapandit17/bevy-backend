@@ -1,21 +1,21 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   first_name: John
   last_name: Doe
   email: john.doe@example.com
-  phone: "1234567890"
+  phone: '1234567890'
   department: one
   designation: Software Engineer
   date_of_joining: 2025-07-29
   status: active
-
+  company: one
 two:
   first_name: Jane
   last_name: Smith
   email: jane.smith@example.com
-  phone: "0987654321"
+  phone: '0987654321'
   department: two
   designation: Manager
   date_of_joining: 2025-07-29
   status: active
+  company: two

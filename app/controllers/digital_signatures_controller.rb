@@ -66,7 +66,7 @@ class DigitalSignaturesController < ApplicationController
 
   # POST /digital_signatures/:id/sign
   def sign
-    @digital_signature = DigitalSignature.find(params[:id])
+    @digital_signature = find_in_tenant(DigitalSignature, params[:id])
 
     # Capture device info from request
     device_info = extract_device_info(request)
@@ -110,7 +110,7 @@ class DigitalSignaturesController < ApplicationController
   private
 
   def set_digital_signature
-    @digital_signature = DigitalSignature.find(params[:id])
+    @digital_signature = find_in_tenant(DigitalSignature, params[:id])
   end
 
   def digital_signature_params

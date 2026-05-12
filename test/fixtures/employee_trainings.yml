@@ -1,5 +1,4 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   employee: one
   name: Ruby on Rails Training
@@ -10,10 +9,10 @@ one:
   status: completed
   progress: 100
   certificate: Rails Developer Certificate
-  cost: 500.00
+  cost: 500.0
   skills: Ruby, Rails, MVC, ActiveRecord
   hours: 40
-
+  company: one
 two:
   employee: two
   name: Leadership Skills Workshop
@@ -23,7 +22,8 @@ two:
   end_date: 2026-08-15
   status: in_progress
   progress: 60
-  certificate: 
-  cost: 750.00
+  certificate:
+  cost: 750.0
   skills: Team Management, Communication, Decision Making
   hours: 24
+  company: two

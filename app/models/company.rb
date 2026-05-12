@@ -1,15 +1,10 @@
 class Company < ApplicationRecord
-  # Note: These associations would need company_id fields in the respective tables
-  # For now, we'll keep the model simple without these associations
-  # has_many :departments, dependent: :destroy
-  # has_many :employees, through: :departments
-  # has_many :job_openings, through: :departments
-  # has_many :assets, dependent: :destroy
-  # has_many :asset_allocations, through: :assets
-  # has_many :onboarding_employees, dependent: :destroy
-  # has_many :offboarding_employees, dependent: :destroy
-  # has_many :candidates, dependent: :destroy
-  # has_many :interviews, through: :candidates
+  has_many :company_memberships, dependent: :destroy
+  has_many :membership_users, through: :company_memberships, source: :user
+  has_many :departments, dependent: :destroy
+  has_many :employees, dependent: :restrict_with_error
+  has_many :candidates, dependent: :destroy
+  has_many :channels, dependent: :destroy
 
   validates :name, presence: true, length: { minimum: 2, maximum: 100 }
   validates :code, presence: true, uniqueness: true, length: { minimum: 2, maximum: 10 }

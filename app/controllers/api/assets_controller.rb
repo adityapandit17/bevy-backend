@@ -4,7 +4,7 @@ module Api
 
     # GET /api/assets
     def index
-      @assets = Asset.includes(:employee)
+      @assets = tenant_assets.includes(:employee)
 
       # Apply filters
       @assets = @assets.by_type(params[:asset_type]) if params[:asset_type].present?
@@ -27,10 +27,10 @@ module Api
         assets: @assets.map { |asset| format_asset(asset) },
         total_count: @assets.size,
         filters: {
-          asset_types: Asset.distinct.pluck(:asset_type),
-          departments: Asset.distinct.pluck(:department),
-          conditions: Asset.distinct.pluck(:condition),
-          statuses: Asset.distinct.pluck(:status)
+          asset_types: tenant_assets.distinct.pluck(:asset_type),
+          departments: tenant_assets.distinct.pluck(:department),
+          conditions: tenant_assets.distinct.pluck(:condition),
+          statuses: tenant_assets.distinct.pluck(:status)
         }
       }
     end
@@ -84,24 +84,24 @@ module Api
 
     # GET /api/assets/stats
     def stats
-      total_assets = Asset.count
-      assigned_assets = Asset.assigned.size
-      available_assets = Asset.available.size
-      maintenance_assets = Asset.maintenance.size
-      total_value = Asset.sum(:current_value) || 0
-      purchase_value = Asset.sum(:purchase_cost) || 0
+      total_assets = tenant_assets.count
+      assigned_assets = tenant_assets.assigned.size
+      available_assets = tenant_assets.available.size
+      maintenance_assets = tenant_assets.maintenance.size
+      total_value = tenant_assets.sum(:current_value) || 0
+      purchase_value = tenant_assets.sum(:purchase_cost) || 0
 
-      asset_types = Asset.group(:asset_type).size
-      status_distribution = Asset.group(:status).size
-      condition_distribution = Asset.group(:condition).size
-      department_distribution = Asset.group(:department).size
+      asset_types = tenant_assets.group(:asset_type).size
+      status_distribution = tenant_assets.group(:status).size
+      condition_distribution = tenant_assets.group(:condition).size
+      department_distribution = tenant_assets.group(:department).size
 
-      overdue_maintenance = Asset.overdue_maintenance.size
-      due_maintenance_soon = Asset.due_maintenance_soon.size
-      warranty_expiring_soon = Asset.warranty_expiring_soon.size
+      overdue_maintenance = tenant_assets.overdue_maintenance.size
+      due_maintenance_soon = tenant_assets.due_maintenance_soon.size
+      warranty_expiring_soon = tenant_assets.warranty_expiring_soon.size
 
       # Calculate average asset age safely (SQLite compatible)
-      assets_with_dates = Asset.where.not(purchase_date: nil)
+      assets_with_dates = tenant_assets.where.not(purchase_date: nil)
       if assets_with_dates.exists?
         # PostgreSQL: Calculate average age in years
         average_age = assets_with_dates.average("EXTRACT(YEAR FROM AGE(CURRENT_DATE, purchase_date))")
@@ -140,7 +140,7 @@ module Api
 
     # GET /api/assets/allocations
     def allocations
-      @allocations = AssetAllocation.includes(:asset, :employee).active.recent
+      @allocations = AssetAllocation.for_current_company.includes(:asset, :employee).active.recent
 
       render json: {
         allocations: @allocations.map { |allocation| format_allocation(allocation) },
@@ -150,26 +150,30 @@ module Api
 
     # GET /api/assets/maintenance
     def maintenance
-      @maintenance_records = MaintenanceRecord.includes(:asset).recent.limit(20)
-      @overdue_assets = Asset.overdue_maintenance.includes(:employee)
-      @due_soon_assets = Asset.due_maintenance_soon.includes(:employee)
+      @maintenance_records = MaintenanceRecord.for_current_company.includes(:asset).recent.limit(20)
+      @overdue_assets = tenant_assets.overdue_maintenance.includes(:employee)
+      @due_soon_assets = tenant_assets.due_maintenance_soon.includes(:employee)
 
       render json: {
         recent_maintenance: @maintenance_records.map { |record| format_maintenance_record(record) },
         overdue_maintenance: @overdue_assets.map { |asset| format_asset(asset) },
         due_maintenance_soon: @due_soon_assets.map { |asset| format_asset(asset) },
         maintenance_stats: {
-          total_maintenance_cost: MaintenanceRecord.sum(:cost) || 0,
-          maintenance_count_this_year: MaintenanceRecord.this_year.size,
-          average_maintenance_cost: MaintenanceRecord.average(:cost)&.round(2) || 0
+          total_maintenance_cost: MaintenanceRecord.for_current_company.sum(:cost) || 0,
+          maintenance_count_this_year: MaintenanceRecord.for_current_company.this_year.size,
+          average_maintenance_cost: MaintenanceRecord.for_current_company.average(:cost)&.round(2) || 0
         }
       }
     end
 
     private
 
+    def tenant_assets
+      Asset.for_current_company
+    end
+
     def set_asset
-      @asset = Asset.find(params[:id])
+      @asset = find_in_tenant(Asset, params[:id])
     rescue ActiveRecord::RecordNotFound
       render json: { message: "Asset not found" }, status: :not_found
     end

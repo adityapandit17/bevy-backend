@@ -418,8 +418,27 @@ module TestHelpers
   end
 
   def sign_in_user(user)
+    ensure_default_workspace_membership(user)
     token = JwtService.generate_token(user)
     @auth_headers = { "Authorization" => "Bearer #{token}" }
+  end
+
+  # Multitenancy: auto-injected JWT user must belong to a company or TenantContext returns 422.
+  def ensure_default_workspace_membership(user)
+    return if user.blank?
+
+    company = Company.order(:id).first
+    company ||= Company.create!(
+      name: "Test Workspace",
+      code: "TS1",
+      industry: "General",
+      employee_count: "0",
+      timezone: "UTC",
+      currency: "USD"
+    )
+    CompanyMembership.find_or_create_by!(user: user, company: company) do |m|
+      m.status = "active"
+    end
   end
 
   def sign_out_user
@@ -443,6 +462,7 @@ class ActionDispatch::IntegrationTest
   def before_setup
     super
     @auth_user = find_or_create_test_admin
+    ensure_default_workspace_membership(@auth_user)
     @auth_headers = auth_headers_for(@auth_user)
   end
 

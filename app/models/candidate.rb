@@ -1,4 +1,6 @@
 class Candidate < ApplicationRecord
+  include BelongsToTenant
+
   has_many :interviews, dependent: :destroy
   has_one :next_interview, -> {
     where("scheduled_date >= ?", Date.current)

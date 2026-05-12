@@ -3,19 +3,19 @@ class BirthdaysController < ApplicationController
 
   # GET /birthdays/today
   def today
-    @birthdays = Employee.active.birthday_today.includes(:department)
+    @birthdays = Employee.for_current_company.active.birthday_today.includes(:department)
     render json: format_birthdays(@birthdays, "today")
   end
 
   # GET /birthdays/this_week
   def this_week
-    @birthdays = Employee.active.birthday_this_week.includes(:department)
+    @birthdays = Employee.for_current_company.active.birthday_this_week.includes(:department)
     render json: format_birthdays(@birthdays, "this_week")
   end
 
   # GET /birthdays/this_month
   def this_month
-    @birthdays = Employee.active.birthday_this_month.includes(:department)
+    @birthdays = Employee.for_current_company.active.birthday_this_month.includes(:department)
     render json: format_birthdays(@birthdays, "this_month")
   end
 
@@ -26,7 +26,7 @@ class BirthdaysController < ApplicationController
 
     (0..29).each do |day_offset|
       date = Date.current + day_offset.days
-      birthdays_on_date = Employee.active.where(
+      birthdays_on_date = Employee.for_current_company.active.where(
         "TO_CHAR(date_of_birth, 'MM-DD') = ?",
         date.strftime("%m-%d")
       ).includes(:department)

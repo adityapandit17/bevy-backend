@@ -1,4 +1,5 @@
 class CompaniesController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_company
 
   def show
@@ -17,14 +18,11 @@ class CompaniesController < ApplicationController
   private
 
   def set_company
-    @company = Company.first || Company.create!(
-      name: "Default Company",
-      code: "DEF",
-      industry: "General",
-      employee_count: "0",
-      timezone: "UTC",
-      currency: "USD"
-    )
+    unless Current.company
+      return render json: { success: false, error: "Workspace context required" }, status: :unprocessable_entity
+    end
+
+    @company = Current.company
   end
 
   def company_params

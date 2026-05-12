@@ -162,7 +162,7 @@ class MaintenanceRecordsController < ApplicationController
   private
 
   def set_maintenance_record
-    @maintenance_record = MaintenanceRecord.find(params[:id])
+    @maintenance_record = find_in_tenant(MaintenanceRecord, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { message: "Maintenance record not found" }, status: :not_found
   end

@@ -5,7 +5,7 @@ class AttendanceRecordsController < ApplicationController
   before_action :authorize_index!, only: [ :index ]
 
   def index
-    @attendance_records = AttendanceRecord.includes(:employee, :attendance_sessions)
+    @attendance_records = AttendanceRecord.for_current_company.includes(:employee, :attendance_sessions)
 
     # Apply filters
     @attendance_records = @attendance_records.by_employee(params[:employee_id]) if params[:employee_id].present?
@@ -374,7 +374,7 @@ class AttendanceRecordsController < ApplicationController
     start_date = params[:start_date] || Date.current.beginning_of_month
     end_date = params[:end_date] || Date.current.end_of_month
 
-    records = AttendanceRecord.where(employee_id: employee_id, date: start_date..end_date)
+    records = AttendanceRecord.for_current_company.where(employee_id: employee_id, date: start_date..end_date)
 
     stats = {
       total_days: records.size,
@@ -397,7 +397,7 @@ class AttendanceRecordsController < ApplicationController
     start_date = params[:start_date] || Date.current.beginning_of_month
     end_date = params[:end_date] || Date.current.end_of_month
 
-    records = AttendanceRecord.where(employee_id: employee_id, date: start_date..end_date)
+    records = AttendanceRecord.for_current_company.where(employee_id: employee_id, date: start_date..end_date)
 
     calendar_data = records.map do |record|
       {
@@ -425,13 +425,13 @@ class AttendanceRecordsController < ApplicationController
       return
     end
 
-    @employee = Employee.find(employee_id)
+    @employee = find_in_tenant(Employee, employee_id)
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Employee not found" }, status: :not_found
   end
 
   def set_attendance_record
-    @attendance_record = AttendanceRecord.find(params[:id])
+    @attendance_record = find_in_tenant(AttendanceRecord, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Attendance record not found" }, status: :not_found
   end

@@ -1,4 +1,6 @@
 class TicketComment < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :helpdesk_ticket
   belongs_to :user, optional: true
   belongs_to :employee, optional: true

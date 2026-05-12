@@ -1,13 +1,11 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   channel: one
   user: one
   role: admin
-  last_read_at: 2026-01-07 13:01:38
-
+  last_read_at: 2026-01-07 18:31:38.000000000 +05:30
 two:
   channel: two
   user: two
   role: member
-  last_read_at: 2026-01-07 13:01:38
+  last_read_at: 2026-01-07 18:31:38.000000000 +05:30

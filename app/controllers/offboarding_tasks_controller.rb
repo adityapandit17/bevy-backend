@@ -98,7 +98,7 @@ class OffboardingTasksController < ApplicationController
   private
 
   def set_offboarding_task
-    @offboarding_task = OffboardingTask.find(params[:id])
+    @offboarding_task = find_in_tenant(OffboardingTask, params[:id])
   end
 
   def offboarding_task_params

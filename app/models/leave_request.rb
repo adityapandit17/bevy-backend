@@ -1,4 +1,6 @@
 class LeaveRequest < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :employee
   belongs_to :manager_approved_by, class_name: "User", optional: true
   belongs_to :hr_approved_by, class_name: "User", optional: true
@@ -180,8 +182,12 @@ class LeaveRequest < ApplicationRecord
     start_of_year = Date.new(year, 1, 1)
     end_of_year = Date.new(year, 12, 31)
 
+    employee = Employee.find_by(id: employee_id)
+    return { total: 0, used: 0, remaining: 0 } unless employee
+
     approved_requests = where(
       employee_id: employee_id,
+      company_id: employee.company_id,
       leave_type: leave_type,
       status: "approved",
       start_date: start_of_year..end_of_year
@@ -190,7 +196,7 @@ class LeaveRequest < ApplicationRecord
     total_days = approved_requests.sum(:days)
 
     # Get leave limit from policy
-    policy = LeavePolicy.for_year(year)
+    policy = LeavePolicy.for_year(year) # uses Current.company when set
     limit = policy.leave_limit_for_type(leave_type)
     remaining = [ limit - total_days, 0 ].max
 
@@ -217,11 +223,13 @@ class LeaveRequest < ApplicationRecord
   end
 
   def self.team_leave_calendar(team_employee_ids, start_date, end_date)
-    where(
+    rel = where(
       employee_id: team_employee_ids,
       start_date: start_date..end_date,
       status: "approved"
-    ).includes(:employee).order(:start_date)
+    )
+    rel = rel.where(company_id: Current.company.id) if Current.company
+    rel.includes(:employee).order(:start_date)
   end
 
   def self.department_leave_stats(department_id, year = Date.current.year)
@@ -230,7 +238,8 @@ class LeaveRequest < ApplicationRecord
 
     requests = joins(:employee)
               .where(employees: { department_id: department_id })
-              .where(start_date: start_of_year..end_of_year)
+    requests = requests.where(employees: { company_id: Current.company.id }) if Current.company
+    requests = requests.where(start_date: start_of_year..end_of_year)
 
     {
       total_requests: requests.size,
@@ -243,6 +252,10 @@ class LeaveRequest < ApplicationRecord
   end
 
   private
+
+  def assign_company_from_current
+    self.company_id ||= employee&.company_id || Current.company&.id
+  end
 
   def calculate_days
     self.days = duration_days if start_date && end_date

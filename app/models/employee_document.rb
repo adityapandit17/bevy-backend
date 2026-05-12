@@ -1,4 +1,6 @@
 class EmployeeDocument < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :employee
 
   # Validations

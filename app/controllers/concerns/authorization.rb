@@ -49,8 +49,10 @@ module Authorization
 
     return true if current_user.employee_id == employee_id.to_i
 
-    return true if current_user.has_role?("Department Head") &&
-                  current_user.employee&.department_id == Employee.find(employee_id).department_id
+    if current_user.has_role?("Department Head")
+      other = Employee.for_current_company.find_by(id: employee_id)
+      return true if other && current_user.employee&.department_id == other.department_id
+    end
 
     false
   end

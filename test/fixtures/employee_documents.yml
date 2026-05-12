@@ -1,5 +1,4 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   employee: one
   name: Employment Contract
@@ -9,7 +8,7 @@ one:
   status: active
   file_size: 2.5MB
   uploaded_by: HR Manager
-
+  company: one
 two:
   employee: two
   name: ID Proof
@@ -19,3 +18,4 @@ two:
   status: active
   file_size: 1.2MB
   uploaded_by: HR Manager
+  company: two

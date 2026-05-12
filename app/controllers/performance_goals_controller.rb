@@ -2,7 +2,7 @@ class PerformanceGoalsController < ApplicationController
   before_action :set_performance_goal, only: [ :show, :update, :destroy ]
 
   def index
-    @performance_goals = PerformanceGoal.all
+    @performance_goals = PerformanceGoal.for_current_company
     render json: @performance_goals
   end
 
@@ -35,7 +35,7 @@ class PerformanceGoalsController < ApplicationController
   private
 
   def set_performance_goal
-    @performance_goal = PerformanceGoal.find(params[:id])
+    @performance_goal = find_in_tenant(PerformanceGoal, params[:id])
   rescue ActiveRecord::RecordNotFound
     head :not_found
   end

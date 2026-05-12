@@ -2,7 +2,7 @@ class EventsController < ApplicationController
   before_action :set_event, only: [ :show, :update, :destroy ]
 
   def index
-    @events = Event.includes(:organizer).all
+    @events = Event.for_current_company.includes(:organizer)
 
     # Filtering
     @events = @events.upcoming if params[:upcoming] == "true"
@@ -83,7 +83,7 @@ class EventsController < ApplicationController
   private
 
   def set_event
-    @event = Event.find(params[:id])
+    @event = find_in_tenant(Event, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Event not found" }, status: :not_found
   end

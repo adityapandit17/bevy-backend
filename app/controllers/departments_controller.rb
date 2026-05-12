@@ -1,11 +1,13 @@
 class DepartmentsController < ApplicationController
+  before_action :authenticate_user!
+
   def index
-    @departments = Department.all
+    @departments = Department.for_current_company
     render json: @departments
   end
 
   def show
-    @department = Department.find(params[:id])
+    @department = find_in_tenant(Department, params[:id])
     render json: @department
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Department not found" }, status: :not_found
@@ -21,7 +23,7 @@ class DepartmentsController < ApplicationController
   end
 
   def update
-    @department = Department.find(params[:id])
+    @department = find_in_tenant(Department, params[:id])
     if @department.update(department_params)
       render json: @department
     else
@@ -32,7 +34,7 @@ class DepartmentsController < ApplicationController
   end
 
   def destroy
-    @department = Department.find(params[:id])
+    @department = find_in_tenant(Department, params[:id])
     if @department.employees.any? || @department.job_openings.any?
       render json: { error: "Cannot delete department with associated employees or job openings" }, status: :unprocessable_entity
     else

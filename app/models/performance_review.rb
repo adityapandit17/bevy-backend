@@ -1,4 +1,6 @@
 class PerformanceReview < ApplicationRecord
+  include BelongsToTenant
+
   belongs_to :employee
 
   # Validations

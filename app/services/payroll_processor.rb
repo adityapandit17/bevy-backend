@@ -10,9 +10,10 @@ class PayrollProcessor
     keyword_init: true
   )
 
-  def initialize(month:, preview: false)
+  def initialize(month:, preview: false, company_id: nil)
     @month = PayrollMonth.parse(month)
     @preview = preview
+    @company_id = company_id || Current.company&.id
     @errors = []
     @created = 0
     @updated = 0
@@ -21,8 +22,10 @@ class PayrollProcessor
   end
 
   def call
+    raise ArgumentError, "company_id is required for payroll processing" if @company_id.blank?
+
     ActiveRecord::Base.transaction do
-      Employee.active.includes(:department, :salary_structures).find_each do |employee|
+      Employee.where(company_id: @company_id).active.includes(:department, :salary_structures).find_each do |employee|
         process_employee(employee)
       end
 

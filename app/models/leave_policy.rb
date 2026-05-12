@@ -1,6 +1,8 @@
 class LeavePolicy < ApplicationRecord
+  include BelongsToTenant
+
   # Validations
-  validates :year, presence: true, uniqueness: true, numericality: { only_integer: true }
+  validates :year, presence: true, uniqueness: { scope: :company_id }, numericality: { only_integer: true }
   validates :holidays_per_year, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :annual_leave, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :sick_leave, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
@@ -17,11 +19,13 @@ class LeavePolicy < ApplicationRecord
 
   # Class methods
   def self.current_policy
-    current.first || create_default_policy
+    rel = Current.company ? where(company_id: Current.company.id) : all
+    rel.current.first || create_default_policy
   end
 
   def self.for_year(year)
-    by_year(year).active.first || create_default_policy_for_year(year)
+    rel = Current.company ? where(company_id: Current.company.id) : all
+    rel.by_year(year).active.first || create_default_policy_for_year(year)
   end
 
   def self.create_default_policy
@@ -29,7 +33,9 @@ class LeavePolicy < ApplicationRecord
   end
 
   def self.create_default_policy_for_year(year)
+    company_id = Current.company&.id || Company.order(:id).first&.id
     create!(
+      company_id: company_id,
       year: year,
       holidays_per_year: 10,
       annual_leave: 21,

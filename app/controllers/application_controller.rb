@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   include Authorization
   include JwtAuthenticatable
+  include TenantContext
 
   # Skip CSRF protection for API endpoints and JSON requests (JWT auth, no cookie-based sessions).
   # Include Content-Type check: requests with application/json are API clients even when format is */*
@@ -27,9 +28,15 @@ class ApplicationController < ActionController::Base
 
   def current_user
     # For JSON requests, @current_user is set by JwtAuthenticatable concern's authenticate_user_from_token!
+    # Legacy GET /sessions/current uses session[:user_id] when JWT is not used (see JwtAuthenticatable#legacy_session_json_route?)
     # For web requests, use session-based authentication
     if request.format.json?
-      @current_user
+      return @current_user if @current_user.present?
+      if session[:user_id].present? && request.get? && request.path == "/sessions/current"
+        return @current_user_session ||= User.find_by(id: session[:user_id])
+      end
+
+      nil
     else
       @current_user ||= User.find(session[:user_id]) if session[:user_id]
     end
@@ -60,5 +67,10 @@ class ApplicationController < ActionController::Base
 
   def json_request?
     request.format.json? || request.headers["Accept"]&.include?("application/json")
+  end
+
+  # Resolve a tenant model by id within Current.company (set by TenantContext).
+  def find_in_tenant(model_class, id)
+    model_class.for_current_company.find(id)
   end
 end

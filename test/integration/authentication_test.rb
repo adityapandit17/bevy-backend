@@ -2,6 +2,10 @@ require "test_helper"
 
 class AuthenticationTest < ActionDispatch::IntegrationTest
   def setup
+    super
+    # Legacy /sessions routes use cookie session auth, not JWT — disable auto-injected Bearer token.
+    @auth_headers = {}
+
     # Create a test user
     @user = User.create!(
       email: "test@example.com",
@@ -53,16 +57,16 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Get current user
-    get current_sessions_url, as: :json
+    get sessions_current_url, as: :json
     assert_response :success
     json_response = JSON.parse(response.body)
     assert_equal @user.id, json_response["user"]["id"]
   end
 
   test "should not get current user when not authenticated" do
-    get current_sessions_url, as: :json
+    get sessions_current_url, as: :json
     assert_response :unauthorized
     json_response = JSON.parse(response.body)
-    assert_equal "Authentication required", json_response["error"]
+    assert_equal "Not authenticated", json_response["error"]
   end
 end

@@ -173,7 +173,7 @@ class AssetsController < ApplicationController
   private
 
   def set_asset
-    @asset = Asset.find(params[:id])
+    @asset = find_in_tenant(Asset, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { message: "Asset not found" }, status: :not_found
   end

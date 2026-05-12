@@ -5,7 +5,7 @@ class DashboardController < ApplicationController
   def index
     begin
       @stats = {
-        total_employees: Employee.active.size,
+        total_employees: Employee.for_current_company.active.size,
         present_today: attendance_stats[:present],
         on_leave: attendance_stats[:on_leave],
         monthly_payroll: payroll_stats[:total_amount]
@@ -36,12 +36,14 @@ class DashboardController < ApplicationController
 
   def attendance_stats
     today = Date.current
-    present_count = AttendanceRecord.joins(:employee)
+    present_count = AttendanceRecord.for_current_company
+                                   .joins(:employee)
                                    .where(date: today, status: "present")
                                    .where(employees: { status: "active" })
                                    .size
 
-    on_leave_count = LeaveRequest.joins(:employee)
+    on_leave_count = LeaveRequest.for_current_company
+                                 .joins(:employee)
                                  .where("start_date <= ? AND end_date >= ?", today, today)
                                  .where(status: "approved")
                                  .where(employees: { status: "active" })
@@ -55,7 +57,7 @@ class DashboardController < ApplicationController
 
   def payroll_stats
     current_month = Date.current.strftime("%B %Y")
-    total_amount = Payroll.where(month: current_month, status: "processed").sum(:net_salary)
+    total_amount = Payroll.for_current_company.where(month: current_month, status: "processed").sum(:net_salary)
 
     {
       total_amount: total_amount
@@ -66,7 +68,7 @@ class DashboardController < ApplicationController
     activities = []
 
     # Recent employee additions - include both active and onboarding employees
-    recent_employees = Employee.where(status: [ "active", "onboarding" ])
+    recent_employees = Employee.for_current_company.where(status: [ "active", "onboarding" ])
                               .where("employees.created_at >= ?", 7.days.ago)
                               .order(created_at: :desc)
                               .limit(3)
@@ -82,7 +84,7 @@ class DashboardController < ApplicationController
     end
 
     # Recent leave requests
-    recent_leaves = LeaveRequest.joins(:employee)
+    recent_leaves = LeaveRequest.for_current_company.joins(:employee)
                                .where("leave_requests.created_at >= ?", 7.days.ago)
                                .where(employees: { status: "active" })
                                .order(created_at: :desc)
@@ -99,7 +101,7 @@ class DashboardController < ApplicationController
     end
 
     # Recent performance reviews
-    recent_reviews = PerformanceReview.joins(:employee)
+    recent_reviews = PerformanceReview.for_current_company.joins(:employee)
                                      .where("performance_reviews.created_at >= ?", 7.days.ago)
                                      .where(employees: { status: "active" })
                                      .order(created_at: :desc)
@@ -151,7 +153,7 @@ class DashboardController < ApplicationController
   end
 
   def birthdays_today
-    Employee.active.birthday_today.includes(:department).map do |employee|
+    Employee.for_current_company.active.birthday_today.includes(:department).map do |employee|
       {
         id: employee.id,
         name: employee.name,
@@ -169,7 +171,7 @@ class DashboardController < ApplicationController
     # Get birthdays for the next 7 days
     (1..7).each do |day_offset|
       date = Date.current + day_offset.days
-      birthdays_on_date = Employee.active.where(
+      birthdays_on_date = Employee.for_current_company.active.where(
         "TO_CHAR(date_of_birth, 'MM-DD') = ?",
         date.strftime("%m-%d")
       ).includes(:department)
@@ -197,7 +199,7 @@ class DashboardController < ApplicationController
     tasks = []
 
     # Get pending leave approvals for this manager
-    pending_leaves = PendingTask.pending
+    pending_leaves = PendingTask.for_current_company.pending
                                  .by_type("LeaveRequest")
                                  .for_employee(employee_id)
                                  .count
@@ -214,7 +216,7 @@ class DashboardController < ApplicationController
     # This ensures managers see their direct reports first, HR/Admin without direct reports see all
     if is_admin_or_hr && !has_direct_reports && pending_leaves == 0
       # HR/Admin with no direct reports see all pending leaves
-      pending_leaves = PendingTask.pending
+      pending_leaves = PendingTask.for_current_company.pending
                                    .by_type("LeaveRequest")
                                    .joins("INNER JOIN leave_requests ON pending_tasks.taskable_id = leave_requests.id")
                                    .joins("INNER JOIN employees ON leave_requests.employee_id = employees.id")
@@ -234,7 +236,7 @@ class DashboardController < ApplicationController
     end
 
     # Scheduled interviews assigned to current employee
-    scheduled_interviews = PendingTask.pending
+    scheduled_interviews = PendingTask.for_current_company.pending
                                       .by_type("Interview")
                                       .for_employee(employee_id)
                                       .where("title LIKE ?", "%Interview Scheduled%")
@@ -251,7 +253,7 @@ class DashboardController < ApplicationController
     end
 
     # Missed interviews assigned to current employee
-    missed_interviews = PendingTask.pending
+    missed_interviews = PendingTask.for_current_company.pending
                                    .by_type("Interview")
                                    .for_employee(employee_id)
                                    .where("title LIKE ?", "%Missed Interview%")

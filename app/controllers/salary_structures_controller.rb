@@ -2,7 +2,7 @@ class SalaryStructuresController < ApplicationController
   before_action :set_salary_structure, only: [ :show, :update, :destroy ]
 
   def index
-    @salary_structures = SalaryStructure.all
+    @salary_structures = SalaryStructure.for_current_company
     render json: @salary_structures
   rescue StandardError => e
     Rails.logger.error "Error fetching salary structures: #{e.message}"
@@ -39,7 +39,7 @@ class SalaryStructuresController < ApplicationController
   # Generate default salary structures for an employee or all employees
   def generate_defaults
     if params[:employee_id].present?
-      employee = Employee.find(params[:employee_id])
+      employee = find_in_tenant(Employee, params[:employee_id])
       created = SalaryStructure.generate_defaults_for_employee(employee)
       render json: {
         message: "Generated #{created.size} default salary structure(s) for employee #{employee.id}",
@@ -61,7 +61,7 @@ class SalaryStructuresController < ApplicationController
 
   # Get complete salary structures for an employee (with defaults)
   def complete_structures
-    employee = Employee.find(params[:employee_id])
+    employee = find_in_tenant(Employee, params[:employee_id])
     structures = SalaryStructure.complete_structures_for_employee(employee)
     render json: structures
   rescue ActiveRecord::RecordNotFound => e
@@ -71,7 +71,7 @@ class SalaryStructuresController < ApplicationController
   private
 
   def set_salary_structure
-    @salary_structure = SalaryStructure.find(params[:id])
+    @salary_structure = find_in_tenant(SalaryStructure, params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Salary structure not found" }, status: :not_found
   end

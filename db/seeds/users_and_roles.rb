@@ -147,3 +147,16 @@ ensure_user_for_employee!(
 )
 
 puts "User roles and permissions setup completed!"
+
+# Multitenancy: ensure every user can access seed workspaces (subdomain dev: bevy / bis).
+if defined?($seed_company) && $seed_company && defined?($seed_company_bis) && $seed_company_bis
+  puts "Linking users to seed companies (#{$seed_company.code}, #{$seed_company_bis.code})..."
+  User.find_each do |user|
+    [ $seed_company, $seed_company_bis ].each do |co|
+      CompanyMembership.find_or_create_by!(user_id: user.id, company_id: co.id) do |m|
+        m.status = "active"
+      end
+    end
+  end
+  puts "✓ Company memberships ensured"
+end

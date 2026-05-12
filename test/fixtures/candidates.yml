@@ -1,43 +1,43 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   first_name: John
   last_name: Doe
   email: john.doe@example.com
-  phone: "1234567890"
+  phone: '1234567890'
   position: Software Engineer
   department: Engineering
-  experience: "5 years"
-  location: "San Francisco, CA"
+  experience: 5 years
+  location: San Francisco, CA
   status: applied
   applied_date: 2025-07-30
   last_contact: 2025-07-30
-  resume: "resume.pdf"
-  cover_letter: "cover_letter.pdf"
-  notes: "Strong technical background"
-  skills: "Ruby, Rails, JavaScript, React"
-  education: "Bachelor's in Computer Science"
-  current_company: "TechCorp"
-  expected_salary: "80000"
-  availability: "Immediate"
-
+  resume: resume.pdf
+  cover_letter: cover_letter.pdf
+  notes: Strong technical background
+  skills: Ruby, Rails, JavaScript, React
+  education: Bachelor's in Computer Science
+  current_company: TechCorp
+  expected_salary: '80000'
+  availability: Immediate
+  company: one
 two:
   first_name: Jane
   last_name: Smith
   email: jane.smith@example.com
-  phone: "0987654321"
+  phone: '0987654321'
   position: Marketing Manager
   department: Marketing
-  experience: "3 years"
-  location: "New York, NY"
+  experience: 3 years
+  location: New York, NY
   status: screening
   applied_date: 2025-07-30
   last_contact: 2025-07-30
-  resume: "jane_resume.pdf"
-  cover_letter: "jane_cover_letter.pdf"
-  notes: "Excellent communication skills"
-  skills: "Marketing, SEO, Social Media"
-  education: "MBA in Marketing"
-  current_company: "MarketingCorp"
-  expected_salary: "70000"
-  availability: "2 weeks notice"
+  resume: jane_resume.pdf
+  cover_letter: jane_cover_letter.pdf
+  notes: Excellent communication skills
+  skills: Marketing, SEO, Social Media
+  education: MBA in Marketing
+  current_company: MarketingCorp
+  expected_salary: '70000'
+  availability: 2 weeks notice
+  company: two

@@ -83,6 +83,15 @@ class RoleBasedAuthenticationTest < ActionDispatch::IntegrationTest
       last_name: "User",
       status: "inactive"
     )
+
+    company = Company.order(:id).first
+    raise "Expected at least one company fixture for tenant scoping" unless company
+
+    [ @super_admin, @hr_manager, @employee ].each do |u|
+      CompanyMembership.find_or_create_by!(user: u, company: company) do |m|
+        m.status = "active"
+      end
+    end
   end
 
   test "super admin can access all employee endpoints" do
@@ -163,10 +172,11 @@ class RoleBasedAuthenticationTest < ActionDispatch::IntegrationTest
   end
 
   test "user without token cannot access protected endpoints" do
-    get "/employees"
+    no_auth = { "Authorization" => "", "Accept" => "application/json" }
+    get "/employees", headers: no_auth
     assert_response :unauthorized
 
-    get "/employees/1"
+    get "/employees/1", headers: no_auth
     assert_response :unauthorized
   end
 
@@ -279,6 +289,10 @@ class RoleBasedAuthenticationTest < ActionDispatch::IntegrationTest
     )
     multi_role_user.roles << @hr_manager_role
     multi_role_user.roles << @employee_role
+
+    CompanyMembership.find_or_create_by!(user: multi_role_user, company: Company.order(:id).first) do |m|
+      m.status = "active"
+    end
 
     token = get_jwt_token(multi_role_user)
 
