@@ -209,6 +209,7 @@ employees.each do |emp|
     # Add random date of birth (age between 22-55)
     age = rand(22..55)
     employee.date_of_birth = Date.current - age.years - rand(0..365).days
+    employee.phone = "9876543212"
   end
 end
 
@@ -2015,7 +2016,7 @@ if super_admin_user && super_admin_user.employee_id.nil?
   employee = Employee.find_or_create_by!(email: super_admin_user.email) do |emp|
     emp.first_name = super_admin_user.first_name
     emp.last_name = super_admin_user.last_name
-    emp.phone = "+91 00000 00000"
+    emp.phone = "+91 9876543212"
     emp.department_id = hr_department.id
     emp.designation = "Super Administrator"
     emp.date_of_joining = super_admin_user.created_at.to_date
