@@ -41,7 +41,7 @@ class SendWelcomeEmailJob < ApplicationJob
 
       # Send welcome email
       begin
-        # WelcomeMailer.welcome_email(employee, user.invitation_token).deliver_now
+        WelcomeMailer.welcome_email(employee, user.invitation_token).deliver_now
         Rails.logger.info "Welcome email sent to #{employee.email}"
 
         {

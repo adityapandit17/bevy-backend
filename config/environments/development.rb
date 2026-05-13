@@ -77,14 +77,11 @@ Rails.application.configure do
   # Raise error when a before_action's only/except options reference missing actions
   config.action_controller.raise_on_missing_callback_actions = true
 
-  # Email configuration for development
+  # Email configuration for development (open mails locally)
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
-    address: "localhost",
-    port: 1025,
-    domain: "localhost"
-  }
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.delivery_method = :letter_opener
 
   # In development, default to the in-process async adapter.
   # If you explicitly opt into Solid Queue (e.g. running with SOLID_QUEUE_IN_PUMA=1),
