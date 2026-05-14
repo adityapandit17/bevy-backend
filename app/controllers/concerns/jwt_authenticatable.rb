@@ -20,16 +20,22 @@ module JwtAuthenticatable
   end
 
   def should_authenticate?
-    # Authenticate if it's a JSON request and not the login endpoint
-    json_request? && !login_endpoint?
+    # Authenticate if it's a JSON request and not a public auth endpoint
+    json_request? && !public_auth_endpoint?
   end
 
   # def should_authenticate_api_request?
   #   login_endpoint?
   # end
 
+  def public_auth_endpoint?
+    request.path == "/api/v1/auth/login" ||
+      request.path == "/api/v1/auth/accept_invitation"
+  end
+
+  # Backwards compatibility for controllers that still reference this name.
   def login_endpoint?
-    request.path == "/api/v1/auth/login"
+    public_auth_endpoint?
   end
 
   def authenticate_user_from_token!

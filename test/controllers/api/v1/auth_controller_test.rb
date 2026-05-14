@@ -198,4 +198,57 @@ class Api::V1::AuthControllerTest < ActionDispatch::IntegrationTest
     assert_not response_data["success"]
     assert_equal "Invalid or expired token", response_data["error"]
   end
+
+  test "accept_invitation returns jwt for valid invitation token" do
+    inviter = users(:one)
+    invited = User.invite!(
+      {
+        email: "invited_accept_#{SecureRandom.hex(4)}@example.com",
+        first_name: "Inv",
+        last_name: "Itee",
+        status: "active"
+      },
+      inviter
+    ) { |u| u.skip_invitation = true }
+
+    assert_predicate invited, :persisted?
+    raw = invited.raw_invitation_token
+    assert raw.present?
+
+    post "/api/v1/auth/accept_invitation",
+         params: {
+           invitation_token: raw,
+           password: "newpass99",
+           password_confirmation: "newpass99"
+         },
+         as: :json
+
+    assert_response :ok
+    response_data = JSON.parse(response.body)
+    assert response_data["success"]
+    assert_not_nil response_data["data"]["token"]
+    assert_equal invited.email, response_data["data"]["user"]["email"]
+  end
+
+  test "accept_invitation rejects invalid token" do
+    post "/api/v1/auth/accept_invitation",
+         params: {
+           invitation_token: "not-a-real-token",
+           password: "newpass99",
+           password_confirmation: "newpass99"
+         },
+         as: :json
+
+    assert_response :unprocessable_entity
+    response_data = JSON.parse(response.body)
+    assert_not response_data["success"]
+  end
+
+  test "accept_invitation requires token and password" do
+    post "/api/v1/auth/accept_invitation",
+         params: { password: "newpass99" },
+         as: :json
+
+    assert_response :bad_request
+  end
 end

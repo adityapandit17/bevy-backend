@@ -20,6 +20,7 @@ Rails.application.routes.draw do
       get "auth/me", to: "auth#me"
       post "auth/validate", to: "auth#validate"
       post "auth/change_password", to: "auth#change_password"
+      post "auth/accept_invitation", to: "auth#accept_invitation"
 
       # Chat API routes
       resources :channels, only: [ :index, :show, :create, :update, :destroy ] do

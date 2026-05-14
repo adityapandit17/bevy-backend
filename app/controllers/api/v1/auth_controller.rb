@@ -45,6 +45,61 @@ class Api::V1::AuthController < ApplicationController
     end
   end
 
+  # POST /api/v1/auth/accept_invitation
+  # Completes Devise Invitable signup using the raw token from the invitation link (frontend flow).
+  def accept_invitation
+    token = params[:invitation_token].presence
+    password = params[:password].presence
+    password_confirmation = params[:password_confirmation].presence || password
+    first_name = params[:first_name].presence
+    last_name = params[:last_name].presence
+
+    if token.blank? || password.blank?
+      return render_error("Invitation token and password are required", :bad_request)
+    end
+
+    if password != password_confirmation
+      return render_error("Password and confirmation do not match", :bad_request)
+    end
+
+    attrs = {
+      invitation_token: token,
+      password: password,
+      password_confirmation: password_confirmation
+    }
+    attrs[:first_name] = first_name if first_name
+    attrs[:last_name] = last_name if last_name
+
+    user = User.accept_invitation!(attrs)
+
+    if user.errors.any?
+      return render_error(user.errors.full_messages.join(", "), :unprocessable_entity)
+    end
+
+    unless user.active?
+      return render_error("Your account is not active. Please contact HR.", :forbidden)
+    end
+
+    jwt = JwtService.generate_token(user)
+    user.update_last_login!
+
+    render_success({
+      token: jwt,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        status: user.status,
+        roles: user.roles.pluck(:name),
+        permissions: user.permissions.pluck(:resource, :action).map { |r, a| "#{r}:#{a}" },
+        last_login_at: user.last_login_at,
+        employee_id: user.employee_id
+      }
+    })
+  end
+
   # POST /api/v1/auth/logout
   def logout
     # In a stateless JWT system, logout is handled client-side

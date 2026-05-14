@@ -41,14 +41,15 @@ class SendWelcomeEmailJob < ApplicationJob
 
       # Send welcome email
       begin
-        WelcomeMailer.welcome_email(employee, user.invitation_token).deliver_now
+        raw_token = user.respond_to?(:raw_invitation_token) ? user.raw_invitation_token : user.invitation_token
+        WelcomeMailer.welcome_email(employee, raw_token).deliver_now
         Rails.logger.info "Welcome email sent to #{employee.email}"
 
         {
           success: true,
           message: "Welcome email sent successfully",
           user_id: user.id,
-          invitation_token: user.invitation_token
+          invitation_token: raw_token
         }
       rescue => e
         Rails.logger.error "Failed to send welcome email: #{e.message}"

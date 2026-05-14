@@ -51,6 +51,8 @@ env:
     POSTGRES_USER: "bevyhr"
     POSTGRES_DB: "bevyhr_production"
     DB_HOST: bevyhr_backend-postgres
+    FRONTEND_URL: https://bevyhr.com
+    MAILER_DEFAULT_FROM: BevyHR <no-reply@bevyhr.com>
 
     # Set number of processes dedicated to Solid Queue (default: 1)
     # JOB_CONCURRENCY: 3
