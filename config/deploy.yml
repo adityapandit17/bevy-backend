@@ -38,6 +38,8 @@ registry:
   #   - KAMAL_REGISTRY_PASSWORD
   server: localhost:5555
 
+retain_containers: 2
+
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 env:
   secret:
