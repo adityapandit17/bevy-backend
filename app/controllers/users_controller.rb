@@ -1,4 +1,5 @@
 class UsersController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_user, only: [ :show, :update, :destroy, :change_password, :update_profile, :preferences, :update_preferences ]
   before_action :authorize_users_access!, except: [ :change_password, :update_profile, :preferences, :update_preferences ]
 

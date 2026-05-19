@@ -22,8 +22,7 @@ class Message < ApplicationRecord
   private
 
   def broadcast_message
-    # Ensure user association is loaded
-    user_record = user
+    user_record = user || User.find_by(id: user_id)
 
     ActionCable.server.broadcast(
       "chat_channel_#{channel_id}",

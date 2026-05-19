@@ -102,6 +102,7 @@ Rails.application.configure do
 
   # Action Cable configuration for production
   config.action_cable.disable_request_forgery_protection = true
+  config.action_cable.url = ENV["CABLE_URL"] if ENV["CABLE_URL"].present?
 
   # Allow Action Cable connections from frontend domain
   # Default to bevyhr.com, can be overridden via ACTION_CABLE_ALLOWED_ORIGINS env var

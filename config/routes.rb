@@ -22,6 +22,9 @@ Rails.application.routes.draw do
       post "auth/change_password", to: "auth#change_password"
       post "auth/accept_invitation", to: "auth#accept_invitation"
 
+      # User directory (chat / DMs — authenticated, not users.index)
+      get "users/directory", to: "users#directory"
+
       # Chat API routes
       resources :channels, only: [ :index, :show, :create, :update, :destroy ] do
         member do

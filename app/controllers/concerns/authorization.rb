@@ -4,8 +4,10 @@ module Authorization
   private
 
   def authorize!(resource, action)
-    # Common solution: Check permissions for all roles
-    return false unless current_user
+    unless current_user
+      render json: { error: "Authentication required" }, status: :unauthorized
+      return false
+    end
 
     # Check permission - queries the database directly for fresh data
     # The has_permission? method queries UserRole and RolePermission directly, bypassing any cached associations

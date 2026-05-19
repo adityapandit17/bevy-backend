@@ -24,6 +24,8 @@ proxy:
   host: api.bevyhr.com
   # Proxy connects to your container on port 80 by default.
   app_port: 3000
+  # Keep WebSocket (/cable) connections alive for Action Cable
+  response_timeout: 86400
 
 # Credentials for your image host.
 registry:
@@ -52,6 +54,9 @@ env:
     POSTGRES_DB: "bevyhr_production"
     DB_HOST: bevyhr_backend-postgres
     FRONTEND_URL: https://bevyhr.com
+    FRONTEND_DOMAIN: bevyhr.com
+    CABLE_URL: wss://api.bevyhr.com/cable
+    ACTION_CABLE_ALLOWED_ORIGINS: https://bevyhr.com,https://www.bevyhr.com
     MAILER_DEFAULT_FROM: BevyHR <no-reply@bevyhr.com>
 
     # Set number of processes dedicated to Solid Queue (default: 1)
