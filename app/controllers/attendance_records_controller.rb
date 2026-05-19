@@ -3,9 +3,26 @@ class AttendanceRecordsController < ApplicationController
   before_action :set_attendance_record, only: [ :show, :update, :destroy ]
   before_action :set_employee, only: [ :clock_in, :clock_out ]
   before_action :authorize_index!, only: [ :index ]
+  before_action :authorize_clock_access!, only: [ :clock_in, :clock_out ]
+  before_action :authorize_attendance_employee_access!, only: [ :today, :stats, :calendar ]
+  before_action :authorize_compliance_report!, only: [ :compliance_report ]
 
   def index
     @attendance_records = AttendanceRecord.includes(:employee, :attendance_sessions)
+
+    if can_view_all_attendance_records?
+      if params[:employee_id].present?
+        unless can_access_attendance_for_employee?(params[:employee_id])
+          render json: { error: "You don't have permission to view this employee's attendance" }, status: :forbidden
+          return
+        end
+      end
+    elsif current_user&.employee_id.present?
+      @attendance_records = @attendance_records.by_employee(current_user.employee_id)
+    else
+      render json: []
+      return
+    end
 
     # Apply filters
     @attendance_records = @attendance_records.by_employee(params[:employee_id]) if params[:employee_id].present?
@@ -370,49 +387,69 @@ class AttendanceRecordsController < ApplicationController
 
   # Get attendance statistics
   def stats
-    employee_id = params[:employee_id]
-    start_date = params[:start_date] || Date.current.beginning_of_month
-    end_date = params[:end_date] || Date.current.end_of_month
+    employee = Employee.find(params[:employee_id])
+    start_date = parse_date_param(params[:start_date]) || Date.current.beginning_of_month
+    end_date = parse_date_param(params[:end_date]) || Date.current.end_of_month
 
-    records = AttendanceRecord.where(employee_id: employee_id, date: start_date..end_date)
+    service = AttendanceComplianceService.new(employee: employee, start_date: start_date, end_date: end_date)
+    compliance = service.summary
 
-    stats = {
+    records = AttendanceRecord.where(employee_id: employee.id, date: start_date..end_date)
+
+    render json: {
       total_days: records.size,
       present_days: records.present.size,
       absent_days: records.absent.size,
       late_days: records.late.size,
       half_days: records.half_day.size,
       work_from_home_days: records.work_from_home.size,
-      total_working_hours: records.sum(:working_hours),
-      average_working_hours: records.average(:working_hours)&.round(2) || 0,
-      attendance_percentage: records.size > 0 ? ((records.present.size.to_f / records.size) * 100).round(2) : 0
+      total_working_hours: compliance[:total_hours_worked],
+      average_working_hours: compliance[:average_daily_hours],
+      attendance_percentage: records.size.positive? ? ((records.present.size.to_f / records.size) * 100).round(2) : 0,
+      compliance: compliance
     }
-
-    render json: stats
   end
 
-  # Get attendance calendar data
+  # Get attendance calendar data with day indicators (present / absent / leave / not_marked)
   def calendar
-    employee_id = params[:employee_id]
-    start_date = params[:start_date] || Date.current.beginning_of_month
-    end_date = params[:end_date] || Date.current.end_of_month
+    employee = Employee.find(params[:employee_id])
+    start_date = parse_date_param(params[:start_date]) || Date.current.beginning_of_month
+    end_date = parse_date_param(params[:end_date]) || Date.current.end_of_month
 
-    records = AttendanceRecord.where(employee_id: employee_id, date: start_date..end_date)
+    service = AttendanceComplianceService.new(employee: employee, start_date: start_date, end_date: end_date)
 
-    calendar_data = records.map do |record|
-      {
-        date: record.date,
-        status: record.status,
-        check_in: record.formatted_check_in,
-        check_out: record.formatted_check_out,
-        working_hours: record.working_hours,
-        is_late: record.is_late?,
-        status_color: record.status_color,
-        status_label: record.status_label
+    render json: {
+      days: service.calendar_days,
+      compliance: service.summary
+    }
+  end
+
+  # Admin report: hours worked vs required for all employees
+  def compliance_report
+    start_date = parse_date_param(params[:start_date]) || Date.current.beginning_of_month
+    end_date = parse_date_param(params[:end_date]) || Date.current.end_of_month
+    as_of = parse_date_param(params[:as_of]) || Date.current
+
+    employees = AttendanceComplianceService.team_report(
+      start_date: start_date,
+      end_date: end_date,
+      as_of: as_of,
+      department_id: params[:department_id]
+    )
+
+    company = Company.first
+    render json: {
+      start_date: start_date,
+      end_date: end_date,
+      as_of: as_of,
+      weekly_working_hours: (company&.weekly_working_hours || 40).to_f,
+      employees: employees,
+      summary: {
+        total_employees: employees.size,
+        behind_schedule_count: employees.count { |e| e[:hours_behind_schedule].to_f.positive? },
+        average_compliance_percent: employees.empty? ? 100 : (employees.sum { |e| e[:compliance_percent] } / employees.size.to_f).round(1)
       }
-    end
-
-    render json: calendar_data
+    }
   end
 
   private
@@ -482,5 +519,37 @@ class AttendanceRecordsController < ApplicationController
 
   def authorize_index!
     authorize!("attendance_records", "index")
+  end
+
+  def authorize_clock_access!
+    unless authorize!("attendance_records", "index")
+      return
+    end
+
+    employee_id = params[:employee_id].to_i
+    return if can_access_attendance_for_employee?(employee_id)
+
+    render json: { error: "You can only clock in/out for your own attendance" }, status: :forbidden
+  end
+
+  def authorize_attendance_employee_access!
+    employee_id = params[:employee_id].to_i
+    return if employee_id.positive? && can_access_attendance_for_employee?(employee_id)
+
+    render json: { error: "You don't have permission to view this employee's attendance" }, status: :forbidden
+  end
+
+  def authorize_compliance_report!
+    return if can_view_all_attendance_records? || current_user&.has_permission?("reports", "index")
+
+    render json: { error: "Insufficient permissions" }, status: :forbidden
+  end
+
+  def parse_date_param(value)
+    return nil if value.blank?
+
+    Date.parse(value.to_s)
+  rescue ArgumentError
+    nil
   end
 end

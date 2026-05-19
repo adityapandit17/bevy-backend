@@ -1,28 +1,32 @@
 class LeaveRequestsController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_leave_request, only: [ :show, :update, :destroy, :approve, :reject, :cancel ]
-  # before_action :authenticate_user!
 
   def index
+    unless current_user&.has_permission?("leave_requests", "index")
+      render json: { error: "Insufficient permissions" }, status: :forbidden
+      return
+    end
+
     @leave_requests = LeaveRequest.includes(:employee)
 
-    # For regular employees (not HR/Admin), filter by their employee_id
-    is_admin_or_hr = current_user&.has_role?("Super Admin") ||
-                     current_user&.has_role?("HR Manager") ||
-                     current_user&.has_role?("HR") ||
-                     current_user&.has_permission?("leave_requests", "index")
-
-    unless is_admin_or_hr
-      if current_user&.employee_id.present?
-        @leave_requests = @leave_requests.by_employee(current_user.employee_id)
-      else
-        # If user has no employee_id, return empty array
+    if params[:manager_pending] == "true"
+      unless current_user&.employee
         render json: []
         return
       end
+      @leave_requests = @leave_requests.pending_for_manager(current_user.employee.id)
+    elsif can_manage_all_leave_requests?
+      @leave_requests = @leave_requests.by_employee(params[:employee_id]) if params[:employee_id].present?
+    elsif current_user&.employee_id.present?
+      @leave_requests = @leave_requests.by_employee(current_user.employee_id)
+    else
+      render json: []
+      return
     end
 
-    # Apply filters (only for HR/Admin or if explicitly provided)
-    @leave_requests = @leave_requests.by_employee(params[:employee_id]) if params[:employee_id].present?
+    # Apply filters for managers / HR with full access
+    @leave_requests = @leave_requests.by_employee(params[:employee_id]) if params[:employee_id].present? && can_manage_all_leave_requests?
     @leave_requests = @leave_requests.by_type(params[:leave_type]) if params[:leave_type].present?
     @leave_requests = @leave_requests.where(status: params[:status]) if params[:status].present?
     @leave_requests = @leave_requests.current_year if params[:current_year] == "true"
@@ -32,12 +36,6 @@ class LeaveRequestsController < ApplicationController
     # Apply date range filter
     if params[:start_date].present? && params[:end_date].present?
       @leave_requests = @leave_requests.where(start_date: params[:start_date]..params[:end_date])
-    end
-
-    # Filter by manager pending approvals
-    if params[:manager_pending] == "true" && current_user&.employee
-      manager_employee_id = current_user.employee.id
-      @leave_requests = @leave_requests.pending_for_manager(manager_employee_id)
     end
 
     # Apply search
@@ -56,9 +54,13 @@ class LeaveRequestsController < ApplicationController
   end
 
   def create
+    unless current_user&.has_permission?("leave_requests", "create") || can_manage_all_leave_requests?
+      render json: { error: "Insufficient permissions" }, status: :forbidden
+      return
+    end
+
     @leave_request = LeaveRequest.new(leave_request_params)
 
-    # Check authorization: user can only apply for their own leave unless they're HR/Admin
     unless can_apply_leave_for?(@leave_request.employee_id)
       render json: { errors: [ "You don't have permission to apply leave for this employee" ] }, status: :forbidden
       return
@@ -155,6 +157,11 @@ class LeaveRequestsController < ApplicationController
       return
     end
 
+    unless can_act_on_leave_request?(@leave_request)
+      render json: { errors: [ "You are not authorized to reject this leave request" ] }, status: :forbidden
+      return
+    end
+
     if @leave_request.pending? || @leave_request.manager_approved?
       @leave_request.update!(
         status: "rejected",
@@ -171,6 +178,11 @@ class LeaveRequestsController < ApplicationController
 
   # Cancel leave request
   def cancel
+    unless can_apply_leave_for?(@leave_request.employee_id) || can_manage_all_leave_requests?
+      render json: { errors: [ "You don't have permission to cancel this leave request" ] }, status: :forbidden
+      return
+    end
+
     if @leave_request.can_be_cancelled?
       @leave_request.update!(status: "cancelled")
       render json: format_leave_request(@leave_request)
@@ -431,5 +443,14 @@ class LeaveRequestsController < ApplicationController
       manager: manager_user ? { id: manager_user.id, name: manager_user.name, email: manager_user.email } : nil,
       hr: hr_user ? { id: hr_user.id, name: hr_user.name, email: hr_user.email } : nil
     }
+  end
+
+  def can_act_on_leave_request?(leave_request)
+    return false unless current_user
+
+    return true if current_user.hr_manager? || current_user.has_permission?("leave_requests", "approve")
+
+    manager_employee = current_user.employee
+    manager_employee.present? && leave_request.employee.manager_id == manager_employee.id
   end
 end

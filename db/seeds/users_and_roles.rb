@@ -23,7 +23,9 @@ if hr_manager
   hr_permission_names = [
     'employees.index', 'employees.create', 'employees.update',
     'payrolls.index', 'payrolls.create',
-    'leave_management.index'
+    'leave_management.index',
+    'attendance_records.index', 'attendance_records.approve',
+    'leave_requests.index', 'leave_requests.create', 'leave_requests.approve', 'leave_requests.reject'
   ]
   hr_permissions = Permission.where(name: hr_permission_names)
   hr_manager.permission_ids = hr_permissions.pluck(:id)
@@ -34,18 +36,28 @@ end
 dept_head = Role.find_by(name: 'Department Head')
 if dept_head
   # 2 of 8 permissions (employees.index, payrolls.index)
-  dept_permission_names = [ 'employees.index', 'payrolls.index' ]
+  dept_permission_names = [
+    'employees.index', 'payrolls.index',
+    'attendance_records.index',
+    'leave_requests.index', 'leave_requests.approve', 'leave_requests.reject'
+  ]
   dept_permissions = Permission.where(name: dept_permission_names)
   dept_head.permission_ids = dept_permissions.pluck(:id)
   puts "✓ Department Head permissions assigned"
 end
 
-# Employee - Self-service portal access
+# Employee - Self-service attendance & leave
 employee_role = Role.find_by(name: 'Employee')
 if employee_role
-  # 0 permissions by default
-  employee_role.permission_ids = []
-  puts "✓ Employee permissions assigned"
+  employee_permission_names = [
+    'attendance_records.index',
+    'leave_requests.index',
+    'leave_requests.create',
+    'leave_requests.cancel'
+  ]
+  employee_permissions = Permission.where(name: employee_permission_names)
+  employee_role.permission_ids = employee_permissions.pluck(:id)
+  puts "✓ Employee permissions assigned (#{employee_permissions.count} permissions)"
 end
 
 # IT Asset Manager - Asset + allocation + maintenance access

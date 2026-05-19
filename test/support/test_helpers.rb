@@ -404,7 +404,7 @@ module TestHelpers
        interviews candidates job_openings onboarding_employees onboarding_tasks
        performance_reviews performance_goals timesheets employee_documents
        employee_benefits employee_trainings ticket_comments maintenance_records
-       asset_allocations users roles permissions].each do |resource|
+       asset_allocations users roles permissions settings reports leave_management].each do |resource|
       %w[index show create update destroy approve].each do |action|
         perm = Permission.find_or_create_by!(resource: resource, action: action) do |p|
           p.name = "#{resource}.#{action}"

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_09_000100) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_19_192229) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -132,9 +132,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_000100) do
     t.string "currency"
     t.string "employee_count"
     t.string "industry"
+    t.integer "lunch_duration_minutes", default: 60
     t.string "name"
     t.string "timezone"
     t.datetime "updated_at", null: false
+    t.decimal "weekly_working_hours", precision: 5, scale: 2, default: "40.0"
+    t.string "work_end_time", default: "18:00"
+    t.string "work_start_time", default: "09:00"
     t.index ["country_code"], name: "index_companies_on_country_code"
   end
 

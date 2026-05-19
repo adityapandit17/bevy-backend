@@ -35,6 +35,8 @@ class Permission < ApplicationRecord
       { name: "attendance_records.index", resource: "attendance_records", action: "index", description: "View attendance records" },
       { name: "attendance_records.approve", resource: "attendance_records", action: "approve", description: "Approve attendance records" },
       { name: "leave_requests.index", resource: "leave_requests", action: "index", description: "View leave requests" },
+      { name: "leave_requests.create", resource: "leave_requests", action: "create", description: "Apply for leave" },
+      { name: "leave_requests.cancel", resource: "leave_requests", action: "cancel", description: "Cancel own leave requests" },
       { name: "leave_requests.approve", resource: "leave_requests", action: "approve", description: "Approve leave requests" },
       { name: "leave_requests.reject", resource: "leave_requests", action: "reject", description: "Reject leave requests" },
       { name: "leave_management.index", resource: "leave_management", action: "index", description: "Manage leave requests for all employees, apply leave on behalf of others, and approve pending leave requests" },

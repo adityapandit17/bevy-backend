@@ -255,6 +255,7 @@ Rails.application.routes.draw do
       get :today
       get :stats
       get :calendar
+      get :compliance_report
     end
   end
   resource :company, only: [ :show, :update ]

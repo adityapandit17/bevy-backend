@@ -22,3 +22,6 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+
+After deploy, run bin/rails roles:sync_employee_self_service so Employee roles get attendance/leave permissions in production DBs.
+

@@ -57,19 +57,41 @@ module Authorization
     false
   end
 
+  def can_view_all_attendance_records?
+    return false unless current_user
+
+    current_user.super_admin? ||
+      current_user.hr_manager? ||
+      current_user.has_permission?("leave_management", "index") ||
+      current_user.has_permission?("attendance_records", "approve")
+  end
+
+  def can_manage_all_leave_requests?
+    return false unless current_user
+
+    current_user.super_admin? ||
+      current_user.hr_manager? ||
+      current_user.has_permission?("leave_management", "index")
+  end
+
+  def can_access_attendance_for_employee?(employee_id)
+    return false unless current_user
+    return true if can_view_all_attendance_records?
+
+    current_user.employee_id.present? && current_user.employee_id == employee_id.to_i
+  end
+
   def can_apply_leave_for?(employee_id)
     return false unless current_user
 
     # Super Admin and HR Manager can apply for anyone
     return true if current_user.has_role?("Super Admin") || current_user.has_role?("HR Manager") || current_user.has_role?("HR")
 
-    # Users with any leave_requests permission can apply for anyone (management access)
-    return true if current_user.has_permission?("leave_requests", "create") ||
-                  current_user.has_permission?("leave_requests", "approve") ||
-                  current_user.has_permission?("leave_requests", "index")
+    return true if current_user.has_permission?("leave_requests", "approve")
 
-    # Users can always apply for their own leave
-    return true if current_user.employee_id == employee_id.to_i
+    if current_user.has_permission?("leave_requests", "create")
+      return true if current_user.employee_id == employee_id.to_i
+    end
 
     false
   end
