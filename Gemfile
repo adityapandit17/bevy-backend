@@ -87,3 +87,5 @@ gem "mission_control-jobs"
 
 # Phone number validation (country-aware)
 gem "phonelib"
+
+gem "google-apis-calendar_v3", "~> 0.53.0"

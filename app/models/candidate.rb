@@ -1,4 +1,5 @@
 class Candidate < ApplicationRecord
+  belongs_to :job_opening, optional: true
   has_many :interviews, dependent: :destroy
   has_one :next_interview, -> {
     where("scheduled_date >= ?", Date.current)
@@ -20,6 +21,33 @@ class Candidate < ApplicationRecord
   scope :by_department, ->(dept) { where(department: dept) }
   scope :archived, -> { where(archived: true) }
   scope :not_archived, -> { where(archived: false) }
+  scope :for_job_opening, ->(job_opening_id) { where(job_opening_id: job_opening_id) }
+  scope :search_text, ->(query) {
+    return all if query.blank?
+
+    term = "%#{query.downcase}%"
+    where(
+      "LOWER(first_name) LIKE :t OR LOWER(last_name) LIKE :t OR LOWER(email) LIKE :t OR LOWER(CONCAT(first_name, ' ', last_name)) LIKE :t",
+      t: term
+    )
+  }
+  scope :with_skills, ->(skills_query) {
+    return all if skills_query.blank?
+
+    skills_query.to_s.split(",").map(&:strip).reject(&:blank?).reduce(all) do |scope, skill|
+      scope.where("LOWER(skills) LIKE ?", "%#{skill.downcase}%")
+    end
+  }
+  scope :applied_on_or_after, ->(date) {
+    return all if date.blank?
+
+    where("applied_date >= ?", date)
+  }
+  scope :applied_on_or_before, ->(date) {
+    return all if date.blank?
+
+    where("applied_date <= ?", date)
+  }
 
   def full_name
     [ first_name, last_name ].compact.join(" ").strip

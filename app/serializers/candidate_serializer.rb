@@ -1,8 +1,8 @@
 class CandidateSerializer < Panko::Serializer
-  attributes :id, :first_name, :last_name, :date_of_birth, :email, :phone, :position, :department, :experience,
+  attributes :id, :job_opening_id, :first_name, :last_name, :date_of_birth, :email, :phone, :position, :department, :experience,
              :location, :status, :applied_date, :last_contact, :resume,
              :cover_letter, :notes, :education, :current_company,
-             :expected_salary, :availability, :created_at, :updated_at
+             :expected_salary, :availability, :linkedin_url, :created_at, :updated_at
 
   # Computed attributes
   attributes :name, :skills, :interview_count, :days_since_applied,

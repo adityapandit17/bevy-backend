@@ -1,6 +1,7 @@
 class InterviewSerializer < Panko::Serializer
   attributes :id, :candidate_id, :interview_type, :scheduled_date, :scheduled_time,
              :interviewer, :status, :notes, :feedback, :rating,
+             :google_calendar_event_id, :google_calendar_html_link, :google_meet_link,
              :created_at, :updated_at
 
   # Computed attributes

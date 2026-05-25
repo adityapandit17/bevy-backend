@@ -22,6 +22,19 @@ Rails.application.routes.draw do
       post "auth/change_password", to: "auth#change_password"
       post "auth/accept_invitation", to: "auth#accept_invitation"
 
+      # Google Calendar (Settings → Integrations)
+      get "google_calendar/status", to: "google_calendar#status"
+      get "google_calendar/authorize_url", to: "google_calendar#authorize_url"
+      get "google_calendar/callback", to: "google_calendar#callback"
+      delete "google_calendar/disconnect", to: "google_calendar#disconnect"
+
+      # Public careers / job applications (no auth) — /api/v1/public/:company_slug/jobs/:job_slug
+      namespace :public do
+        get "resolve/:job_slug", to: "job_openings#resolve"
+        get ":company_slug/jobs/:job_slug", to: "job_openings#show"
+        post ":company_slug/jobs/:job_slug/apply", to: "job_openings#apply"
+      end
+
       # User directory (chat / DMs — authenticated, not users.index)
       get "users/directory", to: "users#directory"
 
@@ -215,7 +228,11 @@ Rails.application.routes.draw do
   # Existing resources
   resources :employees
   resources :departments
-  resources :job_openings
+  resources :job_openings do
+    member do
+      get :candidates
+    end
+  end
   resources :leave_requests do
     member do
       patch :approve

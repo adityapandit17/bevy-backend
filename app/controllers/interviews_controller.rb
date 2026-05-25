@@ -232,6 +232,9 @@ class InterviewsController < ApplicationController
       formatted_date: interview.formatted_date,
       status_color: interview.status_color,
       scheduled_datetime: interview.scheduled_datetime,
+      google_calendar_event_id: interview.google_calendar_event_id,
+      google_calendar_html_link: interview.google_calendar_html_link,
+      google_meet_link: interview.google_meet_link,
       created_at: interview.created_at,
       updated_at: interview.updated_at
     }

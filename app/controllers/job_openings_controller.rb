@@ -6,9 +6,9 @@ class JobOpeningsController < ApplicationController
   skip_before_action :verify_authenticity_token, if: -> { request.format.json? }
 
   before_action :authenticate_user!
-  before_action :set_job_opening, only: [ :show, :update, :destroy ]
+  before_action :set_job_opening, only: [ :show, :update, :destroy, :candidates ]
   before_action :authorize_index!, only: [ :index ]
-  before_action :authorize_show!, only: [ :show ]
+  before_action :authorize_show!, only: [ :show, :candidates ]
   before_action :authorize_create!, only: [ :create ]
   before_action :authorize_update!, only: [ :update ]
   before_action :authorize_destroy!, only: [ :destroy ]
@@ -25,6 +25,26 @@ class JobOpeningsController < ApplicationController
 
   def show
     render json: JobOpeningSerializer.new.serialize(@job_opening)
+  end
+
+  # GET /job_openings/:id/candidates
+  def candidates
+    authorize!("candidates", "index")
+
+    dept_name = @job_opening.department&.name
+    scope = Candidate.not_archived.where(
+      "job_opening_id = :job_id OR (job_opening_id IS NULL AND position = :title AND department = :dept)",
+      job_id: @job_opening.id,
+      title: @job_opening.title,
+      dept: dept_name
+    )
+    scope = scope.search_text(params[:search]) if params[:search].present?
+    scope = scope.with_skills(params[:skills]) if params[:skills].present?
+    scope = scope.applied_on_or_after(params[:applied_from]) if params[:applied_from].present?
+    scope = scope.applied_on_or_before(params[:applied_to]) if params[:applied_to].present?
+
+    candidates = scope.order(applied_date: :desc, created_at: :desc)
+    render json: Panko::ArraySerializer.new(candidates, each_serializer: CandidateSerializer).to_json
   end
 
   def create

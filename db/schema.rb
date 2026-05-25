@@ -10,9 +10,37 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_19_192229) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_25_081900) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "record_id", null: false
+    t.string "record_type", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.string "content_type"
+    t.datetime "created_at", null: false
+    t.string "filename", null: false
+    t.string "key", null: false
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
 
   create_table "asset_allocations", force: :cascade do |t|
     t.integer "asset_id", null: false
@@ -85,8 +113,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_192229) do
     t.string "expected_salary"
     t.string "experience"
     t.string "first_name"
+    t.bigint "job_opening_id"
     t.date "last_contact"
     t.string "last_name"
+    t.string "linkedin_url"
     t.string "location"
     t.text "notes"
     t.string "phone"
@@ -96,6 +126,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_192229) do
     t.string "status"
     t.datetime "updated_at", null: false
     t.index ["archived"], name: "index_candidates_on_archived"
+    t.index ["job_opening_id"], name: "index_candidates_on_job_opening_id"
   end
 
   create_table "channel_memberships", force: :cascade do |t|
@@ -126,11 +157,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_192229) do
 
   create_table "companies", force: :cascade do |t|
     t.text "address"
+    t.string "careers_slug"
     t.string "code"
     t.string "country_code"
     t.datetime "created_at", null: false
     t.string "currency"
     t.string "employee_count"
+    t.text "google_calendar_access_token"
+    t.datetime "google_calendar_connected_at"
+    t.bigint "google_calendar_connected_by_user_id"
+    t.string "google_calendar_email"
+    t.text "google_calendar_refresh_token"
+    t.datetime "google_calendar_token_expires_at"
     t.string "industry"
     t.integer "lunch_duration_minutes", default: 60
     t.string "name"
@@ -139,6 +177,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_192229) do
     t.decimal "weekly_working_hours", precision: 5, scale: 2, default: "40.0"
     t.string "work_end_time", default: "18:00"
     t.string "work_start_time", default: "09:00"
+    t.index ["careers_slug"], name: "index_companies_on_careers_slug", unique: true
     t.index ["country_code"], name: "index_companies_on_country_code"
   end
 
@@ -300,11 +339,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_192229) do
   end
 
   create_table "interviews", force: :cascade do |t|
+    t.text "calendar_sync_error"
+    t.datetime "calendar_synced_at"
     t.integer "candidate_id", null: false
     t.datetime "created_at", null: false
     t.text "feedback"
+    t.string "google_calendar_event_id"
+    t.string "google_calendar_html_link"
+    t.string "google_meet_link"
     t.string "interview_type"
     t.string "interviewer"
+    t.bigint "interviewer_employee_id"
     t.text "notes"
     t.integer "rating"
     t.date "scheduled_date"
@@ -312,6 +357,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_192229) do
     t.string "status"
     t.datetime "updated_at", null: false
     t.index ["candidate_id"], name: "index_interviews_on_candidate_id"
+    t.index ["google_calendar_event_id"], name: "index_interviews_on_google_calendar_event_id"
+    t.index ["interviewer_employee_id"], name: "index_interviews_on_interviewer_employee_id"
   end
 
   create_table "job_openings", force: :cascade do |t|
@@ -323,6 +370,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_192229) do
     t.string "job_type"
     t.string "location"
     t.date "posted"
+    t.string "public_slug"
     t.string "requirements"
     t.integer "salary_max"
     t.integer "salary_min"
@@ -332,6 +380,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_192229) do
     t.datetime "updated_at", null: false
     t.integer "vacancies"
     t.index ["department_id"], name: "index_job_openings_on_department_id"
+    t.index ["public_slug"], name: "index_job_openings_on_public_slug", unique: true
   end
 
   create_table "jwt_denylists", force: :cascade do |t|
@@ -749,11 +798,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_192229) do
     t.index ["status"], name: "index_users_on_status"
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "asset_allocations", "assets"
   add_foreign_key "asset_allocations", "employees"
   add_foreign_key "assets", "employees"
   add_foreign_key "attendance_records", "employees"
   add_foreign_key "attendance_sessions", "attendance_records"
+  add_foreign_key "candidates", "job_openings"
   add_foreign_key "channel_memberships", "channels"
   add_foreign_key "channel_memberships", "users"
   add_foreign_key "channels", "users", column: "created_by_id"
@@ -768,6 +820,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_192229) do
   add_foreign_key "huddles", "channels"
   add_foreign_key "huddles", "users", column: "started_by_id"
   add_foreign_key "interviews", "candidates"
+  add_foreign_key "interviews", "employees", column: "interviewer_employee_id"
   add_foreign_key "job_openings", "departments"
   add_foreign_key "leave_requests", "employees"
   add_foreign_key "leave_requests", "users", column: "hr_approved_by_id"

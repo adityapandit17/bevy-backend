@@ -24,10 +24,11 @@ class CandidatesController < ApplicationController
     # Apply filters
     @candidates = @candidates.by_status(params[:status]) if params[:status].present?
     @candidates = @candidates.by_department(params[:department]) if params[:department].present?
-    if params[:search].present?
-      search_term = "%#{params[:search]}%"
-      @candidates = @candidates.where("LOWER(first_name) LIKE LOWER(?) OR LOWER(last_name) LIKE LOWER(?) OR LOWER(email) LIKE LOWER(?) OR LOWER(position) LIKE LOWER(?)", search_term, search_term, search_term, search_term)
-    end
+    @candidates = @candidates.for_job_opening(params[:job_opening_id]) if params[:job_opening_id].present?
+    @candidates = @candidates.search_text(params[:search]) if params[:search].present?
+    @candidates = @candidates.with_skills(params[:skills]) if params[:skills].present?
+    @candidates = @candidates.applied_on_or_after(params[:applied_from]) if params[:applied_from].present?
+    @candidates = @candidates.applied_on_or_before(params[:applied_to]) if params[:applied_to].present?
 
     render json: Panko::ArraySerializer.new(@candidates, each_serializer: CandidateSerializer).to_json
   end
@@ -48,8 +49,10 @@ class CandidatesController < ApplicationController
     @candidate.applied_date ||= Date.current
     @candidate.last_contact ||= Date.current
     @candidate.status ||= "applied"
+    link_candidate_to_job_opening(@candidate)
 
     if @candidate.save
+      @candidate.job_opening&.increment_applications!
       render json: CandidateSerializer.new.serialize(@candidate), status: :created
     else
       render json: { errors: @candidate.errors.full_messages }, status: :unprocessable_entity
@@ -167,7 +170,11 @@ class CandidatesController < ApplicationController
   end
 
   def candidate_params
-    params.require(:candidate).permit(:first_name, :last_name, :date_of_birth, :email, :phone, :position, :department, :experience, :location, :status, :applied_date, :last_contact, :resume, :cover_letter, :notes, :skills, :education, :current_company, :expected_salary, :availability, :archived)
+    params.require(:candidate).permit(
+      :job_opening_id, :first_name, :last_name, :date_of_birth, :email, :phone, :position, :department,
+      :experience, :location, :status, :applied_date, :last_contact, :resume, :cover_letter, :notes,
+      :skills, :education, :current_company, :expected_salary, :availability, :linkedin_url, :archived
+    )
   end
 
   def authorize_index!
@@ -188,6 +195,16 @@ class CandidatesController < ApplicationController
 
   def authorize_destroy!
     authorize!("candidates", "destroy")
+  end
+
+  def link_candidate_to_job_opening(candidate)
+    return if candidate.job_opening_id.present?
+
+    job = JobOpening.find_by(
+      title: candidate.position,
+      department_id: Department.find_by(name: candidate.department)&.id
+    )
+    candidate.job_opening = job if job
   end
 
   # Legacy format methods kept for backward compatibility if needed

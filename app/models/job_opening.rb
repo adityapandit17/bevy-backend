@@ -1,5 +1,6 @@
 class JobOpening < ApplicationRecord
   belongs_to :department
+  has_many :candidates, dependent: :nullify
 
   validates :title, presence: true, length: { minimum: 5, maximum: 100 }
   validates :description, presence: true, length: { minimum: 20 }
@@ -14,8 +15,11 @@ class JobOpening < ApplicationRecord
   validates :skills, presence: true
   validates :posted, presence: true
   validates :applications, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :public_slug, uniqueness: true, allow_nil: true
 
   validate :salary_range_validity
+
+  before_validation :ensure_public_slug, on: :create
 
   scope :open, -> { where(status: "open") }
   scope :closed, -> { where(status: "closed") }
@@ -37,6 +41,26 @@ class JobOpening < ApplicationRecord
     )
   }
 
+  def self.find_by_public_slug!(slug)
+    find_by!(public_slug: slug)
+  end
+
+  def publicly_available?
+    status == "open"
+  end
+
+  def public_apply_path
+    return nil unless publicly_available? && public_slug.present?
+
+    company = Company.current
+    return nil unless company&.careers_slug.present?
+
+    "/careers/#{company.careers_slug}/#{public_slug}"
+  end
+
+  def increment_applications!
+    increment!(:applications)
+  end
 
   def salary_range_validity
     return unless salary_min.present? && salary_max.present?
@@ -133,5 +157,22 @@ class JobOpening < ApplicationRecord
 
   def display_title
     "#{title} - #{location}"
+  end
+
+  private
+
+  def ensure_public_slug
+    return if public_slug.present?
+
+    base = title.to_s.parameterize.presence || "job"
+    candidate_slug = base
+    suffix = 0
+
+    while JobOpening.exists?(public_slug: candidate_slug)
+      suffix += 1
+      candidate_slug = "#{base}-#{suffix}"
+    end
+
+    self.public_slug = candidate_slug
   end
 end

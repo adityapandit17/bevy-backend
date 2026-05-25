@@ -21,3 +21,6 @@ module ActiveSupport
     alias_method :then_it, :tap
   end
 end
+
+# Avoid accidental Google Calendar API calls (individual tests may enable explicitly)
+ENV["GOOGLE_CALENDAR_ENABLED"] = "false"

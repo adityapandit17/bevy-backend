@@ -1,5 +1,6 @@
 class Interview < ApplicationRecord
   belongs_to :candidate
+  belongs_to :interviewer_employee, class_name: "Employee", optional: true
   has_many :pending_tasks, as: :taskable, dependent: :destroy
 
   validates :interview_type, presence: true, inclusion: { in: %w[phone video onsite] }
@@ -22,6 +23,9 @@ class Interview < ApplicationRecord
   # Callbacks
   after_save :sync_pending_tasks
   after_destroy :cleanup_pending_tasks
+  after_commit :enqueue_google_calendar_sync, on: %i[create update]
+  before_destroy :capture_google_calendar_event_id
+  after_commit :enqueue_google_calendar_deletion, on: :destroy
 
   def scheduled_datetime
     DateTime.new(scheduled_date.year, scheduled_date.month, scheduled_date.day,
@@ -77,5 +81,26 @@ class Interview < ApplicationRecord
 
   def cleanup_pending_tasks
     pending_tasks.destroy_all
+  end
+
+  def enqueue_google_calendar_sync
+    return unless GoogleCalendarService.enabled?
+    return unless status == "scheduled" || google_calendar_event_id.present?
+
+    SyncInterviewCalendarJob.perform_later(id)
+  end
+
+  def capture_google_calendar_event_id
+    @google_calendar_event_id_for_deletion = google_calendar_event_id
+  end
+
+  def enqueue_google_calendar_deletion
+    return unless GoogleCalendarService.enabled?
+    return if @google_calendar_event_id_for_deletion.blank?
+
+    SyncInterviewCalendarJob.perform_later(
+      nil,
+      google_calendar_event_id: @google_calendar_event_id_for_deletion
+    )
   end
 end

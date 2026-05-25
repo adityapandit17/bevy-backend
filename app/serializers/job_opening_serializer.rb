@@ -1,7 +1,8 @@
 class JobOpeningSerializer < Panko::Serializer
   attributes :id, :title, :description, :requirements, :status, :location,
              :job_type, :vacancies, :salary_min, :salary_max, :experience,
-             :skills, :posted, :applications, :created_at, :updated_at
+             :skills, :posted, :applications, :created_at, :updated_at,
+             :public_slug, :public_apply_url, :publicly_available
 
   # Computed attributes
   attributes :salary_range, :average_salary, :days_since_posted,
@@ -62,5 +63,16 @@ class JobOpeningSerializer < Panko::Serializer
 
   def department_name
     object.department&.name
+  end
+
+  def public_apply_url
+    return nil unless object.publicly_available? && object.public_slug.present?
+
+    base = ENV.fetch("FRONTEND_URL", "http://localhost:3001").chomp("/")
+    "#{base}#{object.public_apply_path}"
+  end
+
+  def publicly_available
+    object.publicly_available?
   end
 end

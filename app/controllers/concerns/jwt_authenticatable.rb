@@ -30,7 +30,8 @@ module JwtAuthenticatable
 
   def public_auth_endpoint?
     request.path == "/api/v1/auth/login" ||
-      request.path == "/api/v1/auth/accept_invitation"
+      request.path == "/api/v1/auth/accept_invitation" ||
+      request.path.start_with?("/api/v1/public/")
   end
 
   # Backwards compatibility for controllers that still reference this name.
