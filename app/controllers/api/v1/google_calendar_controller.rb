@@ -21,7 +21,12 @@ module Api
         end
 
         url = GoogleCalendarOauthService.authorization_url(current_user)
-        render_success({ authorization_url: url })
+        render_success({
+          authorization_url: url,
+          redirect_uri: GoogleCalendarOauthService.redirect_uri,
+          app_url: ENV["APP_URL"],
+          frontend_url: ENV["FRONTEND_URL"]
+        })
       rescue GoogleCalendarOauthService::Error => e
         render_error(e.message, :unprocessable_entity)
       end

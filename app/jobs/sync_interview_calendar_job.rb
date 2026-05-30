@@ -10,9 +10,10 @@ class SyncInterviewCalendarJob < ApplicationJob
       return
     end
 
-    interview = Interview.find_by(id: interview_id)
+    interview = Interview.includes(:candidate, :interviewer_employee).find_by(id: interview_id)
     return unless interview
 
-    GoogleCalendarService.sync_interview(interview)
+    result = GoogleCalendarService.sync_interview(interview)
+    GoogleCalendarService.apply_sync_result!(interview, result)
   end
 end

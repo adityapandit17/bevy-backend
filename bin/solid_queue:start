@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Start Solid Queue job workers (development-friendly).
+#
+# On macOS, fork mode often segfaults in the pg gem (Ruby 4.x). Async mode runs
+# workers in-process and avoids that crash.
+#
+# Usage:
+#   bin/solid_queue:start
+#   JOB_CONCURRENCY=2 bin/solid_queue:start
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY="${OBJC_DISABLE_INITIALIZE_FORK_SAFETY:-YES}"
+export SOLID_QUEUE_SUPERVISOR_MODE="${SOLID_QUEUE_SUPERVISOR_MODE:-async}"
+
+exec bundle exec rails solid_queue:start "$@"

@@ -56,6 +56,27 @@ class InterviewTest < ActiveSupport::TestCase
     assert_includes @interview.errors[:scheduled_time], "can't be blank"
   end
 
+  test "should not allow scheduling in the past" do
+    @interview.scheduled_date = Date.current - 1.day
+    @interview.scheduled_time = Time.zone.parse("10:00")
+    assert_not @interview.valid?
+    assert_includes @interview.errors[:base], "cannot schedule interviews in the past"
+  end
+
+  test "should allow completed interviews with past datetime" do
+    @interview.status = "completed"
+    @interview.scheduled_date = Date.current - 1.month
+    @interview.scheduled_time = Time.zone.local(
+      @interview.scheduled_date.year,
+      @interview.scheduled_date.month,
+      @interview.scheduled_date.day,
+      10,
+      0,
+      0
+    )
+    assert @interview.valid?
+  end
+
   test "should require interviewer" do
     @interview.interviewer = nil
     assert_not @interview.valid?

@@ -48,6 +48,7 @@ class InterviewsController < ApplicationController
 
     @interview = Interview.new(interview_params)
     @interview.status ||= "scheduled"
+    assign_interviewer_employee(@interview)
 
     if @interview.save!
       # Update candidate's last contact date
@@ -70,7 +71,10 @@ class InterviewsController < ApplicationController
       end
     end
 
-    if @interview.update(interview_params)
+    @interview.assign_attributes(interview_params)
+    assign_interviewer_employee(@interview)
+
+    if @interview.save
       render json: format_interview(@interview)
     else
       render json: { errors: @interview.errors.full_messages }, status: :unprocessable_entity
@@ -156,7 +160,7 @@ class InterviewsController < ApplicationController
         id: interview.id,
         title: "#{interview.candidate.name} - #{interview.interview_type.titleize}",
         start: interview.scheduled_datetime.iso8601,
-        end: (interview.scheduled_datetime + 1.hour).iso8601,
+        end: (interview.scheduled_datetime + interview.duration_minutes.to_i.minutes).iso8601,
         candidate_name: interview.candidate.name,
         interviewer: interview.interviewer,
         status: interview.status,
@@ -208,7 +212,27 @@ class InterviewsController < ApplicationController
   end
 
   def interview_params
-    params.require(:interview).permit(:candidate_id, :interview_type, :scheduled_date, :scheduled_time, :interviewer, :status, :notes, :feedback, :rating)
+    params.require(:interview).permit(
+      :candidate_id, :interview_type, :scheduled_date, :scheduled_time, :interviewer,
+      :interviewer_employee_id, :duration_minutes, :status, :notes, :feedback, :rating
+    )
+  end
+
+  def assign_interviewer_employee(interview)
+    if params.dig(:interview, :interviewer_employee_id).present?
+      interview.interviewer_employee_id = params[:interview][:interviewer_employee_id]
+      return
+    end
+
+    return if interview.interviewer_employee_id.present?
+    return if interview.interviewer.blank?
+
+    employee = Employee.where(
+      "LOWER(TRIM(first_name || ' ' || last_name)) = ?",
+      interview.interviewer.downcase.strip
+    ).first
+
+    interview.interviewer_employee = employee if employee
   end
 
   def format_interview(interview)
@@ -235,6 +259,9 @@ class InterviewsController < ApplicationController
       google_calendar_event_id: interview.google_calendar_event_id,
       google_calendar_html_link: interview.google_calendar_html_link,
       google_meet_link: interview.google_meet_link,
+      duration_minutes: interview.duration_minutes,
+      calendar_synced_at: interview.calendar_synced_at,
+      calendar_sync_error: interview.calendar_sync_error,
       created_at: interview.created_at,
       updated_at: interview.updated_at
     }

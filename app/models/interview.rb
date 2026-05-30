@@ -8,8 +8,10 @@ class Interview < ApplicationRecord
   validates :scheduled_time, presence: true
   validates :interviewer, presence: true
   validates :status, presence: true, inclusion: { in: %w[scheduled completed cancelled no_show] }
+  validates :duration_minutes, numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 480 }, allow_nil: true
   validates :rating, numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 5 }, allow_nil: true
   validate :candidate_not_rejected
+  validate :scheduled_datetime_not_in_past, if: :scheduled_status_with_datetime?
 
   scope :scheduled, -> { where(status: "scheduled") }
   scope :completed, -> { where(status: "completed") }
@@ -28,8 +30,28 @@ class Interview < ApplicationRecord
   after_commit :enqueue_google_calendar_deletion, on: :destroy
 
   def scheduled_datetime
-    DateTime.new(scheduled_date.year, scheduled_date.month, scheduled_date.day,
-                 scheduled_time.hour, scheduled_time.min, scheduled_time.sec)
+    zone = ActiveSupport::TimeZone[calendar_time_zone] || Time.zone
+    time_value = scheduled_time
+    time_str = if time_value.respond_to?(:strftime)
+      time_value.strftime("%H:%M:%S")
+    else
+      time_value.to_s
+    end
+
+    zone.parse("#{scheduled_date} #{time_str}") || zone.local(
+      scheduled_date.year,
+      scheduled_date.month,
+      scheduled_date.day,
+      time_value.hour,
+      time_value.min,
+      time_value.sec
+    )
+  end
+
+  def calendar_time_zone
+    GoogleCalendarTimezone.normalize(Company.first&.timezone)
+  rescue NameError
+    ENV.fetch("GOOGLE_CALENDAR_TIME_ZONE", "UTC")
   end
 
   def is_today?
@@ -72,6 +94,19 @@ class Interview < ApplicationRecord
   def candidate_not_rejected
     if candidate&.status == "rejected"
       errors.add(:candidate, "cannot schedule interviews for rejected candidates")
+    end
+  end
+
+  def scheduled_status_with_datetime?
+    status == "scheduled" && scheduled_date.present? && scheduled_time.present?
+  end
+
+  def scheduled_datetime_not_in_past
+    dt = scheduled_datetime
+    return unless dt
+
+    if dt < Time.current
+      errors.add(:base, "cannot schedule interviews in the past")
     end
   end
 

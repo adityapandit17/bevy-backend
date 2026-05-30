@@ -78,7 +78,12 @@ class GoogleCalendarOauthService
 
     def status_for(company)
       mode = connection_mode_for(company)
-      base = { oauth_configured: oauth_configured?, mode: mode }
+      base = {
+        oauth_configured: oauth_configured?,
+        mode: mode,
+        redirect_uri: oauth_configured? ? redirect_uri : nil,
+        client_id_prefix: oauth_client_id_prefix
+      }
 
       case mode
       when "platform"
@@ -172,6 +177,13 @@ class GoogleCalendarOauthService
 
     def app_base_url
       ENV.fetch("APP_URL", "http://localhost:3000").chomp("/")
+    end
+
+    def oauth_client_id_prefix
+      id = ENV["GOOGLE_CALENDAR_CLIENT_ID"].to_s
+      return nil if id.blank?
+
+      id.split("-").first
     end
   end
 end

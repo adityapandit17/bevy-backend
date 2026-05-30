@@ -9,7 +9,10 @@ class SyncInterviewCalendarJobTest < ActiveJob::TestCase
 
     singleton = GoogleCalendarService.singleton_class
     original = singleton.instance_method(:sync_interview)
-    singleton.define_method(:sync_interview) { |i| called = (i.id == interview.id) }
+    singleton.define_method(:sync_interview) do |i|
+      called = (i.id == interview.id)
+      { success: true }
+    end
     SyncInterviewCalendarJob.perform_now(interview.id)
     singleton.define_method(:sync_interview, original)
     assert called

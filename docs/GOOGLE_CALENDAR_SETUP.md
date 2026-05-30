@@ -121,11 +121,36 @@ When `GOOGLE_CALENDAR_ENABLED=true`, the **platform account in env takes priorit
 | Issue | Fix |
 |-------|-----|
 | Connect disabled in UI | Set `GOOGLE_CALENDAR_CLIENT_ID` and `CLIENT_SECRET`; restart server |
-| `redirect_uri_mismatch` | Redirect URI in Cloud Console must match `GOOGLE_CALENDAR_REDIRECT_URI` exactly |
+| `redirect_uri_mismatch` | See **Redirect URI mismatch** below |
 | `access_denied` / can't sign in | Add your Gmail under OAuth consent **Test users** |
 | No refresh token | Revoke app at [Google permissions](https://myaccount.google.com/permissions), reconnect with `prompt=consent` |
 | Events not created | Platform: `GOOGLE_CALENDAR_ENABLED=true` + token; or Settings connected; check job worker and `[GoogleCalendar]` logs |
 | Platform mode in UI but no events | Confirm `GOOGLE_CALENDAR_REFRESH_TOKEN` is valid |
+
+---
+
+## Redirect URI mismatch (`redirect_uri_mismatch`)
+
+Google’s error page shows the exact URI BevyHR sends, e.g.:
+
+`http://localhost:3000/api/v1/google_calendar/callback`
+
+Fix it in **Credentials** (not the OAuth consent screen branding page):
+
+1. [Google Cloud Console](https://console.cloud.google.com/) → select the **same project** where you created the OAuth client.
+2. **APIs & Services → Credentials**.
+3. Open your **OAuth 2.0 Client ID** — type must be **Web application** (Desktop / iOS / Android clients will not accept this redirect).
+4. Under **Authorized redirect URIs**, click **Add URI** and paste **exactly** (no trailing slash):
+   ```
+   http://localhost:3000/api/v1/google_calendar/callback
+   ```
+5. **Save**. Wait 1–2 minutes for Google to propagate.
+6. Confirm `GOOGLE_CALENDAR_CLIENT_ID` in `backend/.env` matches this client’s Client ID (numeric prefix before `-` should match).
+7. Restart Rails (`bin/rails server`) and try **Connect** again.
+
+**Authorized JavaScript origins** (optional for this flow): `http://localhost:3001` — this does **not** replace redirect URIs.
+
+Settings → Integrations shows the redirect URI and client ID prefix to copy when not connected.
 
 ---
 

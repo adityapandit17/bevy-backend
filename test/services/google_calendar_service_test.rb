@@ -78,7 +78,12 @@ class GoogleCalendarServiceTest < ActiveSupport::TestCase
     end
 
     with_fake_calendar_client(fake_client) do
-      @interview.update_columns(google_calendar_event_id: nil, status: "scheduled", interview_type: "video")
+      @interview.update_columns(
+        google_calendar_event_id: nil,
+        status: "scheduled",
+        interview_type: "video",
+        duration_minutes: 30
+      )
       result = GoogleCalendarService.sync_interview(@interview.reload)
       assert result[:success]
       assert_equal "all", captured[:send_updates]
