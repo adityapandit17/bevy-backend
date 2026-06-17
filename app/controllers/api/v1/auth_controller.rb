@@ -27,18 +27,8 @@ class Api::V1::AuthController < ApplicationController
 
       render_success({
         token: token,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          status: user.status,
-          roles: user.roles.pluck(:name),
-          permissions: user.permissions.pluck(:resource, :action).map { |r, a| "#{r}:#{a}" },
-          last_login_at: user.last_login_at,
-          employee_id: user.employee_id
-        }
+        user: user_payload(user),
+        company: company_settings_payload
       })
     else
       render_error("Invalid email or password", :unauthorized)
@@ -204,20 +194,8 @@ class Api::V1::AuthController < ApplicationController
   # GET /api/v1/auth/me
   def me
     render_success({
-      user: {
-        id: current_user.id,
-        email: current_user.email,
-        name: current_user.name,
-        first_name: current_user.first_name,
-        last_name: current_user.last_name,
-        status: current_user.status,
-        roles: current_user.roles.pluck(:name),
-        permissions: current_user.permissions.pluck(:resource, :action).map { |r, a| "#{r}:#{a}" },
-        last_login_at: current_user.last_login_at,
-        created_at: current_user.created_at,
-        updated_at: current_user.updated_at,
-        employee_id: current_user.employee_id
-      }
+      user: user_payload(current_user),
+      company: company_settings_payload
     })
   end
 
@@ -283,6 +261,29 @@ class Api::V1::AuthController < ApplicationController
   end
 
   private
+
+  def user_payload(user)
+    {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      status: user.status,
+      roles: user.roles.pluck(:name),
+      permissions: user.permissions.pluck(:resource, :action).map { |r, a| "#{r}:#{a}" },
+      last_login_at: user.last_login_at,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+      employee_id: user.employee_id
+    }
+  end
+
+  def company_settings_payload
+    {
+      dashboard_layout: Company.dashboard_layout_for_current
+    }
+  end
 
   def render_success(data, status = :ok)
     render json: {

@@ -128,6 +128,7 @@ class Api::V1::AuthControllerTest < ActionDispatch::IntegrationTest
     assert_equal @user.id, response_data["data"]["user"]["id"]
     assert_equal @user.email, response_data["data"]["user"]["email"]
     assert_equal @user.name, response_data["data"]["user"]["name"]
+    assert_equal "top_nav", response_data["data"]["company"]["dashboard_layout"]
   end
 
   test "should not get current user info without token" do

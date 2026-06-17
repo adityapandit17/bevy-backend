@@ -60,6 +60,27 @@ class CompaniesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "09:00", body["work_start_time"]
   end
 
+  test "should update dashboard layout on company" do
+    patch company_url, params: {
+      company: { dashboard_layout: "sidebar" }
+    }, as: :json
+
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal "sidebar", body["dashboard_layout"]
+
+    updated = Company.find(body["id"])
+    assert_equal "sidebar", updated.dashboard_layout
+  end
+
+  test "show includes dashboard layout default" do
+    get company_url, as: :json
+    assert_response :success
+
+    body = JSON.parse(response.body)
+    assert_equal "top_nav", body["dashboard_layout"]
+  end
+
   test "should not update company with invalid params" do
     patch company_url, params: { company: { name: "" } }, as: :json
     assert_response :unprocessable_entity

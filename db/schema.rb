@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_28_160000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_17_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -162,6 +162,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_28_160000) do
     t.string "country_code"
     t.datetime "created_at", null: false
     t.string "currency"
+    t.string "dashboard_layout", default: "top_nav", null: false
     t.string "employee_count"
     t.text "google_calendar_access_token"
     t.datetime "google_calendar_connected_at"

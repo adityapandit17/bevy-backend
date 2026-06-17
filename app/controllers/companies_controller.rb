@@ -42,7 +42,8 @@ class CompaniesController < ApplicationController
   def company_params
     params.require(:company).permit(
       :name, :code, :industry, :employee_count, :address, :timezone, :currency, :country_code,
-      :weekly_working_hours, :work_start_time, :work_end_time, :lunch_duration_minutes
+      :weekly_working_hours, :work_start_time, :work_end_time, :lunch_duration_minutes,
+      :dashboard_layout
     )
   end
 

@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
 class Company < ApplicationRecord
+  DASHBOARD_LAYOUTS = %w[top_nav sidebar].freeze
+
   LOGO_CONTENT_TYPES = %w[image/png image/jpeg image/jpg image/webp image/svg+xml].freeze
   LOGO_MAX_SIZE = 2.megabytes
+
+  validates :dashboard_layout, inclusion: { in: DASHBOARD_LAYOUTS }
 
   has_one_attached :logo
 
@@ -23,6 +27,10 @@ class Company < ApplicationRecord
 
   def self.current
     first
+  end
+
+  def self.dashboard_layout_for_current
+    current&.dashboard_layout.presence || "top_nav"
   end
 
   def formatted_employee_count
