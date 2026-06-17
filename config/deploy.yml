@@ -9,7 +9,7 @@ image: bevyhr/bevyhr_backend
 # Deploy to these servers.
 servers:
   web:
-    - 13.205.97.162
+    - 122.185.46.118
   # job:
   #   hosts:
   #     - 192.168.0.1
@@ -143,7 +143,7 @@ ssh:
 accessories:
   postgres:
     image: postgres:17
-    host: 13.205.97.162
+    host: 122.185.46.118
     env:
       clear:
         POSTGRES_USER: "bevyhr"
