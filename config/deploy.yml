@@ -113,8 +113,8 @@ builder:
 
 # Use a different ssh user than root
 ssh:
-  user: ubuntu
-  keys: [~/.ssh/bevyhr.pem]
+  user: b902dc
+  keys: [~/.ssh/bestserver]
 
 # Use accessory services (secrets come from .kamal/secrets).
 # accessories:
