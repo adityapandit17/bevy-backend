@@ -21,6 +21,8 @@ Rails.application.routes.draw do
       post "auth/validate", to: "auth#validate"
       post "auth/change_password", to: "auth#change_password"
       post "auth/accept_invitation", to: "auth#accept_invitation"
+      post "auth/forgot_password", to: "auth#forgot_password"
+      post "auth/reset_password", to: "auth#reset_password"
 
       # Google Calendar (Settings → Integrations)
       get "google_calendar/status", to: "google_calendar#status"

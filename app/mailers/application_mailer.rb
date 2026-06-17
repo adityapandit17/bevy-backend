@@ -17,4 +17,11 @@ class ApplicationMailer < ActionMailer::Base
     encoded = URI.encode_www_form_component(invitation_token.to_s)
     "#{base}/accept-invitation?invitation_token=#{encoded}"
   end
+
+  # Next.js route that collects a new password and calls POST /api/v1/auth/reset_password.
+  def frontend_reset_password_url(reset_password_token)
+    base = ENV.fetch("FRONTEND_URL", "http://localhost:3001").to_s.chomp("/")
+    encoded = URI.encode_www_form_component(reset_password_token.to_s)
+    "#{base}/reset-password?reset_password_token=#{encoded}"
+  end
 end

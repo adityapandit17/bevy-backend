@@ -251,4 +251,77 @@ class Api::V1::AuthControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
   end
+
+  test "forgot_password sends reset email for active user" do
+    assert_emails 1 do
+      post "/api/v1/auth/forgot_password", params: { email: @user.email }, as: :json
+    end
+
+    assert_response :ok
+    response_data = JSON.parse(response.body)
+    assert response_data["success"]
+    assert_match(/password reset instructions/i, response_data["data"]["message"])
+
+    email = ActionMailer::Base.deliveries.last
+    assert_equal @user.email, email.to.first
+    assert_match(/reset your bevyhr password/i, email.subject)
+  end
+
+  test "forgot_password returns success for unknown email without sending" do
+    assert_no_emails do
+      post "/api/v1/auth/forgot_password", params: { email: "nobody@example.com" }, as: :json
+    end
+
+    assert_response :ok
+    response_data = JSON.parse(response.body)
+    assert response_data["success"]
+  end
+
+  test "forgot_password requires email" do
+    post "/api/v1/auth/forgot_password", params: {}, as: :json
+
+    assert_response :bad_request
+    response_data = JSON.parse(response.body)
+    assert_not response_data["success"]
+    assert_equal "Email is required", response_data["error"]
+  end
+
+  test "reset_password returns jwt for valid token" do
+    raw = @user.send(:set_reset_password_token)
+
+    post "/api/v1/auth/reset_password",
+         params: {
+           reset_password_token: raw,
+           password: "newpass99",
+           password_confirmation: "newpass99"
+         },
+         as: :json
+
+    assert_response :ok
+    response_data = JSON.parse(response.body)
+    assert response_data["success"]
+    assert_not_nil response_data["data"]["token"]
+    assert_equal @user.email, response_data["data"]["user"]["email"]
+    assert @user.reload.valid_password?("newpass99")
+  end
+
+  test "reset_password rejects invalid token" do
+    post "/api/v1/auth/reset_password",
+         params: {
+           reset_password_token: "not-a-real-token",
+           password: "newpass99",
+           password_confirmation: "newpass99"
+         },
+         as: :json
+
+    assert_response :unprocessable_entity
+    response_data = JSON.parse(response.body)
+    assert_not response_data["success"]
+  end
+
+  test "reset_password requires token and password" do
+    post "/api/v1/auth/reset_password", params: { password: "newpass99" }, as: :json
+
+    assert_response :bad_request
+  end
 end

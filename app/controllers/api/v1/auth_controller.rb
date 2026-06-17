@@ -45,6 +45,76 @@ class Api::V1::AuthController < ApplicationController
     end
   end
 
+  # POST /api/v1/auth/forgot_password
+  # Sends reset instructions to the user's email (always returns success to avoid enumeration).
+  def forgot_password
+    email = params[:email]&.downcase&.strip
+
+    if email.blank?
+      return render_error("Email is required", :bad_request)
+    end
+
+    user = User.find_by(email: email)
+    if user&.active?
+      raw_token = user.send(:set_reset_password_token)
+      PasswordResetMailer.reset_password_email(user, raw_token).deliver_now
+    end
+
+    render_success({
+      message: "If an account exists for that email, you will receive password reset instructions shortly."
+    })
+  end
+
+  # POST /api/v1/auth/reset_password
+  # Completes Devise recoverable flow using the raw token from the reset link (frontend flow).
+  def reset_password
+    token = params[:reset_password_token].presence
+    password = params[:password].presence
+    password_confirmation = params[:password_confirmation].presence || password
+
+    if token.blank? || password.blank?
+      return render_error("Reset token and password are required", :bad_request)
+    end
+
+    if password != password_confirmation
+      return render_error("Password and confirmation do not match", :bad_request)
+    end
+
+    user = User.reset_password_by_token(
+      reset_password_token: token,
+      password: password,
+      password_confirmation: password_confirmation
+    )
+
+    if user.errors.any?
+      return render_error(user.errors.full_messages.join(", "), :unprocessable_entity)
+    end
+
+    unless user.active?
+      return render_error("Your account is not active. Please contact HR.", :forbidden)
+    end
+
+    jwt = JwtService.generate_token(user)
+    user.update_last_login!
+
+    render_success({
+      token: jwt,
+      message: "Password reset successfully",
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        status: user.status,
+        roles: user.roles.pluck(:name),
+        permissions: user.permissions.pluck(:resource, :action).map { |r, a| "#{r}:#{a}" },
+        last_login_at: user.last_login_at,
+        employee_id: user.employee_id
+      }
+    })
+  end
+
   # POST /api/v1/auth/accept_invitation
   # Completes Devise Invitable signup using the raw token from the invitation link (frontend flow).
   def accept_invitation

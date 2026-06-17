@@ -31,6 +31,8 @@ module JwtAuthenticatable
   def public_auth_endpoint?
     request.path == "/api/v1/auth/login" ||
       request.path == "/api/v1/auth/accept_invitation" ||
+      request.path == "/api/v1/auth/forgot_password" ||
+      request.path == "/api/v1/auth/reset_password" ||
       request.path.start_with?("/api/v1/public/")
   end
 
