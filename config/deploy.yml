@@ -99,7 +99,7 @@ asset_path: /rails/public/assets
 
 # Configure the image builder.
 builder:
-  arch: arm64
+  arch: amd64
 
   # # Build image via remote server (useful for faster amd64 builds on arm64 computers)
   # remote: ssh://docker@docker-builder-server
@@ -113,6 +113,7 @@ builder:
 
 # Use a different ssh user than root
 ssh:
+  port: 2233
   user: b902dc
   keys: [~/.ssh/bestserver]
 
