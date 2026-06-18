@@ -38,7 +38,7 @@ class ApiAuthenticationMatrixTest < ActionDispatch::IntegrationTest
     end
 
     test "GET #{endpoint[:path]} succeeds with #{endpoint[:permission]}" do
-      sign_in_as(create_api_user(permissions: [endpoint[:permission]]))
+      sign_in_as(create_api_user(permissions: [ endpoint[:permission] ]))
       get endpoint[:path]
       assert_response :success
     end

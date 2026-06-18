@@ -6,7 +6,7 @@ class AttendanceComplianceService
     @employee = employee
     @start_date = start_date || as_of.beginning_of_month
     @end_date = end_date || as_of.end_of_month
-    @as_of = [as_of, @end_date].min
+    @as_of = [ as_of, @end_date ].min
     @company = employee.company || ActsAsTenant.current_tenant
   end
 
@@ -58,9 +58,9 @@ class AttendanceComplianceService
       0.0
     end
 
-    hours_behind = [required_to_date - total_hours, 0].max.round(2)
+    hours_behind = [ required_to_date - total_hours, 0 ].max.round(2)
     compliance_percent = if required_to_date.positive?
-      [(total_hours / required_to_date * 100).round(1), 100].min
+      [ (total_hours / required_to_date * 100).round(1), 100 ].min
     else
       100.0
     end

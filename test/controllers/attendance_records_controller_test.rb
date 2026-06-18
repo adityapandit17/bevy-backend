@@ -53,7 +53,7 @@ class AttendanceRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     ids = json_response.map { |r| r["employee_id"] }.uniq
-    assert_equal [@report_employee.id], ids
+    assert_equal [ @report_employee.id ], ids
   end
 
   test "employee cannot index another employee via employee_id param" do

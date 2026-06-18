@@ -60,7 +60,7 @@ class TenantIsolationTest < ActionDispatch::IntegrationTest
     end
     role.permissions << show_perm unless role.permissions.include?(show_perm)
 
-    [@user_a, @user_b].each do |user|
+    [ @user_a, @user_b ].each do |user|
       user.roles << role unless user.roles.include?(role)
     end
 

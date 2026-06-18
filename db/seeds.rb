@@ -24,7 +24,6 @@ end
 puts "Seeding tenant data for #{default_company.name} (#{default_company.code})..."
 
 ActsAsTenant.with_tenant(default_company) do
-
 # Create departments if they don't exist
 departments = [
   { name: "Engineering" },
@@ -2289,7 +2288,6 @@ if User.count > 0 && Channel.count == 0
 else
   puts "Channels already exist or no users found. Skipping channel creation."
 end
-
 end # ActsAsTenant.with_tenant
 
 load Rails.root.join("db", "seeds", "platform_admin.rb")

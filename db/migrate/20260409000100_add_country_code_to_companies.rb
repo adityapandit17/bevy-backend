@@ -4,4 +4,3 @@ class AddCountryCodeToCompanies < ActiveRecord::Migration[8.1]
     add_index :companies, :country_code
   end
 end
-
