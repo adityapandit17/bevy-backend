@@ -1,4 +1,5 @@
 class OffboardingTask < ApplicationRecord
+  include TenantScoped
   belongs_to :offboarding_employee
 
   # Validations

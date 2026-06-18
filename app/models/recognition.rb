@@ -1,4 +1,5 @@
 class Recognition < ApplicationRecord
+  include TenantScoped
   belongs_to :given_by, class_name: "User", foreign_key: :given_by_id
   belongs_to :received_by, class_name: "Employee", foreign_key: :received_by_id
 

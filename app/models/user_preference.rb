@@ -1,4 +1,5 @@
 class UserPreference < ApplicationRecord
+  include TenantScoped
   belongs_to :user
 
   validates :language, inclusion: { in: %w[en es fr de] }, allow_nil: true

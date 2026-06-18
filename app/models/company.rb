@@ -2,13 +2,23 @@
 
 class Company < ApplicationRecord
   DASHBOARD_LAYOUTS = %w[top_nav sidebar].freeze
+  STATUSES = %w[active trial pending suspended cancelled past_due].freeze
+  PLANS = %w[starter professional enterprise].freeze
+  TRIAL_DAYS = 14
 
   LOGO_CONTENT_TYPES = %w[image/png image/jpeg image/jpg image/webp image/svg+xml].freeze
   LOGO_MAX_SIZE = 2.megabytes
 
   validates :dashboard_layout, inclusion: { in: DASHBOARD_LAYOUTS }
+  validates :status, inclusion: { in: STATUSES }
+  validates :plan, inclusion: { in: PLANS }
 
   has_one_attached :logo
+
+  has_many :users, dependent: :nullify
+  has_many :employees, dependent: :destroy
+  has_many :departments, dependent: :destroy
+  has_many :roles, dependent: :destroy
 
   validates :name, presence: true, length: { minimum: 2, maximum: 100 }
   validates :code, presence: true, uniqueness: true, length: { minimum: 2, maximum: 10 }
@@ -22,15 +32,45 @@ class Company < ApplicationRecord
   before_validation :ensure_careers_slug
 
   scope :by_industry, ->(industry) { where(industry: industry) }
+  scope :trial, -> { where(status: "trial") }
+  scope :active_tenants, -> { where(status: %w[active trial]) }
   scope :large_companies, -> { where("CAST(employee_count AS INTEGER) > ?", 1000) }
   scope :small_companies, -> { where("CAST(employee_count AS INTEGER) <= ?", 100) }
 
-  def self.current
-    first
+  def self.dashboard_layout_for(company)
+    company&.dashboard_layout.presence || "top_nav"
   end
 
-  def self.dashboard_layout_for_current
-    current&.dashboard_layout.presence || "top_nav"
+  def accessible?
+    status.in?(%w[active trial])
+  end
+
+  def trial_active?
+    status == "trial" && trial_ends_at.present? && trial_ends_at > Time.current
+  end
+
+  def trial_expired?
+    status == "trial" && trial_ends_at.present? && trial_ends_at <= Time.current
+  end
+
+  def employee_count_number
+    users.joins(:employee).distinct.count
+  rescue StandardError
+    0
+  end
+
+  def estimated_mrr
+    plan_rates = { "starter" => 2999, "professional" => 7999, "enterprise" => 19_999 }
+    status.in?(%w[active trial]) ? (plan_rates[plan] || 2999) : 0
+  end
+
+  def platform_json
+    as_json.merge(
+      "employees" => employee_count_number,
+      "mrr" => estimated_mrr,
+      "created_at" => created_at,
+      "trial_ends_at" => trial_ends_at
+    )
   end
 
   def formatted_employee_count
@@ -79,6 +119,27 @@ class Company < ApplicationRecord
 
   def remove_logo!
     logo.purge if logo.attached?
+  end
+
+  def settings_json
+    {
+      id: id,
+      name: name,
+      code: code,
+      plan: plan,
+      status: status,
+      dashboard_layout: dashboard_layout.presence || "top_nav",
+      timezone: timezone,
+      currency: currency,
+      country_code: country_code,
+      work_start_time: work_start_time,
+      work_end_time: work_end_time,
+      weekly_working_hours: weekly_working_hours,
+      lunch_duration_minutes: lunch_duration_minutes,
+      logo_url: logo_url,
+      careers_page_url: careers_page_url,
+      google_calendar_connected: google_calendar_connected?
+    }
   end
 
   private

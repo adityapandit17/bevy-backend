@@ -1,4 +1,5 @@
 class PendingTask < ApplicationRecord
+  include TenantScoped
   belongs_to :taskable, polymorphic: true
   belongs_to :assigned_to, class_name: "Employee", foreign_key: :assigned_to_id, optional: true
 

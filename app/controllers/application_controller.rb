@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   include Authorization
   include JwtAuthenticatable
+  include SetCurrentTenant
 
   # Skip CSRF protection for API endpoints and JSON requests (JWT auth, no cookie-based sessions).
   # Include Content-Type check: requests with application/json are API clients even when format is */*

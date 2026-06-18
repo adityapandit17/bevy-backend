@@ -1,4 +1,5 @@
 class EmployeeDocument < ApplicationRecord
+  include TenantScoped
   belongs_to :employee
 
   # Validations

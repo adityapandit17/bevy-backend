@@ -7,7 +7,7 @@ class AttendanceComplianceService
     @start_date = start_date || as_of.beginning_of_month
     @end_date = end_date || as_of.end_of_month
     @as_of = [as_of, @end_date].min
-    @company = Company.first
+    @company = employee.company || ActsAsTenant.current_tenant
   end
 
   def weekly_working_hours

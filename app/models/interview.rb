@@ -1,4 +1,5 @@
 class Interview < ApplicationRecord
+  include TenantScoped
   belongs_to :candidate
   belongs_to :interviewer_employee, class_name: "Employee", optional: true
   has_many :pending_tasks, as: :taskable, dependent: :destroy
@@ -49,7 +50,7 @@ class Interview < ApplicationRecord
   end
 
   def calendar_time_zone
-    GoogleCalendarTimezone.normalize(Company.first&.timezone)
+    GoogleCalendarTimezone.normalize(company&.timezone)
   rescue NameError
     ENV.fetch("GOOGLE_CALENDAR_TIME_ZONE", "UTC")
   end

@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  company: one
   title: Senior Software Engineer
   department: one
   description: We are looking for an experienced software engineer to join our team and help build amazing products. This role involves working with cutting-edge technologies and collaborating with cross-functional teams.
@@ -17,6 +18,7 @@ one:
   applications: 0
 
 two:
+  company: one
   title: Marketing Manager
   department: two
   description: We are seeking a creative and strategic marketing manager to lead our marketing initiatives and drive brand awareness. This role involves developing and executing comprehensive marketing campaigns.

@@ -32,7 +32,7 @@ module Api
         ENV.delete("GOOGLE_CALENDAR_ENABLED")
         ENV.delete("GOOGLE_CALENDAR_REFRESH_TOKEN")
 
-        company = Company.first || companies(:one)
+        company = companies(:one)
         company.update!(
           google_calendar_refresh_token: "rt_test",
           google_calendar_email: "hr@example.com",

@@ -1,4 +1,5 @@
 class PerformanceGoal < ApplicationRecord
+  include TenantScoped
   belongs_to :employee
 
   # Validations

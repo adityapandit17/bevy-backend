@@ -30,7 +30,9 @@ class JwtService
     # Generate token for user authentication
     def generate_token(user)
       payload = {
+        aud: "tenant",
         user_id: user.id,
+        company_id: user.company_id,
         email: user.email,
         name: user.name,
         roles: user.roles.pluck(:name),
@@ -46,13 +48,18 @@ class JwtService
 
       payload = decode(token)
       return nil unless payload
+      return nil unless payload["aud"] == "tenant"
 
       # Check if token is expired
       return nil if payload["exp"] && Time.current.to_i > payload["exp"]
 
       # Find user by ID from token and eager load roles with permissions
-      user = User.includes(roles: :permissions).find_by(id: payload["user_id"])
+      user = User.includes(:company, roles: :permissions).find_by(id: payload["user_id"])
       return nil unless user&.active?
+      return nil if user.company_id.blank?
+
+      token_company_id = payload["company_id"]
+      return nil if token_company_id.present? && token_company_id.to_i != user.company_id
 
       # Update last login time (this might reload the user, so reload associations after)
       user.update_last_login!

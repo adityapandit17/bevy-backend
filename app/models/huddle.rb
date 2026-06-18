@@ -1,4 +1,5 @@
 class Huddle < ApplicationRecord
+  include TenantScoped
   belongs_to :channel
   belongs_to :started_by, class_name: "User"
   has_many :huddle_participants, dependent: :destroy

@@ -1,4 +1,5 @@
 class MaintenanceRecord < ApplicationRecord
+  include TenantScoped
   belongs_to :asset
 
   # Validations

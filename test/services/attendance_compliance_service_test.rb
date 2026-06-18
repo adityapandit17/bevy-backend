@@ -8,14 +8,7 @@ class AttendanceComplianceServiceTest < ActiveSupport::TestCase
     @start = @as_of.beginning_of_month
     @end = @as_of.end_of_month
 
-    @company = Company.first || Company.create!(
-      name: "Test Co",
-      code: "TST",
-      industry: "Technology",
-      employee_count: "50",
-      timezone: "UTC",
-      currency: "USD"
-    )
+    @company = companies(:one)
     @company.update!(
       weekly_working_hours: 40,
       work_start_time: "09:00",

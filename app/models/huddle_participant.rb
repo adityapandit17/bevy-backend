@@ -1,4 +1,5 @@
 class HuddleParticipant < ApplicationRecord
+  include TenantScoped
   belongs_to :huddle
   belongs_to :user
 

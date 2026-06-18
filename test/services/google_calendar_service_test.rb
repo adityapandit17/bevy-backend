@@ -24,7 +24,7 @@ class GoogleCalendarServiceTest < ActiveSupport::TestCase
 
     ENV.delete("GOOGLE_CALENDAR_REFRESH_TOKEN")
     ENV["GOOGLE_CALENDAR_ENABLED"] = "false"
-    Company.first&.update_columns(google_calendar_refresh_token: nil)
+    companies(:one).update_columns(google_calendar_refresh_token: nil)
     assert_not GoogleCalendarService.enabled?
   end
 
@@ -45,7 +45,7 @@ class GoogleCalendarServiceTest < ActiveSupport::TestCase
     ENV.delete("GOOGLE_CALENDAR_REFRESH_TOKEN")
     GoogleCalendarService.send(:remove_instance_variable, :@company) if GoogleCalendarService.instance_variable_defined?(:@company)
 
-    company = Company.first
+    company = companies(:one)
     company.update_columns(
       google_calendar_refresh_token: "company-refresh-token",
       google_calendar_email: "company@example.com"

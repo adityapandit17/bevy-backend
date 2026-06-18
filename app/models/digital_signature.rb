@@ -1,4 +1,5 @@
 class DigitalSignature < ApplicationRecord
+  include TenantScoped
   belongs_to :policy_document
   belongs_to :employee
 

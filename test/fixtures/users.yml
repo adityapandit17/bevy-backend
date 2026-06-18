@@ -1,4 +1,5 @@
 one:
+  company: one
   email: user1@example.com
   encrypted_password: <%= User.new.send(:password_digest, 'password123') %>
   first_name: John
@@ -9,6 +10,7 @@ one:
   updated_at: <%= 1.day.ago %>
 
 two:
+  company: one
   email: user2@example.com
   encrypted_password: <%= User.new.send(:password_digest, 'password123') %>
   first_name: Jane
@@ -19,6 +21,7 @@ two:
   updated_at: <%= 2.days.ago %>
 
 inactive:
+  company: one
   email: inactive@example.com
   encrypted_password: <%= User.new.send(:password_digest, 'password123') %>
   first_name: Inactive
@@ -29,6 +32,7 @@ inactive:
   updated_at: <%= 1.week.ago %>
 
 suspended:
+  company: one
   email: suspended@example.com
   encrypted_password: <%= User.new.send(:password_digest, 'password123') %>
   first_name: Suspended
@@ -39,6 +43,7 @@ suspended:
   updated_at: <%= 1.week.ago %>
 
 admin:
+  company: one
   email: admin@example.com
   encrypted_password: <%= User.new.send(:password_digest, 'password123') %>
   first_name: Admin

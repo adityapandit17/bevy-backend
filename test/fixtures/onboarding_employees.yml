@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  company: one
   employee: one
   start_date: 2025-07-30
   status: pending
@@ -8,6 +9,7 @@ one:
   notes: Initial onboarding setup
 
 two:
+  company: one
   employee: two
   start_date: 2025-07-30
   status: in_progress

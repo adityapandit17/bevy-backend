@@ -1,4 +1,5 @@
 class KnowledgeArticle < ApplicationRecord
+  include TenantScoped
   # Validations
   validates :title, presence: true
   validates :status, inclusion: { in: %w[draft published archived] }

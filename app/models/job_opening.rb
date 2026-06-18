@@ -1,4 +1,5 @@
 class JobOpening < ApplicationRecord
+  include TenantScoped
   belongs_to :department
   has_many :candidates, dependent: :nullify
 
@@ -15,7 +16,7 @@ class JobOpening < ApplicationRecord
   validates :skills, presence: true
   validates :posted, presence: true
   validates :applications, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
-  validates :public_slug, uniqueness: true, allow_nil: true
+  validates :public_slug, uniqueness: { scope: :company_id }, allow_nil: true
 
   validate :salary_range_validity
 
@@ -52,7 +53,7 @@ class JobOpening < ApplicationRecord
   def public_apply_path
     return nil unless publicly_available? && public_slug.present?
 
-    company = Company.current
+    company = self.company
     return nil unless company&.careers_slug.present?
 
     "/careers/#{company.careers_slug}/#{public_slug}"

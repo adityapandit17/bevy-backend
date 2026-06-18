@@ -1,4 +1,5 @@
 class Candidate < ApplicationRecord
+  include TenantScoped
   belongs_to :job_opening, optional: true
   has_many :interviews, dependent: :destroy
   has_one :next_interview, -> {

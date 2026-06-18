@@ -1,4 +1,5 @@
 class LeaveRequest < ApplicationRecord
+  include TenantScoped
   belongs_to :employee
   belongs_to :manager_approved_by, class_name: "User", optional: true
   belongs_to :hr_approved_by, class_name: "User", optional: true

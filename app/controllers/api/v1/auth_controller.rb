@@ -5,30 +5,30 @@ class Api::V1::AuthController < ApplicationController
 
   # POST /api/v1/auth/login
   def login
-    email = params[:email]&.downcase
+    email = params[:email]&.downcase&.strip
     password = params[:password]
+    company_code = params[:company_code]&.upcase&.strip
 
     # Validate required parameters
     if email.blank? || password.blank?
       return render_error("Email and password are required", :bad_request)
-
     end
 
-    # Find user by email
-    user = User.find_by(email: email)
+    user = find_user_for_login(email, company_code)
+
+    if user.nil? && company_code.blank? && User.unscoped.where(email: email).count > 1
+      return render_error("Company code is required for this email", :unauthorized)
+    end
 
     # Authenticate user with Devise
     if user&.valid_password?(password) && user.active?
-      # Generate JWT token
       token = JwtService.generate_token(user)
-
-      # Update last login time
       user.update_last_login!
 
       render_success({
         token: token,
         user: user_payload(user),
-        company: company_settings_payload
+        company: company_payload(user.company)
       })
     else
       render_error("Invalid email or password", :unauthorized)
@@ -270,6 +270,7 @@ class Api::V1::AuthController < ApplicationController
       first_name: user.first_name,
       last_name: user.last_name,
       status: user.status,
+      company_id: user.company_id,
       roles: user.roles.pluck(:name),
       permissions: user.permissions.pluck(:resource, :action).map { |r, a| "#{r}:#{a}" },
       last_login_at: user.last_login_at,
@@ -280,9 +281,26 @@ class Api::V1::AuthController < ApplicationController
   end
 
   def company_settings_payload
-    {
-      dashboard_layout: Company.dashboard_layout_for_current
-    }
+    company_payload(current_user.company)
+  end
+
+  def company_payload(company)
+    return {} unless company
+
+    Company.dashboard_layout_for(company).then do |layout|
+      company.settings_json.merge(dashboard_layout: layout)
+    end
+  end
+
+  def find_user_for_login(email, company_code)
+    scope = User.unscoped.includes(:company).where(email: email)
+
+    if company_code.present?
+      scope.joins(:company).find_by(companies: { code: company_code })
+    else
+      matches = scope.to_a
+      matches.size == 1 ? matches.first : nil
+    end
   end
 
   def render_success(data, status = :ok)

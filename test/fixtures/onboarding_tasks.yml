@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  company: one
   onboarding_employee: one
   title: Complete HR Paperwork
   description: Fill out all required HR forms and documentation
@@ -12,6 +13,7 @@ one:
   documents: Employment contract, Tax forms, Benefits enrollment
 
 two:
+  company: one
   onboarding_employee: two
   title: IT Setup
   description: Set up computer, email, and access to systems

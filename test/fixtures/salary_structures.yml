@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  company: one
   employee: one
   basic: 50000.00
   hra: 15000.00
@@ -9,6 +10,7 @@ one:
   effective_from: 2025-07-29
 
 two:
+  company: one
   employee: two
   basic: 60000.00
   hra: 18000.00

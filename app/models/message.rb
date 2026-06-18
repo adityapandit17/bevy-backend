@@ -1,4 +1,5 @@
 class Message < ApplicationRecord
+  include TenantScoped
   belongs_to :channel
   belongs_to :user
 

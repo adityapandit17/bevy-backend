@@ -1,4 +1,5 @@
 class SlaWorkflow < ApplicationRecord
+  include TenantScoped
   # Validations
   validates :name, presence: true
   validates :priority, inclusion: { in: %w[low medium high] }

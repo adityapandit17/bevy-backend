@@ -49,7 +49,7 @@ class CompaniesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "show includes work settings defaults" do
-    company = Company.first
+    company = companies(:one)
     company.update!(weekly_working_hours: 40, work_start_time: "09:00", work_end_time: "18:00")
 
     get company_url, as: :json

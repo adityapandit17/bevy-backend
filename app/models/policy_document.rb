@@ -1,4 +1,5 @@
 class PolicyDocument < ApplicationRecord
+  include TenantScoped
   belongs_to :uploader, class_name: "User", foreign_key: "uploaded_by", optional: true
 
   # Validations

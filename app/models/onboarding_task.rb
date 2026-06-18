@@ -1,4 +1,5 @@
 class OnboardingTask < ApplicationRecord
+  include TenantScoped
   belongs_to :onboarding_employee
 
   validates :title, presence: true

@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  company: one
   title: How to Request Leave
   content: Step-by-step guide to requesting leave through the HRMS portal
   category: HR Policies
@@ -13,6 +14,7 @@ one:
   updated_at: 2025-11-19 22:04:30
 
 two:
+  company: one
   title: IT Equipment Request Process
   content: Instructions for requesting new IT equipment and software
   category: IT Support

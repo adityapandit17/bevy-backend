@@ -6,14 +6,7 @@ class AttendanceComplianceTest < ActionDispatch::IntegrationTest
     @employee = employees(:one)
     setup_manager_team!
 
-    company = Company.first || Company.create!(
-      name: "Test Co",
-      code: "TCMP",
-      industry: "Technology",
-      employee_count: "50",
-      timezone: "UTC",
-      currency: "USD"
-    )
+    company = companies(:one)
     company.update!(weekly_working_hours: 40, work_start_time: "09:00", work_end_time: "18:00")
 
     @month_start = Date.current.beginning_of_month.iso8601

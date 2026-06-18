@@ -1,4 +1,5 @@
 class OffboardingEmployee < ApplicationRecord
+  include TenantScoped
   belongs_to :employee
   has_many :offboarding_tasks, dependent: :destroy
 

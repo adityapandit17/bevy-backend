@@ -1,4 +1,5 @@
 class Asset < ApplicationRecord
+  include TenantScoped
   belongs_to :employee, optional: true
   has_many :asset_allocations, dependent: :destroy
   has_many :maintenance_records, dependent: :destroy

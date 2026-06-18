@@ -437,7 +437,7 @@ class AttendanceRecordsController < ApplicationController
       department_id: params[:department_id]
     )
 
-    company = Company.first
+    company = ActsAsTenant.current_tenant || current_user&.company
     render json: {
       start_date: start_date,
       end_date: end_date,

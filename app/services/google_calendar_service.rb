@@ -35,14 +35,16 @@ class GoogleCalendarService
     end
 
     def sync_interview(interview)
-      return { skipped: true, reason: "disabled" } unless enabled?
+      with_company(interview.company) do
+        return { skipped: true, reason: "disabled" } unless enabled?
 
-      if interview.status == "scheduled"
-        upsert_event(interview)
-      elsif interview.google_calendar_event_id.present?
-        delete_event(interview)
-      else
-        { skipped: true, reason: "no_event" }
+        if interview.status == "scheduled"
+          upsert_event(interview)
+        elsif interview.google_calendar_event_id.present?
+          delete_event(interview)
+        else
+          { skipped: true, reason: "no_event" }
+        end
       end
     rescue Google::Apis::Error, Error => e
       Rails.logger.error "[GoogleCalendar] sync failed for interview #{interview.id}: #{e.message}"
@@ -97,7 +99,15 @@ class GoogleCalendarService
     end
 
     def company
-      @company ||= Company.first
+      @company || ActsAsTenant.current_tenant
+    end
+
+    def with_company(company_record)
+      previous = @company
+      @company = company_record
+      yield
+    ensure
+      @company = previous
     end
 
     def upsert_event(interview)

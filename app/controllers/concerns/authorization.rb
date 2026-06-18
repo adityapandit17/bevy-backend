@@ -47,14 +47,24 @@ module Authorization
   def can_access_employee_data?(employee_id)
     return false unless current_user
 
+    employee = Employee.find_by(id: employee_id)
+    return false unless employee
+
     return true if current_user.has_role?("Super Admin") || current_user.has_role?("HR Manager") || current_user.has_role?("HR")
 
     return true if current_user.employee_id == employee_id.to_i
 
     return true if current_user.has_role?("Department Head") &&
-                  current_user.employee&.department_id == Employee.find(employee_id).department_id
+                  current_user.employee&.department_id == employee.department_id
 
     false
+  end
+
+  def tenant_record_accessible?(record)
+    return true unless record.respond_to?(:company_id)
+    return true if record.company_id.blank?
+
+    current_user&.company_id == record.company_id
   end
 
   def can_view_all_attendance_records?

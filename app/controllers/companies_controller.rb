@@ -29,14 +29,10 @@ class CompaniesController < ApplicationController
   private
 
   def set_company
-    @company = Company.first || Company.create!(
-      name: "Default Company",
-      code: "DEF",
-      industry: "General",
-      employee_count: "0",
-      timezone: "UTC",
-      currency: "USD"
-    )
+    @company = current_user&.company || ActsAsTenant.current_tenant
+    return if @company.present?
+
+    render json: { success: false, error: "Company not found" }, status: :not_found
   end
 
   def company_params

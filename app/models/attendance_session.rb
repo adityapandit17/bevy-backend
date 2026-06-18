@@ -1,4 +1,5 @@
 class AttendanceSession < ApplicationRecord
+  include TenantScoped
   belongs_to :attendance_record
 
   before_save :calculate_session_hours

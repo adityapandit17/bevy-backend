@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  company: one
   candidate: one
   interview_type: video
   scheduled_date: 2025-07-30
@@ -12,6 +13,7 @@ one:
   rating: 4
 
 two:
+  company: one
   candidate: two
   interview_type: phone
   scheduled_date: 2025-07-30

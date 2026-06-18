@@ -1,4 +1,6 @@
- class User < ApplicationRecord
+class User < ApplicationRecord
+  include TenantScoped
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :invitable, :database_authenticatable, :registerable,
@@ -22,6 +24,8 @@
   validates :first_name, presence: true
   validates :last_name, presence: true
   validates :status, presence: true, inclusion: { in: %w[active inactive suspended] }
+  validates :email, uniqueness: { scope: :company_id, case_sensitive: false }
+  validate :roles_belong_to_company
 
   # Scopes
   scope :active, -> { where(status: "active") }
@@ -140,4 +144,15 @@
   def downcase_email
     self.email = email.downcase if email.present?
   end
- end
+
+  def roles_belong_to_company
+    return if company_id.blank?
+
+    roles.each do |role|
+      next if role.system_role?
+      next if role.company_id == company_id
+
+      errors.add(:roles, "cannot include roles from another company")
+    end
+  end
+end

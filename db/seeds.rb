@@ -7,6 +7,24 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
+puts "Setting up default tenant company..."
+default_company = Company.find_or_create_by!(code: "DEMO") do |company|
+  company.name = "BevyHR Demo"
+  company.industry = "technology"
+  company.employee_count = "51-200"
+  company.timezone = "asia-kolkata"
+  company.currency = "inr"
+  company.country_code = "IN"
+  company.status = "active"
+  company.plan = "professional"
+  company.contact_email = "admin@hrms.com"
+  company.contact_name = "Super Admin"
+end
+
+puts "Seeding tenant data for #{default_company.name} (#{default_company.code})..."
+
+ActsAsTenant.with_tenant(default_company) do
+
 # Create departments if they don't exist
 departments = [
   { name: "Engineering" },
@@ -2271,3 +2289,7 @@ if User.count > 0 && Channel.count == 0
 else
   puts "Channels already exist or no users found. Skipping channel creation."
 end
+
+end # ActsAsTenant.with_tenant
+
+load Rails.root.join("db", "seeds", "platform_admin.rb")

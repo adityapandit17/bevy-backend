@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  company: one
   employee: one
   title: MyString
   description: MyText
@@ -10,6 +11,7 @@ one:
   due_date: 2025-07-30
 
 two:
+  company: one
   employee: two
   title: MyString
   description: MyText

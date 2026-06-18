@@ -61,14 +61,7 @@ module Api
       private
 
       def current_company
-        Company.first || Company.create!(
-          name: "Default Company",
-          code: "DEF",
-          industry: "General",
-          employee_count: "0",
-          timezone: "UTC",
-          currency: "USD"
-        )
+        current_user.company
       end
 
       def integrations_settings_url(result, email: nil, message: nil)

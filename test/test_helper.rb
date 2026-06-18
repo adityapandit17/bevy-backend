@@ -15,6 +15,14 @@ module ActiveSupport
 
     include TestHelpers
 
+    setup do
+      ActsAsTenant.current_tenant = companies(:one)
+    end
+
+    teardown do
+      ActsAsTenant.current_tenant = nil
+    end
+
     # BDD-style helpers for Given/When/Then readability
     alias_method :given, :setup
     alias_method :when_i, :tap

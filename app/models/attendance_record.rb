@@ -1,4 +1,5 @@
 class AttendanceRecord < ApplicationRecord
+  include TenantScoped
   belongs_to :employee
   has_many :attendance_sessions, dependent: :destroy
 

@@ -1,4 +1,5 @@
 class LeavePolicy < ApplicationRecord
+  include TenantScoped
   # Validations
   validates :year, presence: true, uniqueness: true, numericality: { only_integer: true }
   validates :holidays_per_year, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }

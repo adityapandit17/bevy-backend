@@ -1,6 +1,7 @@
 module TestHelpers
   # Helper methods for creating test data
   def create_test_employee(attributes = {})
+    company = attributes.delete(:company) || companies(:one)
     default_attributes = {
       first_name: "Test",
       last_name: "Employee",
@@ -9,25 +10,33 @@ module TestHelpers
       department_id: departments(:one).id,
       designation: "Software Engineer",
       date_of_joining: Date.current,
-      status: "active"
+      status: "active",
+      company: company
     }
 
-    Employee.create!(default_attributes.merge(attributes))
+    ActsAsTenant.with_tenant(company) do
+      Employee.create!(default_attributes.merge(attributes))
+    end
   end
 
   def create_test_department(attributes = {})
+    company = attributes.delete(:company) || companies(:one)
     default_attributes = {
-      name: "Test Department"
+      name: "Test Department #{SecureRandom.hex(3)}",
+      company: company
     }
 
-    Department.create!(default_attributes.merge(attributes))
+    ActsAsTenant.with_tenant(company) do
+      Department.create!(default_attributes.merge(attributes))
+    end
   end
 
   def create_test_asset(attributes = {})
+    company = attributes.delete(:company) || companies(:one)
     default_attributes = {
       name: "Test Asset",
       asset_type: "laptop",
-      serial_number: "TEST123456789",
+      serial_number: "TEST#{SecureRandom.hex(4)}",
       brand: "Test Brand",
       model: "Test Model",
       purchase_date: Date.current,
@@ -36,23 +45,30 @@ module TestHelpers
       status: "available",
       location: "Test Location",
       department: "Engineering",
-      condition: "good"
+      condition: "good",
+      company: company
     }
 
-    Asset.create!(default_attributes.merge(attributes))
+    ActsAsTenant.with_tenant(company) do
+      Asset.create!(default_attributes.merge(attributes))
+    end
   end
 
   def create_test_leave_request(attributes = {})
+    company = attributes.delete(:company) || companies(:one)
     default_attributes = {
       employee_id: employees(:one).id,
       leave_type: "annual",
       start_date: Date.current + 1.week,
       end_date: Date.current + 2.weeks,
       reason: "Test leave",
-      status: "pending"
+      status: "pending",
+      company: company
     }
 
-    LeaveRequest.create!(default_attributes.merge(attributes))
+    ActsAsTenant.with_tenant(company) do
+      LeaveRequest.create!(default_attributes.merge(attributes))
+    end
   end
 
   # Helper methods for API testing
@@ -379,18 +395,22 @@ module TestHelpers
 
   # Create (or find) a super-admin test user with full permissions
   def find_or_create_test_admin
-    user = User.find_by(email: "test.admin@example.com")
+    company = companies(:one)
+    user = User.unscoped.find_by(email: "test.admin@example.com", company_id: company.id)
     unless user
-      user = User.create!(
-        email: "test.admin@example.com",
-        password: "Password123!",
-        first_name: "Test",
-        last_name: "Admin",
-        status: "active"
-      )
+      ActsAsTenant.with_tenant(company) do
+        user = User.create!(
+          email: "test.admin@example.com",
+          password: "Password123!",
+          first_name: "Test",
+          last_name: "Admin",
+          status: "active",
+          company: company
+        )
+      end
     end
 
-    role = Role.find_or_create_by!(name: "Test Super Admin") do |r|
+    role = Role.find_or_create_by!(name: "Test Super Admin", company: company) do |r|
       r.description = "Full access role for tests"
     end
 
@@ -442,8 +462,15 @@ class ActionDispatch::IntegrationTest
   # BDD-style before_setup: runs before each test's own setup
   def before_setup
     super
+    ActsAsTenant.current_tenant = companies(:one)
     @auth_user = find_or_create_test_admin
+    @auth_user.update!(company: companies(:one)) if @auth_user.company_id != companies(:one).id
     @auth_headers = auth_headers_for(@auth_user)
+  end
+
+  def after_teardown
+    ActsAsTenant.current_tenant = nil
+    super
   end
 
   # Automatically inject auth + JSON accept headers into all HTTP methods

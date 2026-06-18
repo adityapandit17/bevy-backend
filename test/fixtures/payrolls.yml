@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  company: one
   employee: one
   month: January
   gross_salary: 55000.00
@@ -8,6 +9,7 @@ one:
   status: pending
 
 two:
+  company: one
   employee: two
   month: February
   gross_salary: 65000.00

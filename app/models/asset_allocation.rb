@@ -1,4 +1,5 @@
 class AssetAllocation < ApplicationRecord
+  include TenantScoped
   belongs_to :asset
   belongs_to :employee
 

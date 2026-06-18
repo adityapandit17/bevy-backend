@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  company: one
   employee: one
   date: 2025-07-30
   hours: 9.99
@@ -11,6 +12,7 @@ one:
   notes: MyText
 
 two:
+  company: one
   employee: two
   date: 2025-07-30
   hours: 9.99

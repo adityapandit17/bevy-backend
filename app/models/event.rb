@@ -1,4 +1,5 @@
 class Event < ApplicationRecord
+  include TenantScoped
   belongs_to :organizer, class_name: "User", foreign_key: :organizer_id, optional: true
 
   # Validations

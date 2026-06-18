@@ -1,4 +1,5 @@
 class Employee < ApplicationRecord
+  include TenantScoped
   belongs_to :department
   has_one :user, dependent: :destroy
 
@@ -30,7 +31,7 @@ class Employee < ApplicationRecord
 
   validates :first_name, presence: true
   validates :last_name, presence: true
-  validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :email, presence: true, uniqueness: { scope: :company_id }, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :phone, presence: true
   validate :phone_valid_for_company_country
   validates :designation, presence: true
@@ -340,7 +341,7 @@ class Employee < ApplicationRecord
 
     # Single-tenant: company settings come from the first (and only) Company record
     # Fallback to "IN" so validation is deterministic even if settings aren't saved yet.
-    country = (Company.first&.country_code.presence || "IN").to_s.upcase
+    country = (company&.country_code.presence || ActsAsTenant.current_tenant&.country_code.presence || "IN").to_s.upcase
 
     # Phonelib expects ISO3166-1 alpha-2 (e.g. "IN", "US")
     raw = phone.to_s

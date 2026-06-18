@@ -39,16 +39,19 @@ module ApiAuthorizationHelpers
     role.reload
   end
 
-  def create_role_with_permissions(*permission_names, role_name: nil)
+  def create_role_with_permissions(*permission_names, role_name: nil, company: nil)
+    company ||= ActsAsTenant.current_tenant || companies(:one)
     role = Role.create!(
       name: role_name || "TestRole #{SecureRandom.hex(4)}",
-      description: "Role for API authorization tests"
+      description: "Role for API authorization tests",
+      company: company
     )
     grant_permissions_to_role(role, *permission_names)
     role
   end
 
   def create_api_user(permissions: [], employee: nil, email: nil, roles: [])
+    company = employee&.company || ActsAsTenant.current_tenant || companies(:one)
     user = User.create!(
       email: email || "api.user.#{SecureRandom.hex(4)}@test.com",
       password: "Password123!",
@@ -56,7 +59,8 @@ module ApiAuthorizationHelpers
       first_name: "API",
       last_name: "User",
       status: "active",
-      employee_id: employee&.id
+      employee_id: employee&.id,
+      company: company
     )
 
     if permissions.present?

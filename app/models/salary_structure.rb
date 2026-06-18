@@ -1,4 +1,5 @@
 class SalaryStructure < ApplicationRecord
+  include TenantScoped
   belongs_to :employee
 
   # Validations

@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  company: one
   title: Laptop not booting
   description: My laptop doesn't start after the latest update
   category: IT Support
@@ -16,6 +17,7 @@ one:
   updated_at: 2025-11-19 22:04:28
 
 two:
+  company: one
   title: Payroll discrepancy
   description: My November payroll amount appears incorrect
   category: HR

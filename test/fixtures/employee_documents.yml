@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  company: one
   employee: one
   name: Employment Contract
   document_type: contract
@@ -11,6 +12,7 @@ one:
   uploaded_by: HR Manager
 
 two:
+  company: one
   employee: two
   name: ID Proof
   document_type: id_proof

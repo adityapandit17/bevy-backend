@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  company: one
   employee: one
   leave_type: annual
   start_date: 2025-07-29
@@ -9,6 +10,7 @@ one:
   status: pending
 
 two:
+  company: one
   employee: two
   leave_type: sick
   start_date: 2025-07-29

@@ -8,14 +8,7 @@ module Api
       class JobOpeningsControllerTest < ActionDispatch::IntegrationTest
         setup do
           @department = departments(:one)
-          @company = Company.first || Company.create!(
-            name: "Test Co",
-            code: "TST",
-            industry: "technology",
-            employee_count: "1-50",
-            timezone: "UTC",
-            currency: "USD"
-          )
+          @company = companies(:one)
           @company.update!(careers_slug: "test-co") if @company.careers_slug.blank?
 
           @open_job = JobOpening.create!(

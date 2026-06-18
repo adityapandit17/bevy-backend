@@ -1,4 +1,5 @@
 class Notification < ApplicationRecord
+  include TenantScoped
   belongs_to :user
 
   # Use new enum syntax compatible with Rails 7.1+/8.x and Ruby keyword args

@@ -48,7 +48,7 @@ class GoogleCalendarOauthService
       raise Error, "Google did not return a refresh token. Revoke app access in Google Account settings and try again." if refresh_token.blank?
 
       email = fetch_google_email(token_client.access_token)
-      company = Company.first
+      company = user.company
       raise Error, "Company record not found" unless company
 
       company.update!(

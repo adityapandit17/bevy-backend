@@ -1,4 +1,5 @@
 class Channel < ApplicationRecord
+  include TenantScoped
   belongs_to :created_by, class_name: "User"
   has_many :channel_memberships, dependent: :destroy
   has_many :users, through: :channel_memberships

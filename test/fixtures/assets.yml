@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  company: one
   name: MacBook Pro 14
   asset_type: laptop
   serial_number: SN001234567
@@ -20,6 +21,7 @@ one:
   employee: one
 
 two:
+  company: one
   name: Dell Monitor 27
   asset_type: desktop
   serial_number: SN009876543
