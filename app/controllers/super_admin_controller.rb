@@ -316,10 +316,11 @@ class SuperAdminController < ApplicationController
 
   # Helper methods for database management
   def database_tables
-    ActiveRecord::Base.connection.tables.map do |table|
+    connection = ActiveRecord::Base.connection
+    connection.tables.map do |table|
       {
         name: table,
-        rows: ActiveRecord::Base.connection.execute("SELECT COUNT(*) FROM #{table}").first["count"]
+        rows: connection.select_value("SELECT COUNT(*) FROM #{connection.quote_table_name(table)}")
       }
     end
   end

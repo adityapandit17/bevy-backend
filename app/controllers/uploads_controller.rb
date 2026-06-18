@@ -67,7 +67,9 @@ class UploadsController < ApplicationController
         original_filename = "uploaded_file"
       end
 
-      filename = "#{SecureRandom.uuid}_#{original_filename}"
+      sanitized_name = File.basename(original_filename.to_s)
+      sanitized_name = "uploaded_file" if sanitized_name.blank?
+      filename = "#{SecureRandom.uuid}_#{sanitized_name}"
 
       # Create uploads directory if it doesn't exist
       uploads_dir = Rails.root.join("storage", "uploads")
@@ -102,8 +104,19 @@ class UploadsController < ApplicationController
   end
 
   def show
-    filename = params[:filename]
-    file_path = Rails.root.join("storage", "uploads", filename)
+    filename = safe_upload_filename(params[:filename])
+    unless filename
+      render json: { error: "Invalid filename" }, status: :bad_request
+      return
+    end
+
+    uploads_dir = Rails.root.join("storage", "uploads")
+    file_path = uploads_dir.join(filename)
+
+    unless file_path.to_s.start_with?(uploads_dir.to_s)
+      render json: { error: "File not found" }, status: :not_found
+      return
+    end
 
     # Check if this is a download request (has download=true parameter)
     is_download = params[:download] == "true"
@@ -140,6 +153,13 @@ class UploadsController < ApplicationController
   end
 
   private
+
+  def safe_upload_filename(raw_filename)
+    basename = File.basename(raw_filename.to_s)
+    return nil if basename.blank? || basename != raw_filename.to_s
+
+    basename
+  end
 
   def set_frame_options_header
     # Remove any existing X-Frame-Options header

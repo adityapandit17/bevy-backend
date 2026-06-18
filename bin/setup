@@ -15,6 +15,14 @@ FileUtils.chdir APP_ROOT do
   puts "== Installing dependencies =="
   system("bundle check") || system!("bundle install")
 
+  hook_src = File.join(APP_ROOT, ".githooks", "pre-commit")
+  hook_dst = File.join(APP_ROOT, ".git", "hooks", "pre-commit")
+  if File.exist?(hook_src) && File.directory?(File.dirname(hook_dst))
+    FileUtils.cp(hook_src, hook_dst)
+    FileUtils.chmod(0o755, hook_dst)
+    puts "\n== Installed Git pre-commit hook (RuboCop) =="
+  end
+
   # puts "\n== Copying sample files =="
   # unless File.exist?("config/database.yml")
   #   FileUtils.cp "config/database.yml.sample", "config/database.yml"

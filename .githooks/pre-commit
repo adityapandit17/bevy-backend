@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(rb|rake)$' || true)
+
+if [ -z "$STAGED" ]; then
+  exit 0
+fi
+
+echo "Running RuboCop on staged Ruby files..."
+# shellcheck disable=SC2086
+echo "$STAGED" | xargs bin/rubocop --force-exclusion
