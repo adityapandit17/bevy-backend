@@ -54,7 +54,11 @@ class EmployeeSerializer < Panko::Serializer
   end
 
   def direct_reports_count
-    object.direct_reports.count
+    if object.association(:direct_reports).loaded?
+      object.direct_reports.size
+    else
+      object.direct_reports.count
+    end
   end
 
   def badge_level_label

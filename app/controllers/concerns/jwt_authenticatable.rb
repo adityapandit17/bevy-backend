@@ -55,10 +55,8 @@ module JwtAuthenticatable
     user = JwtService.verify_token(token)
 
     if user
-      # Ensure roles are loaded and set current_user
-      user.roles.load unless user.association(:roles).loaded?
       @current_user = user
-      Rails.logger.info "JWT Authentication successful - User: #{user.id}, Email: #{user.email}, Roles: #{user.roles.pluck(:name).inspect}, @current_user set: #{@current_user.present?}"
+      Rails.logger.debug { "JWT auth OK user=#{user.id}" } if Rails.env.development?
     else
       Rails.logger.error "JWT Authentication failed: Invalid or expired token"
       render_unauthorized("Invalid or expired token")

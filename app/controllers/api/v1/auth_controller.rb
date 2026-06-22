@@ -271,8 +271,8 @@ class Api::V1::AuthController < ApplicationController
       last_name: user.last_name,
       status: user.status,
       company_id: user.company_id,
-      roles: user.roles.pluck(:name),
-      permissions: user.permissions.pluck(:resource, :action).map { |r, a| "#{r}:#{a}" },
+      roles: user.association(:roles).loaded? ? user.roles.map(&:name) : user.roles.pluck(:name),
+      permissions: user.permission_strings,
       last_login_at: user.last_login_at,
       created_at: user.created_at,
       updated_at: user.updated_at,
@@ -281,7 +281,12 @@ class Api::V1::AuthController < ApplicationController
   end
 
   def company_settings_payload
-    company_payload(current_user.company)
+    company = current_user.company
+    return {} unless company
+
+    Rails.cache.fetch("company_settings:#{company.id}:#{company.updated_at.to_i}", expires_in: 1.hour) do
+      company_payload(company)
+    end
   end
 
   def company_payload(company)

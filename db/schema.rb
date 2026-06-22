@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_19_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_23_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -92,6 +92,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_19_120000) do
     t.string "status"
     t.datetime "updated_at", null: false
     t.decimal "working_hours"
+    t.index ["company_id", "date", "status"], name: "index_attendance_records_on_company_date_status"
     t.index ["company_id"], name: "index_attendance_records_on_company_id"
     t.index ["employee_id", "date"], name: "index_attendance_records_on_employee_id_and_date_unique", unique: true
     t.index ["employee_id"], name: "index_attendance_records_on_employee_id"
@@ -304,8 +305,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_19_120000) do
     t.datetime "updated_at", null: false
     t.index ["badge_level"], name: "index_employees_on_badge_level"
     t.index ["company_id", "email"], name: "index_employees_on_company_id_and_email", unique: true
+    t.index ["company_id", "status"], name: "index_employees_on_company_id_and_status"
     t.index ["company_id"], name: "index_employees_on_company_id"
     t.index ["department_id"], name: "index_employees_on_department_id"
+    t.index ["manager_id"], name: "index_employees_on_manager_id"
   end
 
   create_table "events", force: :cascade do |t|
@@ -502,6 +505,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_19_120000) do
     t.index ["hr_approved_by_id"], name: "index_leave_requests_on_hr_approved_by_id"
     t.index ["manager_approved_by_id"], name: "index_leave_requests_on_manager_approved_by_id"
     t.index ["rejected_by_id"], name: "index_leave_requests_on_rejected_by_id"
+    t.index ["status", "start_date", "end_date"], name: "index_leave_requests_on_status_and_dates"
   end
 
   create_table "maintenance_records", force: :cascade do |t|
@@ -630,6 +634,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_19_120000) do
     t.decimal "unpaid_days", precision: 10, scale: 2
     t.datetime "updated_at", null: false
     t.integer "working_days"
+    t.index ["company_id", "month", "status"], name: "index_payrolls_on_company_month_status"
     t.index ["company_id"], name: "index_payrolls_on_company_id"
     t.index ["employee_id"], name: "index_payrolls_on_employee_id"
   end
@@ -645,6 +650,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_19_120000) do
     t.string "taskable_type", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
+    t.index ["assigned_to_id", "status", "taskable_type"], name: "index_pending_tasks_on_assignee_status_type"
     t.index ["assigned_to_id", "status"], name: "index_pending_tasks_on_assigned_to_id_and_status"
     t.index ["assigned_to_id"], name: "index_pending_tasks_on_assigned_to_id"
     t.index ["company_id"], name: "index_pending_tasks_on_company_id"

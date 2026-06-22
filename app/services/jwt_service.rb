@@ -61,12 +61,10 @@ class JwtService
       token_company_id = payload["company_id"]
       return nil if token_company_id.present? && token_company_id.to_i != user.company_id
 
-      # Update last login time (this might reload the user, so reload associations after)
-      user.update_last_login!
-
-      # Reload roles and permissions associations if they were cleared by update_last_login!
-      user.roles.reload unless user.association(:roles).loaded?
-      user.roles.each { |role| role.permissions.reload unless role.association(:permissions).loaded? }
+      # Throttle last-login writes — avoids 2 UPDATEs on every authenticated request
+      if user.last_login_at.nil? || user.last_login_at < 15.minutes.ago
+        user.update_last_login!
+      end
 
       user
     end

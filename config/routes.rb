@@ -108,6 +108,9 @@ Rails.application.routes.draw do
   # Dashboard route
   get "/dashboard", to: "dashboard#index"
 
+  # HR reports
+  get "reports/:type", to: "reports#show", as: :report
+
   resources :users do
     member do
       patch :update_roles

@@ -73,28 +73,37 @@ class User < ApplicationRecord
   end
 
   def has_role?(role_name)
-    roles.exists?(name: role_name)
+    if association(:roles).loaded?
+      roles.any? { |role| role.name == role_name }
+    else
+      roles.exists?(name: role_name)
+    end
   end
 
   def has_permission?(resource, action)
-    # Permission is driven by role-permission assignments, with a couple of
-    # explicit cross-module allowances for better UX.
-    # All roles (including Super Admin) are treated equally - permissions must be assigned
-
     # Any role that can see Payroll / Salary Structures / Attendance / Leave
     # can also see basic employee information used in those modules.
     if resource == "employees" && action == "index"
       helper_modules = %w[payrolls salary_structures attendance_records leave_requests]
-      has_helper_access = roles.joins(:permissions)
-                               .where(permissions: { resource: helper_modules, action: "index" })
-                               .exists?
-      return true if has_helper_access
+      if roles_with_permissions_loaded?
+        has_helper = roles.any? do |role|
+          role.permissions.any? { |p| helper_modules.include?(p.resource) && p.action == "index" }
+        end
+        return true if has_helper
+      else
+        has_helper_access = roles.joins(:permissions)
+                                 .where(permissions: { resource: helper_modules, action: "index" })
+                                 .exists?
+        return true if has_helper_access
+      end
     end
 
-    # Check if any of the user's roles have the specific permission
-    # This works for all roles including Super Admin - they need explicit permissions assigned
-    # Query directly through RolePermission to ensure we get fresh data from the database
-    # Always query fresh from database to avoid stale association cache
+    if roles_with_permissions_loaded?
+      return roles.any? do |role|
+        role.permissions.any? { |p| p.resource == resource && p.action == action }
+      end
+    end
+
     user_role_ids = UserRole.where(user_id: id).pluck(:role_id)
     return false if user_role_ids.empty?
 
@@ -104,8 +113,15 @@ class User < ApplicationRecord
                   .exists?
   end
 
+  def permission_strings
+    if roles_with_permissions_loaded?
+      roles.flat_map(&:permissions).uniq.map { |p| "#{p.resource}:#{p.action}" }
+    else
+      permissions.pluck(:resource, :action).map { |r, a| "#{r}:#{a}" }
+    end
+  end
+
   def permissions
-    # Combined permissions from all roles for this user
     Permission.joins(role_permissions: :role).where(roles: { id: role_ids }).distinct
   end
 
@@ -140,6 +156,10 @@ class User < ApplicationRecord
   end
 
   private
+
+  def roles_with_permissions_loaded?
+    association(:roles).loaded? && roles.all? { |role| role.association(:permissions).loaded? }
+  end
 
   def downcase_email
     self.email = email.downcase if email.present?

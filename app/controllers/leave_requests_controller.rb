@@ -8,7 +8,12 @@ class LeaveRequestsController < ApplicationController
       return
     end
 
-    @leave_requests = LeaveRequest.includes(:employee)
+    @leave_requests = LeaveRequest.includes(
+      { employee: [ :department, { manager: :user } ] },
+      :manager_approved_by,
+      :hr_approved_by,
+      :rejected_by
+    )
 
     if params[:manager_pending] == "true"
       unless current_user&.employee
@@ -438,11 +443,15 @@ class LeaveRequestsController < ApplicationController
     return {} unless employee
 
     manager_user = employee.manager&.user
-    hr_user = User.hr_managers.first
+    hr_user = hr_approver_user
     {
       manager: manager_user ? { id: manager_user.id, name: manager_user.name, email: manager_user.email } : nil,
       hr: hr_user ? { id: hr_user.id, name: hr_user.name, email: hr_user.email } : nil
     }
+  end
+
+  def hr_approver_user
+    @hr_approver_user ||= User.hr_managers.active.first
   end
 
   def can_act_on_leave_request?(leave_request)

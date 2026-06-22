@@ -3,36 +3,35 @@ class DashboardController < ApplicationController
 
   # GET /dashboard
   def index
-    begin
-      @stats = {
-        total_employees: Employee.active.size,
-        present_today: attendance_stats[:present],
-        on_leave: attendance_stats[:on_leave],
-        monthly_payroll: payroll_stats[:total_amount]
+    payload = Rails.cache.fetch(dashboard_cache_key, expires_in: 2.minutes) do
+      {
+        stats: {
+          total_employees: Employee.active.size,
+          present_today: attendance_stats[:present],
+          on_leave: attendance_stats[:on_leave],
+          monthly_payroll: payroll_stats[:total_amount]
+        },
+        recent_activities: recent_activities,
+        upcoming_events: upcoming_events,
+        birthdays_today: birthdays_today,
+        upcoming_birthdays: upcoming_birthdays,
+        pending_tasks: pending_tasks
       }
-
-      @recent_activities = recent_activities
-      @upcoming_events = upcoming_events
-      @birthdays_today = birthdays_today
-      @upcoming_birthdays = upcoming_birthdays
-      @pending_tasks = pending_tasks
-
-      render json: {
-        stats: @stats,
-        recent_activities: @recent_activities,
-        upcoming_events: @upcoming_events,
-        birthdays_today: @birthdays_today,
-        upcoming_birthdays: @upcoming_birthdays,
-        pending_tasks: @pending_tasks
-      }
-    rescue => e
-      Rails.logger.error "Dashboard error: #{e.message}"
-      Rails.logger.error e.backtrace.join("\n")
-      render json: { error: e.message }, status: :internal_server_error
     end
+
+    render json: payload
+  rescue => e
+    Rails.logger.error "Dashboard error: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    render json: { error: e.message }, status: :internal_server_error
   end
 
   private
+
+  def dashboard_cache_key
+    company_id = current_user&.company_id || ActsAsTenant.current_tenant&.id || "global"
+    "dashboard/v1/#{company_id}/#{Date.current}/#{current_user&.id}"
+  end
 
   def attendance_stats
     today = Date.current
@@ -83,6 +82,7 @@ class DashboardController < ApplicationController
 
     # Recent leave requests
     recent_leaves = LeaveRequest.joins(:employee)
+                               .includes(:employee)
                                .where("leave_requests.created_at >= ?", 7.days.ago)
                                .where(employees: { status: "active" })
                                .order(created_at: :desc)
@@ -100,6 +100,7 @@ class DashboardController < ApplicationController
 
     # Recent performance reviews
     recent_reviews = PerformanceReview.joins(:employee)
+                                     .includes(employee: :department)
                                      .where("performance_reviews.created_at >= ?", 7.days.ago)
                                      .where(employees: { status: "active" })
                                      .order(created_at: :desc)
@@ -164,17 +165,17 @@ class DashboardController < ApplicationController
   end
 
   def upcoming_birthdays
-    upcoming = []
+    mmdds = (1..7).map { |offset| (Date.current + offset.days).strftime("%m-%d") }
+    employees_by_mmdd = Employee.active
+      .where("TO_CHAR(date_of_birth, 'MM-DD') IN (?)", mmdds)
+      .includes(:department)
+      .group_by { |employee| employee.date_of_birth.strftime("%m-%d") }
 
-    # Get birthdays for the next 7 days
+    upcoming = []
     (1..7).each do |day_offset|
       date = Date.current + day_offset.days
-      birthdays_on_date = Employee.active.where(
-        "TO_CHAR(date_of_birth, 'MM-DD') = ?",
-        date.strftime("%m-%d")
-      ).includes(:department)
-
-      birthdays_on_date.each do |employee|
+      mmdd = date.strftime("%m-%d")
+      (employees_by_mmdd[mmdd] || []).each do |employee|
         upcoming << {
           id: employee.id,
           name: employee.name,
@@ -187,7 +188,7 @@ class DashboardController < ApplicationController
       end
     end
 
-    upcoming.first(4) # Limit to 4 upcoming birthdays
+    upcoming.first(4)
   end
 
   def pending_tasks
