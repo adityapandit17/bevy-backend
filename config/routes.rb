@@ -80,6 +80,12 @@ Rails.application.routes.draw do
         get :stats
         get :allocations
         get :maintenance
+        get :lookup
+      end
+      member do
+        get :qr_code
+        get :barcode
+        get :label
       end
     end
   end

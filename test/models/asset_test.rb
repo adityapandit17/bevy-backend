@@ -63,6 +63,36 @@ class AssetTest < ActiveSupport::TestCase
     assert_includes duplicate_asset.errors[:serial_number], "has already been taken"
   end
 
+  test "assigns asset_tag on create" do
+    asset = Asset.new(
+      name: "Tagged Laptop",
+      asset_type: "laptop",
+      serial_number: "TAG#{SecureRandom.hex(4)}",
+      brand: "Apple",
+      model: "MacBook Air",
+      purchase_date: Date.current,
+      purchase_cost: 1200.00,
+      current_value: 1200.00,
+      status: "available",
+      location: "Office",
+      department: "Engineering",
+      condition: "good",
+      company: companies(:one)
+    )
+    assert asset.valid?
+    asset.save!
+    assert asset.asset_tag.present?
+    assert_match(/\AAST-\d+-[A-Z0-9]+\z/, asset.asset_tag)
+  end
+
+  test "find_by_scan_code resolves payload and tag" do
+    asset = assets(:one)
+    payload = asset.scan_payload
+    assert_equal asset, Asset.find_by_scan_code(payload)
+    assert_equal asset, Asset.find_by_scan_code(asset.asset_tag)
+    assert_equal asset, Asset.find_by_scan_code(asset.serial_number)
+  end
+
   test "should require brand" do
     @asset.brand = nil
     assert_not @asset.valid?

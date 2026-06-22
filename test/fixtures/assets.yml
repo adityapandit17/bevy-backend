@@ -2,6 +2,7 @@
 
 one:
   company: one
+  asset_tag: AST-1-SN001234
   name: MacBook Pro 14
   asset_type: laptop
   serial_number: SN001234567
@@ -22,6 +23,7 @@ one:
 
 two:
   company: one
+  asset_tag: AST-1-SN009876
   name: Dell Monitor 27
   asset_type: desktop
   serial_number: SN009876543

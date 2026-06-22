@@ -1,2 +1,10 @@
 #!/usr/bin/env ruby
-exec "./bin/rails", "server", *ARGV
+args = ARGV.dup
+has_bind = args.each_cons(2).any? { |a, b| a == "-b" || a == "--binding" } ||
+           args.any? { |a| a.start_with?("-b") || a.start_with?("--binding=") }
+
+if !has_bind && ENV.fetch("RAILS_ENV", "development") == "development"
+  args.unshift("-b", "0.0.0.0")
+end
+
+exec "./bin/rails", "server", *args

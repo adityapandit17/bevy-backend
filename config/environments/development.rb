@@ -70,7 +70,13 @@ Rails.application.configure do
 
   # Allow Action Cable access from frontend origin
   config.action_cable.disable_request_forgery_protection = true
-  config.action_cable.allowed_request_origins = [ /http:\/\/localhost:3001/, /http:\/\/127\.0\.0\.1:3001/ ]
+  config.action_cable.allowed_request_origins = [
+    /http:\/\/localhost:3001/,
+    /http:\/\/127\.0\.0\.1:3001/,
+    /http:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?/,
+    /http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?/,
+    /http:\/\/172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}(:\d+)?/
+  ]
 
   # Disable CSRF protection entirely in development for easier API testing
   config.action_controller.allow_forgery_protection = false

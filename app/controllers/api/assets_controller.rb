@@ -1,6 +1,8 @@
 module Api
   class AssetsController < ApplicationController
-    before_action :set_asset, only: [ :show, :update, :destroy ]
+    include AssetApiFormatting
+
+    before_action :set_asset, only: [ :show, :update, :destroy, :qr_code, :barcode, :label ]
 
     # GET /api/assets
     def index
@@ -16,8 +18,8 @@ module Api
       if params[:search].present?
         search_term = "%#{params[:search]}%"
         @assets = @assets.where(
-          "assets.name ILIKE ? OR assets.serial_number ILIKE ? OR assets.brand ILIKE ? OR assets.model ILIKE ?",
-          search_term, search_term, search_term, search_term
+          "assets.name ILIKE ? OR assets.serial_number ILIKE ? OR assets.asset_tag ILIKE ? OR assets.brand ILIKE ? OR assets.model ILIKE ?",
+          search_term, search_term, search_term, search_term, search_term
         )
       end
 
@@ -42,6 +44,42 @@ module Api
         maintenance_history: @asset.maintenance_records.order(maintenance_date: :desc).map { |record| format_maintenance_record(record) },
         allocation_history: @asset.asset_allocations.map { |allocation| format_allocation(allocation) }
       }
+    end
+
+    # GET /api/assets/lookup?code=...
+    def lookup
+      code = params[:code].presence || params[:tag].presence
+      if code.blank?
+        render json: { message: "Scan code is required" }, status: :bad_request
+        return
+      end
+
+      asset = Asset.find_by_scan_code(code)
+      if asset
+        render json: { asset: format_asset(asset) }
+      else
+        render json: { message: "Asset not found for scan code" }, status: :not_found
+      end
+    end
+
+    # GET /api/assets/:id/label
+    def label
+      service = AssetLabelService.new(@asset)
+      render json: {
+        label: service.label_metadata(base_url: request.base_url),
+        qr_code_data_url: png_data_url(service.qr_png),
+        barcode_data_url: png_data_url(service.barcode_png)
+      }
+    end
+
+    # GET /api/assets/:id/qr_code
+    def qr_code
+      send_png(AssetLabelService.new(@asset).qr_png, filename: "#{@asset.asset_tag}-qr.png")
+    end
+
+    # GET /api/assets/:id/barcode
+    def barcode
+      send_png(AssetLabelService.new(@asset).barcode_png, filename: "#{@asset.asset_tag}-barcode.png")
     end
 
     # POST /api/assets
@@ -183,68 +221,15 @@ module Api
       )
     end
 
-    def format_asset(asset)
-      {
-        id: asset.id,
-        name: asset.name,
-        asset_type: asset.asset_type,
-        serial_number: asset.serial_number,
-        model: asset.model,
-        brand: asset.brand,
-        purchase_date: asset.purchase_date&.strftime("%Y-%m-%d"),
-        warranty_expiry: asset.warranty_expiry&.strftime("%Y-%m-%d"),
-        purchase_cost: asset.purchase_cost,
-        current_value: asset.current_value,
-        status: asset.status,
-        location: asset.location,
-        department: asset.department,
-        notes: asset.notes,
-        condition: asset.condition,
-        last_maintenance: asset.last_maintenance&.strftime("%Y-%m-%d"),
-        next_maintenance: asset.next_maintenance&.strftime("%Y-%m-%d"),
-        assigned_to: asset.employee ? {
-          id: asset.employee.id,
-          name: asset.employee.name,
-          email: asset.employee.email,
-          department: asset.employee.department&.name
-        } : nil,
-        created_at: asset.created_at,
-        updated_at: asset.updated_at
-      }
+    def send_png(binary, filename:)
+      send_data binary,
+                type: "image/png",
+                disposition: "inline",
+                filename: filename
     end
 
-    def format_maintenance_record(record)
-      {
-        id: record.id,
-        maintenance_date: record.maintenance_date.strftime("%Y-%m-%d"),
-        maintenance_type: record.maintenance_type,
-        description: record.description,
-        cost: record.cost,
-        performed_by: record.performed_by,
-        next_maintenance: record.next_maintenance&.strftime("%Y-%m-%d"),
-        asset_name: record.asset.name,
-        asset_serial_number: record.asset.serial_number,
-        created_at: record.created_at
-      }
-    end
-
-    def format_allocation(allocation)
-      {
-        id: allocation.id,
-        asset_id: allocation.asset_id,
-        asset_name: allocation.asset.name,
-        asset_serial_number: allocation.asset.serial_number,
-        asset_type: allocation.asset.asset_type,
-        employee_id: allocation.employee_id,
-        employee_name: allocation.employee.name,
-        employee_email: allocation.employee.email,
-        employee_department: allocation.employee.department&.name,
-        assigned_date: allocation.assigned_date.strftime("%Y-%m-%d"),
-        return_date: allocation.return_date&.strftime("%Y-%m-%d"),
-        notes: allocation.notes,
-        status: allocation.status,
-        created_at: allocation.created_at
-      }
+    def png_data_url(binary)
+      "data:image/png;base64,#{Base64.strict_encode64(binary)}"
     end
   end
 end

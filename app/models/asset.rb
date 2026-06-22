@@ -8,6 +8,7 @@ class Asset < ApplicationRecord
   validates :name, presence: true
   validates :asset_type, presence: true, inclusion: { in: %w[laptop desktop mobile printer server network other] }
   validates :serial_number, presence: true, uniqueness: true
+  validates :asset_tag, presence: true, uniqueness: true
   validates :brand, presence: true
   validates :model, presence: true
   validates :purchase_date, presence: true
@@ -32,6 +33,7 @@ class Asset < ApplicationRecord
   scope :warranty_expiring_soon, -> { where("warranty_expiry BETWEEN ? AND ?", Date.current, Date.current + 90.days) }
 
   # Callbacks
+  before_validation :ensure_asset_tag, on: :create
   before_save :calculate_depreciation
   before_save :update_status_based_on_allocation
 
@@ -125,6 +127,23 @@ class Asset < ApplicationRecord
     "#{brand} #{model} - #{serial_number}"
   end
 
+  def scan_payload
+    AssetLabelService::SCAN_PREFIX + asset_tag.to_s
+  end
+
+  def self.find_by_scan_code(code)
+    normalized = code.to_s.strip
+    return nil if normalized.blank?
+
+    if (match = normalized.match(/\ABEVYHR[\|:]AST[\|:](.+)\z/i))
+      normalized = match[1].strip
+    end
+
+    find_by(asset_tag: normalized) ||
+      find_by(serial_number: normalized) ||
+      (normalized.match?(/\A\d+\z/) ? find_by(id: normalized.to_i) : nil)
+  end
+
   def status_color
     case status
     when "available"
@@ -158,6 +177,18 @@ class Asset < ApplicationRecord
   end
 
   private
+
+  def ensure_asset_tag
+    return if asset_tag.present?
+
+    loop do
+      candidate = format("AST-%s-%s", company_id, SecureRandom.alphanumeric(8).upcase)
+      unless self.class.exists?(asset_tag: candidate)
+        self.asset_tag = candidate
+        break
+      end
+    end
+  end
 
   def calculate_depreciation
     return unless purchase_date && purchase_cost

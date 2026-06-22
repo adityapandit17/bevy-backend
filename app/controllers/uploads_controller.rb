@@ -26,7 +26,16 @@ class UploadsController < ApplicationController
     file = params[:file]
 
     # Validate file type
-    allowed_types = [ "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ]
+    allowed_types = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/heic",
+      "image/heif"
+    ]
 
     # Handle both ActionController::Parameters and ActionDispatch::Http::UploadedFile
     if file.respond_to?(:content_type)
@@ -37,19 +46,36 @@ class UploadsController < ApplicationController
       content_type = nil
     end
 
-    unless content_type && allowed_types.include?(content_type)
-      render json: { error: "Invalid file type. Only PDF and Word documents are allowed. Got: #{content_type}" }, status: :unprocessable_entity
-      return
+    if file.respond_to?(:original_filename)
+      original_filename = file.original_filename
+    elsif file.is_a?(ActionController::Parameters) && file[:original_filename]
+      original_filename = file[:original_filename]
+    else
+      original_filename = "uploaded_file"
     end
 
-    # Validate file size (5MB limit)
     if file.respond_to?(:size)
       file_size = file.size
     elsif file.is_a?(ActionController::Parameters) && file[:tempfile]
-      # In tests, tempfile might be a string representation, so we'll skip size validation
       file_size = 0
     else
       file_size = 0
+    end
+
+    # Mobile camera scans may omit content_type; infer from filename when possible.
+    if content_type.blank? && original_filename.present?
+      content_type = case File.extname(original_filename.to_s).downcase
+      when ".jpg", ".jpeg" then "image/jpeg"
+      when ".png" then "image/png"
+      when ".heic" then "image/heic"
+      when ".pdf" then "application/pdf"
+      else content_type
+      end
+    end
+
+    unless content_type && allowed_types.include?(content_type)
+      render json: { error: "Invalid file type. Allowed: PDF, Word, JPEG, PNG. Got: #{content_type}" }, status: :unprocessable_entity
+      return
     end
 
     if file_size > 5.megabytes
@@ -58,15 +84,6 @@ class UploadsController < ApplicationController
     end
 
     begin
-      # Generate unique filename
-      if file.respond_to?(:original_filename)
-        original_filename = file.original_filename
-      elsif file.is_a?(ActionController::Parameters) && file[:original_filename]
-        original_filename = file[:original_filename]
-      else
-        original_filename = "uploaded_file"
-      end
-
       sanitized_name = File.basename(original_filename.to_s)
       sanitized_name = "uploaded_file" if sanitized_name.blank?
       filename = "#{SecureRandom.uuid}_#{sanitized_name}"
