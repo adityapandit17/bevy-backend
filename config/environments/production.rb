@@ -118,8 +118,12 @@ Rails.application.configure do
   origins_to_use = allowed_origins_env ? allowed_origins_env.split(",").map(&:strip) : default_origins
 
   config.action_cable.allowed_request_origins = origins_to_use.map do |origin|
-    # Escape special regex characters and create pattern
-    escaped = origin.gsub(".", "\\.").gsub("*", ".*")
-    Regexp.new("^https?:\\/\\/#{escaped}$")
+    # Env may be "bevyhr.com" or full "https://bevyhr.com" — do not double-prefix the scheme.
+    if origin.match?(%r{\Ahttps?://}i)
+      Regexp.new("^#{Regexp.escape(origin).gsub('\*', '.*')}$")
+    else
+      escaped = origin.gsub(".", "\\.").gsub("*", ".*")
+      Regexp.new("^https?://#{escaped}$")
+    end
   end
 end

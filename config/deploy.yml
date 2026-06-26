@@ -46,6 +46,7 @@ env:
     - RAILS_MASTER_KEY
     # - POSTGRES_USERNAME
     - POSTGRES_PASSWORD
+    - TURN_CREDENTIAL
     # - POSTGRES_HOST
     # - POSTGRES_DATABASE
   clear:
@@ -59,6 +60,8 @@ env:
     FRONTEND_DOMAIN: bevyhr.com
     CABLE_URL: wss://api.bevyhr.com/cable
     ACTION_CABLE_ALLOWED_ORIGINS: https://bevyhr.com,https://www.bevyhr.com
+    TURN_URLS: turn:122.185.46.118:3478?transport=udp,turn:122.185.46.118:3478?transport=tcp
+    TURN_USERNAME: bevyhr
     MAILER_DEFAULT_FROM: BevyHR <no-reply@bevyhr.com>
 
     # Set number of processes dedicated to Solid Queue (default: 1)
@@ -155,3 +158,16 @@ accessories:
       - db/production_setup.sql:/docker-entrypoint-initdb.d/setup.sql
     directories:
       - data:/var/lib/postgresql/data
+
+  coturn:
+    image: coturn/coturn:4.6.2-alpine
+    host: 122.185.46.118
+    port:
+      - "3478:3478"
+      - "3478:3478/udp"
+    env:
+      secret:
+        - TURN_CREDENTIAL
+    options:
+      entrypoint: /bin/sh
+    cmd: -c "exec turnserver -n --listening-port=3478 --fingerprint --lt-cred-mech --realm=bevyhr.com --user=bevyhr:$$TURN_CREDENTIAL --no-cli --log-file=stdout --no-multicast-peers"
