@@ -13,11 +13,17 @@ class Api::V1::CallsController < ApplicationController
     ]
 
     turn_urls = ENV.fetch("TURN_URLS", ENV["TURN_URL"]).to_s.split(",").map(&:strip).reject(&:blank?)
-    turn_urls.each do |url|
-      turn = { urls: url }
-      turn[:username] = ENV["TURN_USERNAME"] if ENV["TURN_USERNAME"].present?
-      turn[:credential] = ENV["TURN_CREDENTIAL"] if ENV["TURN_CREDENTIAL"].present?
-      servers << turn
+    turn_username = ENV["TURN_USERNAME"].presence
+    turn_credential = ENV["TURN_CREDENTIAL"].presence
+
+    if turn_urls.any? && turn_username && turn_credential
+      turn_urls.each do |url|
+        servers << { urls: url, username: turn_username, credential: turn_credential }
+      end
+    elsif turn_urls.any?
+      Rails.logger.warn(
+        "[CallsController] TURN_URLS configured but TURN_USERNAME/TURN_CREDENTIAL missing; omitting TURN from ice_config"
+      )
     end
 
     render json: { success: true, data: { ice_servers: servers } }
