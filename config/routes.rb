@@ -43,6 +43,13 @@ Rails.application.routes.draw do
         post "auth/login", to: "auth#login"
         post "auth/logout", to: "auth#logout"
         get "auth/me", to: "auth#me"
+        post "auth/change_password", to: "auth#change_password"
+
+        resources :admins, only: [ :index ] do
+          member do
+            patch :password
+          end
+        end
 
         resources :companies, only: [ :index, :show, :update ] do
           collection do
@@ -55,6 +62,8 @@ Rails.application.routes.draw do
       get "users/directory", to: "users#directory"
 
       # Chat API routes
+      get "calls/ice_config", to: "calls#ice_config"
+
       resources :channels, only: [ :index, :show, :create, :update, :destroy ] do
         member do
           post :add_members

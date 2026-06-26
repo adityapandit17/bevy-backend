@@ -57,4 +57,41 @@ class Api::V1::Platform::AuthControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unauthorized
   end
+
+  test "change_password with valid current password" do
+    token = PlatformJwtService.generate_token(@admin)
+
+    post "/api/v1/platform/auth/change_password",
+         params: {
+           current_password: "password123",
+           new_password: "newpassword123",
+           confirm_password: "newpassword123"
+         },
+         headers: { "Authorization" => "Bearer #{token}" },
+         as: :json
+
+    assert_response :ok
+    assert @admin.reload.valid_password?("newpassword123")
+  end
+
+  test "super admin can reset another admin password" do
+    other = PlatformAdminUser.create!(
+      email: "other@test.com",
+      first_name: "Other",
+      last_name: "Admin",
+      password: "password123",
+      password_confirmation: "password123",
+      role: "support",
+      status: "active"
+    )
+    token = PlatformJwtService.generate_token(@admin)
+
+    patch "/api/v1/platform/admins/#{other.id}/password",
+          params: { new_password: "resetpass123", confirm_password: "resetpass123" },
+          headers: { "Authorization" => "Bearer #{token}" },
+          as: :json
+
+    assert_response :ok
+    assert other.reload.valid_password?("resetpass123")
+  end
 end

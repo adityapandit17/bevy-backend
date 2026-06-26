@@ -5,7 +5,7 @@ module Api
     module Platform
       class AuthController < ApplicationController
         skip_before_action :authenticate_user_from_token!
-        before_action :authenticate_platform_admin!, only: [ :logout, :me ]
+        before_action :authenticate_platform_admin!, only: [ :logout, :me, :change_password ]
 
         def login
           email = params[:email]&.downcase&.strip
@@ -37,6 +37,46 @@ module Api
 
         def me
           render json: { success: true, data: { admin: admin_payload(current_platform_admin) } }
+        end
+
+        def change_password
+          current_password = params[:current_password]
+          new_password = params[:new_password]
+          confirm_password = params[:confirm_password]
+
+          if current_password.blank? || new_password.blank? || confirm_password.blank?
+            return render json: {
+              success: false,
+              error: "Current password, new password, and confirmation are required"
+            }, status: :bad_request
+          end
+
+          if new_password != confirm_password
+            return render json: {
+              success: false,
+              error: "New password and confirmation do not match"
+            }, status: :bad_request
+          end
+
+          if new_password.length < 8
+            return render json: {
+              success: false,
+              error: "Password must be at least 8 characters long"
+            }, status: :bad_request
+          end
+
+          unless current_platform_admin.valid_password?(current_password)
+            return render json: { success: false, error: "Current password is incorrect" }, status: :unauthorized
+          end
+
+          if current_platform_admin.update(password: new_password, password_confirmation: confirm_password)
+            render json: { success: true, data: { message: "Password changed successfully" } }
+          else
+            render json: {
+              success: false,
+              error: current_platform_admin.errors.full_messages.join(", ")
+            }, status: :unprocessable_entity
+          end
         end
 
         private
