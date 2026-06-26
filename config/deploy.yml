@@ -162,12 +162,12 @@ accessories:
   coturn:
     image: coturn/coturn:4.6.2-alpine
     host: 122.185.46.118
-    port:
-      - "3478:3478"
-      - "3478:3478/udp"
+    port: "3478:3478"
     env:
       secret:
         - TURN_CREDENTIAL
     options:
       entrypoint: /bin/sh
+      publish:
+        - "3478:3478/udp"
     cmd: -c "exec turnserver -n --listening-port=3478 --fingerprint --lt-cred-mech --realm=bevyhr.com --user=bevyhr:$$TURN_CREDENTIAL --no-cli --log-file=stdout --no-multicast-peers"
