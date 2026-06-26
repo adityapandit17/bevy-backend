@@ -9,11 +9,20 @@
 #     priority: 2
 #     schedule: at 5am every day
 
+# Cron schedules use an explicit IANA timezone so Docker (UTC) still fires at local EOD.
+# Fugit accepts "cron Asia/Kolkata" suffix — see https://github.com/floraison/fugit
+default: &nightly_punch_out
+  class: AutoPunchOutJob
+  schedule: "59 23 * * * Asia/Kolkata"  # 11:59 PM IST every night
+  queue: default
+
 production:
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12
   nightly_task:
-    class: AutoPunchOutJob
-    schedule: "59 23 * * *"  # 11:59 PM every night
-    queue: default
+    <<: *nightly_punch_out
+
+development:
+  nightly_task:
+    <<: *nightly_punch_out

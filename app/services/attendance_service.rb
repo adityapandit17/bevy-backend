@@ -177,11 +177,8 @@ class AttendanceService
     record
   end
 
-  # Class method to auto punch out all active sessions at 23:59
+  # Class method to auto punch out all active sessions at 23:59 in the app timezone.
   def self.auto_punch_out_all_active_sessions
-    # Set punch out time to 23:59:59 of the current day
-    punch_out_time = Date.current.end_of_day - 1.second
-
     # Find all active sessions (where check_out IS NULL)
     active_sessions = AttendanceSession.where("check_out IS NULL").includes(:attendance_record)
 
@@ -195,10 +192,12 @@ class AttendanceService
 
     # Group sessions by attendance_record to update records efficiently
     active_sessions.group_by(&:attendance_record).each do |record, sessions|
+      punch_out_time = record.date.in_time_zone.end_of_day - 1.second
+
       ActiveRecord::Base.transaction do
         sessions.each do |session|
           begin
-            # Update session with punch out time at 23:59:59 of current day
+            # Update session with punch out time at 23:59:59 of the attendance day
             session.update!(check_out: punch_out_time)
             punched_out_count += 1
             Rails.logger.info "Auto punched out session #{session.id} for employee #{record.employee_id} at #{punch_out_time} (check_in: #{session.check_in})"
@@ -230,7 +229,7 @@ class AttendanceService
     {
       punched_out_count: punched_out_count,
       errors: errors,
-      message: "Auto punched out #{punched_out_count} active session(s) at #{punch_out_time}"
+      message: "Auto punched out #{punched_out_count} active session(s) at #{Time.current.in_time_zone}"
     }
   rescue => e
     Rails.logger.error "Auto punch out failed: #{e.message}"
