@@ -31,6 +31,10 @@ class CallChannel < ApplicationCable::Channel
       handle_call_offer(data)
     when "call-answer"
       handle_call_answer(data)
+    when "call-renegotiate-offer"
+      handle_call_renegotiate_offer(data)
+    when "call-renegotiate-answer"
+      handle_call_renegotiate_answer(data)
     when "call-reject"
       handle_call_reject(data)
     when "call-end"
@@ -64,7 +68,8 @@ class CallChannel < ApplicationCable::Channel
         callId: call_id,
         from: data["from"],
         to: data["to"],
-        offer: data["offer"]
+        offer: data["offer"],
+        mediaType: data["mediaType"] || "audio"
       }
     )
 
@@ -96,6 +101,52 @@ class CallChannel < ApplicationCable::Channel
         }
       )
       Rails.logger.info "Call answer broadcasted successfully"
+    end
+  end
+
+  def handle_call_renegotiate_offer(data)
+    from_user_id = data["from"]&.dig("id")
+    to_user_id = data["to"]&.dig("id")
+    call_id = data["callId"]
+
+    unless from_user_id == current_user.id
+      Rails.logger.warn "Call renegotiate offer rejected: from_user_id (#{from_user_id}) != current_user.id (#{current_user.id})"
+      return
+    end
+
+    if to_user_id
+      ActionCable.server.broadcast(
+        "user_#{to_user_id}_calls",
+        {
+          type: "call-renegotiate-offer",
+          callId: call_id,
+          from: data["from"],
+          to: data["to"],
+          offer: data["offer"]
+        }
+      )
+    end
+  end
+
+  def handle_call_renegotiate_answer(data)
+    call_id = data["callId"]
+    from_user_id = data["from"]&.dig("id")
+    to_user_id = data["to"]&.dig("id")
+
+    unless from_user_id == current_user.id
+      Rails.logger.warn "Call renegotiate answer rejected: from_user_id (#{from_user_id}) != current_user.id (#{current_user.id})"
+      return
+    end
+
+    if to_user_id
+      ActionCable.server.broadcast(
+        "user_#{to_user_id}_calls",
+        {
+          type: "call-renegotiate-answer",
+          callId: call_id,
+          answer: data["answer"]
+        }
+      )
     end
   end
 
