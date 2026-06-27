@@ -9,7 +9,9 @@ class Api::V1::Public::SignupsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "creates trial company and admin user" do
-    assert_difference [ "Company.count", "User.count", "Employee.count" ], 1 do
+    email = "jane.#{SecureRandom.hex(4)}@acmetrial.com"
+
+    assert_difference("Company.unscoped.count", 1) do
       post "/api/v1/public/signup",
            params: {
              company_name: "Acme Trial Co",
@@ -18,7 +20,7 @@ class Api::V1::Public::SignupsControllerTest < ActionDispatch::IntegrationTest
              plan: "starter",
              admin_first_name: "Jane",
              admin_last_name: "Founder",
-             admin_email: "jane@acmetrial.com",
+             admin_email: email,
              admin_password: "securepass123"
            },
            as: :json
@@ -30,9 +32,17 @@ class Api::V1::Public::SignupsControllerTest < ActionDispatch::IntegrationTest
     assert body["data"]["token"].present?
     assert_equal "trial", body["data"]["company"]["status"]
 
-    company = Company.find_by(code: body["data"]["company"]["code"])
+    company = Company.unscoped.find_by(code: body["data"]["company"]["code"])
     assert company.trial_ends_at.present?
-    assert User.exists?(email: "jane@acmetrial.com", company_id: company.id)
+
+    ActsAsTenant.with_tenant(company) do
+      assert_equal 1, User.count
+      assert User.exists?(email: email)
+      assert_equal 1, Employee.count
+      assert_equal DepartmentSeeder.default_names.size, Department.count
+      assert Department.exists?(name: "Engineering")
+      assert Department.exists?(name: "General")
+    end
   end
 
   test "rejects duplicate email" do

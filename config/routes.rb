@@ -45,18 +45,55 @@ Rails.application.routes.draw do
         get "auth/me", to: "auth#me"
         post "auth/change_password", to: "auth#change_password"
 
-        resources :admins, only: [ :index ] do
+        resource :settings, only: [ :show, :update ]
+
+        resources :admins, only: [ :index, :create, :update, :destroy ] do
           member do
             patch :password
           end
         end
 
-        resources :companies, only: [ :index, :show, :update ] do
+        resources :companies, only: [ :index, :show, :create, :update ] do
           collection do
             get :stats
           end
+          member do
+            post :end_trial
+            post :extend_trial
+            post :restart_trial
+            post :activate
+            get :feature_flags
+            patch :feature_flags, action: :feature_flags
+            get :audits
+          end
+        end
+
+        resources :audits, only: [ :index ]
+
+        resources :pricing_plans
+        resources :inquiries
+        resources :follow_ups
+        resources :campaigns
+        resources :announcements
+        resources :invoices
+        resources :subscription_requests, only: [ :index, :show, :create ] do
+          member do
+            post :approve
+            post :reject
+          end
         end
       end
+
+      get "public/pricing", to: "public_pricing#index"
+
+      # Tenant billing (accessible even when subscription locked)
+      get "billing/summary", to: "billing#summary"
+      post "billing/checkout", to: "billing#checkout"
+      post "billing/change_plan", to: "billing#change_plan"
+      post "billing/portal", to: "billing#portal"
+      get "billing/invoices", to: "billing#invoices"
+
+      post "webhooks/payment/stripe", to: "payment_webhooks#stripe"
 
       # User directory (chat / DMs — authenticated, not users.index)
       get "users/directory", to: "users#directory"
@@ -261,7 +298,12 @@ Rails.application.routes.draw do
 
   # Existing resources
   resources :employees
-  resources :departments
+  resources :departments do
+    collection do
+      get :defaults
+      post :seed_defaults
+    end
+  end
   resources :job_openings do
     member do
       get :candidates

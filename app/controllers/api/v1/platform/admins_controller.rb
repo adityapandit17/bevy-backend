@@ -4,12 +4,44 @@ module Api
   module V1
     module Platform
       class AdminsController < BaseController
-        before_action :require_super_admin!, only: [ :password ]
-        before_action :set_admin, only: [ :password ]
+        before_action :require_super_admin!, except: [ :index ]
+        before_action :set_admin, only: [ :password, :update, :destroy ]
 
         def index
           admins = PlatformAdminUser.order(:email)
           render_success(admins.map { |admin| admin_payload(admin) })
+        end
+
+        def create
+          admin = PlatformAdminUser.new(admin_params)
+          admin.password = params[:password]
+          admin.password_confirmation = params[:password_confirmation] || params[:password]
+
+          if admin.save
+            audit_action!(action: "admin.create", resource: admin, metadata: { email: admin.email, role: admin.role })
+            render_success(admin_payload(admin), :created)
+          else
+            render_error(admin.errors.full_messages.join(", "))
+          end
+        end
+
+        def update
+          if @admin.update(admin_update_params)
+            audit_record_update!(action: "admin.update", record: @admin)
+            render_success(admin_payload(@admin))
+          else
+            render_error(@admin.errors.full_messages.join(", "))
+          end
+        end
+
+        def destroy
+          if @admin.id == current_platform_admin.id
+            return render_error("You cannot deactivate your own account")
+          end
+
+          @admin.update!(status: "inactive")
+          audit_action!(action: "admin.deactivate", resource: @admin, metadata: { email: @admin.email })
+          render_success({ message: "Admin deactivated" })
         end
 
         def password
@@ -29,6 +61,7 @@ module Api
           end
 
           if @admin.update(password: new_password, password_confirmation: confirm_password)
+            audit_action!(action: "admin.password_reset", resource: @admin, metadata: { email: @admin.email })
             render_success({ message: "Password updated for #{@admin.email}" })
           else
             render_error(@admin.errors.full_messages.join(", "))
@@ -37,16 +70,18 @@ module Api
 
         private
 
-        def require_super_admin!
-          return if current_platform_admin&.role == "super_admin"
-
-          render_error("Only super admins can manage platform admin passwords", :forbidden)
-        end
-
         def set_admin
           @admin = PlatformAdminUser.find(params[:id])
         rescue ActiveRecord::RecordNotFound
           render_error("Platform admin not found", :not_found)
+        end
+
+        def admin_params
+          params.require(:admin).permit(:email, :first_name, :last_name, :role, :status)
+        end
+
+        def admin_update_params
+          params.require(:admin).permit(:first_name, :last_name, :role, :status)
         end
 
         def admin_payload(admin)

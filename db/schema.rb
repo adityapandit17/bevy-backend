@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_23_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_27_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -174,6 +174,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_120000) do
 
   create_table "companies", force: :cascade do |t|
     t.text "address"
+    t.integer "billable_seats", default: 1, null: false
+    t.string "billing_cycle", default: "monthly", null: false
     t.string "careers_slug"
     t.string "code"
     t.string "contact_email"
@@ -183,6 +185,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_120000) do
     t.string "currency"
     t.string "dashboard_layout", default: "top_nav", null: false
     t.string "employee_count"
+    t.string "gateway_customer_id"
+    t.string "gateway_subscription_id"
     t.text "google_calendar_access_token"
     t.datetime "google_calendar_connected_at"
     t.bigint "google_calendar_connected_by_user_id"
@@ -193,7 +197,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_120000) do
     t.integer "lunch_duration_minutes", default: 60
     t.integer "max_employees", default: 50
     t.string "name"
+    t.string "payment_gateway", default: "stripe", null: false
     t.string "plan", default: "starter", null: false
+    t.datetime "renews_at"
     t.string "status", default: "active", null: false
     t.string "timezone"
     t.datetime "trial_ends_at"
@@ -203,6 +209,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_120000) do
     t.string "work_start_time", default: "09:00"
     t.index ["careers_slug"], name: "index_companies_on_careers_slug", unique: true
     t.index ["country_code"], name: "index_companies_on_country_code"
+    t.index ["gateway_customer_id"], name: "index_companies_on_gateway_customer_id"
+    t.index ["gateway_subscription_id"], name: "index_companies_on_gateway_subscription_id"
+  end
+
+  create_table "company_feature_flags", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.boolean "enabled", default: false, null: false
+    t.string "key", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "key"], name: "index_company_feature_flags_on_company_id_and_key", unique: true
+    t.index ["company_id"], name: "index_company_feature_flags_on_company_id"
   end
 
   create_table "departments", force: :cascade do |t|
@@ -716,6 +734,115 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_120000) do
     t.index ["email"], name: "index_platform_admin_users_on_email", unique: true
   end
 
+  create_table "platform_announcements", force: :cascade do |t|
+    t.string "audience", default: "all", null: false
+    t.datetime "created_at", null: false
+    t.datetime "ends_at"
+    t.text "message", null: false
+    t.bigint "platform_admin_user_id"
+    t.datetime "starts_at"
+    t.string "status", default: "draft", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["platform_admin_user_id"], name: "index_platform_announcements_on_platform_admin_user_id"
+    t.index ["status"], name: "index_platform_announcements_on_status"
+  end
+
+  create_table "platform_audit_logs", force: :cascade do |t|
+    t.string "action", null: false
+    t.bigint "company_id"
+    t.datetime "created_at", null: false
+    t.string "ip_address"
+    t.jsonb "metadata", default: {}, null: false
+    t.bigint "platform_admin_user_id", null: false
+    t.bigint "resource_id"
+    t.string "resource_type"
+    t.datetime "updated_at", null: false
+    t.index ["action"], name: "index_platform_audit_logs_on_action"
+    t.index ["company_id", "created_at"], name: "index_platform_audit_logs_on_company_id_and_created_at"
+    t.index ["company_id"], name: "index_platform_audit_logs_on_company_id"
+    t.index ["created_at"], name: "index_platform_audit_logs_on_created_at"
+    t.index ["platform_admin_user_id", "created_at"], name: "idx_on_platform_admin_user_id_created_at_bfd50b8af0"
+    t.index ["platform_admin_user_id"], name: "index_platform_audit_logs_on_platform_admin_user_id"
+    t.index ["resource_type", "resource_id"], name: "index_platform_audit_logs_on_resource_type_and_resource_id"
+  end
+
+  create_table "platform_campaigns", force: :cascade do |t|
+    t.string "audience"
+    t.integer "budget", default: 0, null: false
+    t.string "channel", default: "email", null: false
+    t.integer "conversions", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.date "end_date"
+    t.string "name", null: false
+    t.integer "sent_count", default: 0, null: false
+    t.date "start_date"
+    t.string "status", default: "draft", null: false
+    t.datetime "updated_at", null: false
+    t.index ["status"], name: "index_platform_campaigns_on_status"
+  end
+
+  create_table "platform_follow_ups", force: :cascade do |t|
+    t.string "assignee", null: false
+    t.string "company_name", null: false
+    t.datetime "created_at", null: false
+    t.date "due_date", null: false
+    t.string "follow_up_type", default: "call", null: false
+    t.text "notes"
+    t.bigint "platform_inquiry_id", null: false
+    t.string "status", default: "scheduled", null: false
+    t.datetime "updated_at", null: false
+    t.index ["due_date"], name: "index_platform_follow_ups_on_due_date"
+    t.index ["platform_inquiry_id"], name: "index_platform_follow_ups_on_platform_inquiry_id"
+    t.index ["status"], name: "index_platform_follow_ups_on_status"
+  end
+
+  create_table "platform_inquiries", force: :cascade do |t|
+    t.string "assignee"
+    t.string "company_name", null: false
+    t.string "contact_name", null: false
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.integer "estimated_seats", default: 10
+    t.text "notes"
+    t.string "plan_interest", default: "starter"
+    t.string "source", default: "website"
+    t.string "status", default: "new", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_platform_inquiries_on_email"
+    t.index ["status"], name: "index_platform_inquiries_on_status"
+  end
+
+  create_table "platform_invoices", force: :cascade do |t|
+    t.integer "amount", default: 0, null: false
+    t.date "billing_period_end"
+    t.date "billing_period_start"
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.date "due_date"
+    t.string "gateway_invoice_id"
+    t.string "invoice_number", null: false
+    t.text "notes"
+    t.datetime "paid_at"
+    t.string "payment_gateway"
+    t.string "plan"
+    t.string "receipt_url"
+    t.string "status", default: "draft", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_platform_invoices_on_company_id"
+    t.index ["gateway_invoice_id"], name: "index_platform_invoices_on_gateway_invoice_id"
+    t.index ["invoice_number"], name: "index_platform_invoices_on_invoice_number", unique: true
+    t.index ["status"], name: "index_platform_invoices_on_status"
+  end
+
+  create_table "platform_settings", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "key", null: false
+    t.datetime "updated_at", null: false
+    t.text "value"
+    t.index ["key"], name: "index_platform_settings_on_key", unique: true
+  end
+
   create_table "policy_documents", force: :cascade do |t|
     t.string "category", null: false
     t.bigint "company_id", null: false
@@ -734,6 +861,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_120000) do
     t.index ["category"], name: "index_policy_documents_on_category"
     t.index ["company_id"], name: "index_policy_documents_on_company_id"
     t.index ["status"], name: "index_policy_documents_on_status"
+  end
+
+  create_table "pricing_plans", force: :cascade do |t|
+    t.integer "annual_price", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.jsonb "features", default: [], null: false
+    t.string "gateway_price_annual_id"
+    t.string "gateway_price_monthly_id"
+    t.string "gateway_product_id"
+    t.integer "max_employees", default: 50, null: false
+    t.integer "monthly_price", default: 0, null: false
+    t.string "name", null: false
+    t.integer "per_seat_price", default: 0, null: false
+    t.boolean "popular", default: false, null: false
+    t.integer "position", default: 0, null: false
+    t.boolean "published", default: true, null: false
+    t.string "slug", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_pricing_plans_on_slug", unique: true
   end
 
   create_table "recognitions", force: :cascade do |t|
@@ -815,6 +962,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_120000) do
     t.index ["category"], name: "index_sla_workflows_on_category"
     t.index ["company_id"], name: "index_sla_workflows_on_company_id"
     t.index ["status"], name: "index_sla_workflows_on_status"
+  end
+
+  create_table "subscription_requests", force: :cascade do |t|
+    t.integer "amount", default: 0
+    t.string "billing_cycle", default: "monthly", null: false
+    t.bigint "company_id"
+    t.string "company_name"
+    t.datetime "created_at", null: false
+    t.text "notes"
+    t.string "plan", default: "starter", null: false
+    t.string "request_type", default: "new_tenant", null: false
+    t.string "requested_by"
+    t.integer "seats", default: 10
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_subscription_requests_on_company_id"
+    t.index ["status"], name: "index_subscription_requests_on_status"
   end
 
   create_table "ticket_comments", force: :cascade do |t|
@@ -931,6 +1095,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_120000) do
   add_foreign_key "channel_memberships", "users"
   add_foreign_key "channels", "companies"
   add_foreign_key "channels", "users", column: "created_by_id"
+  add_foreign_key "company_feature_flags", "companies"
   add_foreign_key "departments", "companies"
   add_foreign_key "digital_signatures", "companies"
   add_foreign_key "digital_signatures", "employees"
@@ -986,6 +1151,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_120000) do
   add_foreign_key "performance_goals", "employees"
   add_foreign_key "performance_reviews", "companies"
   add_foreign_key "performance_reviews", "employees"
+  add_foreign_key "platform_announcements", "platform_admin_users"
+  add_foreign_key "platform_audit_logs", "companies"
+  add_foreign_key "platform_audit_logs", "platform_admin_users"
+  add_foreign_key "platform_follow_ups", "platform_inquiries"
+  add_foreign_key "platform_invoices", "companies"
   add_foreign_key "policy_documents", "companies"
   add_foreign_key "recognitions", "companies"
   add_foreign_key "recognitions", "employees", column: "received_by_id"
@@ -997,6 +1167,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_120000) do
   add_foreign_key "salary_structures", "departments"
   add_foreign_key "salary_structures", "employees"
   add_foreign_key "sla_workflows", "companies"
+  add_foreign_key "subscription_requests", "companies"
   add_foreign_key "ticket_comments", "companies"
   add_foreign_key "timesheets", "companies"
   add_foreign_key "timesheets", "employees"

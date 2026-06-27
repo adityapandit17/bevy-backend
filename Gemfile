@@ -99,3 +99,6 @@ gem "google-apis-calendar_v3", "~> 0.53.0"
 gem "rqrcode", "~> 3.2"
 gem "barby", "~> 0.7.0"
 gem "chunky_png", "~> 1.4"
+
+# SaaS billing (Stripe — swap gateway via PAYMENT_GATEWAY env)
+gem "stripe", "~> 13.0"

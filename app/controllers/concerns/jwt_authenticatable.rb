@@ -35,6 +35,8 @@ module JwtAuthenticatable
       request.path == "/api/v1/auth/reset_password" ||
       request.path == "/api/v1/platform/auth/login" ||
       request.path == "/api/v1/public/signup" ||
+      request.path == "/api/v1/public/pricing" ||
+      request.path == "/api/v1/webhooks/payment/stripe" ||
       request.path.start_with?("/api/v1/public/")
   end
 

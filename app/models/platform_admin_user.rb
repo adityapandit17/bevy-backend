@@ -12,6 +12,8 @@ class PlatformAdminUser < ApplicationRecord
 
   scope :active, -> { where(status: "active") }
 
+  has_many :platform_audit_logs, dependent: :destroy
+
   def name
     "#{first_name} #{last_name}"
   end

@@ -4,6 +4,8 @@ module Api
   module V1
     module Platform
       class BaseController < ApplicationController
+        include PlatformAuditable
+
         skip_before_action :authenticate_user_from_token!
         skip_around_action :with_tenant_from_user, raise: false
 
@@ -33,8 +35,22 @@ module Api
           render json: { success: true, data: data }, status: status
         end
 
-        def render_error(message, status = :unprocessable_entity)
-          render json: { success: false, error: message }, status: status
+        def render_error(message, status = :unprocessable_entity, code: nil)
+          payload = { success: false, error: message }
+          payload[:code] = code if code.present?
+          render json: payload, status: status
+        end
+
+        def require_super_admin!
+          return if current_platform_admin&.role == "super_admin"
+
+          render_error("Only super admins can perform this action", :forbidden)
+        end
+
+        def require_billing_or_super!
+          return if current_platform_admin&.role.in?(%w[super_admin billing])
+
+          render_error("Insufficient permissions", :forbidden)
         end
       end
     end

@@ -39,13 +39,26 @@ module SetCurrentTenant
       return
     end
 
-    unless company.status.in?(%w[active trial])
-      render json: { success: false, error: "Company account is not active" }, status: :forbidden
+    unless company.accessible?
+      if subscription_exempt_path?
+        yield
+        return
+      end
+
+      code = company.trial_expired? ? "TRIAL_EXPIRED" : "SUBSCRIPTION_LOCKED"
+      message = company.trial_expired? ? "Your trial has ended. Please subscribe to continue." : "Company account is not active"
+      render json: { success: false, error: message, code: code }, status: :forbidden
       return
     end
 
     ActsAsTenant.with_tenant(company) do
       yield
     end
+  end
+
+  def subscription_exempt_path?
+    request.path == "/api/v1/auth/me" ||
+      request.path == "/api/v1/auth/logout" ||
+      request.path.start_with?("/api/v1/billing/")
   end
 end

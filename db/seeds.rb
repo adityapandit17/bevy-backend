@@ -25,20 +25,7 @@ puts "Seeding tenant data for #{default_company.name} (#{default_company.code}).
 
 ActsAsTenant.with_tenant(default_company) do
 # Create departments if they don't exist
-departments = [
-  { name: "Engineering" },
-  { name: "Marketing" },
-  { name: "HR" },
-  { name: "Finance" },
-  { name: "Operations" },
-  { name: "Sales" },
-  { name: "Product" },
-  { name: "Design" }
-]
-
-departments.each do |dept|
-  Department.find_or_create_by!(name: dept[:name])
-end
+DepartmentSeeder.seed!
 
 # Create employees if they don't exist
 employees = [
@@ -2291,3 +2278,4 @@ end
 end # ActsAsTenant.with_tenant
 
 load Rails.root.join("db", "seeds", "platform_admin.rb")
+load Rails.root.join("db", "seeds", "platform_saas.rb")

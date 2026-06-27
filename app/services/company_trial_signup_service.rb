@@ -18,6 +18,7 @@ class CompanyTrialSignupService
       company = create_company!
 
       ActsAsTenant.with_tenant(company) do
+        DepartmentSeeder.seed!
         employee = create_admin_employee!
         user = create_admin_user!(employee)
         assign_super_admin_role!(user)
@@ -96,7 +97,7 @@ class CompanyTrialSignupService
   end
 
   def default_department
-    Department.find_or_create_by!(name: "General")
+    Department.find_by!(name: "General")
   end
 
   def normalized_plan

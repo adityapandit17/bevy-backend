@@ -19,6 +19,10 @@ class Company < ApplicationRecord
   has_many :employees, dependent: :destroy
   has_many :departments, dependent: :destroy
   has_many :roles, dependent: :destroy
+  has_many :company_feature_flags, dependent: :destroy
+  has_many :platform_invoices, dependent: :destroy
+  has_many :subscription_requests, dependent: :destroy
+  has_many :platform_audit_logs, dependent: :destroy
 
   validates :name, presence: true, length: { minimum: 2, maximum: 100 }
   validates :code, presence: true, uniqueness: true, length: { minimum: 2, maximum: 10 }
@@ -42,7 +46,65 @@ class Company < ApplicationRecord
   end
 
   def accessible?
-    status.in?(%w[active trial])
+    return false unless status.in?(%w[active trial])
+
+    status == "active" || trial_active?
+  end
+
+  def subscription_locked?
+    !accessible?
+  end
+
+  def end_trial!
+    update!(status: "past_due", trial_ends_at: Time.current)
+  end
+
+  def extend_trial!(days)
+    base = trial_ends_at.present? && trial_ends_at > Time.current ? trial_ends_at : Time.current
+    update!(status: "trial", trial_ends_at: base + days.to_i.days)
+  end
+
+  def restart_trial!(days: nil)
+    days = days.to_i
+    days = PlatformSetting.get("default_trial_days").to_i if days <= 0
+
+    if gateway_subscription_id.present?
+      begin
+        Billing::SubscriptionManager.new.cancel(self)
+      rescue Billing::GatewayError
+        update!(gateway_subscription_id: nil)
+      end
+    end
+
+    update!(
+      status: "trial",
+      trial_ends_at: days.days.from_now,
+      gateway_subscription_id: nil
+    )
+  end
+
+  def billable_seat_count
+    seats = employee_count_number
+    seats = 1 if seats < 1
+    plan_record = PricingPlan.find_by(slug: plan)
+    max = plan_record&.max_employees || max_employees || 50
+    [ seats, max ].min
+  end
+
+  def trial_days_remaining
+    return 0 unless trial_active? && trial_ends_at.present?
+
+    ((trial_ends_at - Time.current) / 1.day).ceil
+  end
+
+  def activate_subscription!(plan: nil, billing_cycle: "monthly")
+    attrs = {
+      status: "active",
+      billing_cycle: billing_cycle,
+      renews_at: billing_cycle == "annual" ? 1.year.from_now : 1.month.from_now
+    }
+    attrs[:plan] = plan if plan.present?
+    update!(attrs)
   end
 
   def trial_active?
@@ -60,8 +122,10 @@ class Company < ApplicationRecord
   end
 
   def estimated_mrr
-    plan_rates = { "starter" => 2999, "professional" => 7999, "enterprise" => 19_999 }
-    status.in?(%w[active trial]) ? (plan_rates[plan] || 2999) : 0
+    return 0 unless status.in?(%w[active trial])
+    return 0 if status == "trial" && trial_expired?
+
+    PricingPlan.monthly_rate_for(plan)
   end
 
   def platform_json
@@ -69,7 +133,13 @@ class Company < ApplicationRecord
       "employees" => employee_count_number,
       "mrr" => estimated_mrr,
       "created_at" => created_at,
-      "trial_ends_at" => trial_ends_at
+      "trial_ends_at" => trial_ends_at,
+      "renews_at" => renews_at,
+      "billing_cycle" => billing_cycle,
+      "feature_flags" => CompanyFeatureFlag.for_company(self),
+      "trial_active" => trial_active?,
+      "trial_expired" => trial_expired?,
+      "subscription_locked" => subscription_locked?
     )
   end
 
@@ -128,6 +198,15 @@ class Company < ApplicationRecord
       code: code,
       plan: plan,
       status: status,
+      trial_ends_at: trial_ends_at,
+      trial_active: trial_active?,
+      trial_expired: trial_expired?,
+      trial_days_remaining: trial_days_remaining,
+      subscription_locked: subscription_locked?,
+      billing_cycle: billing_cycle,
+      renews_at: renews_at,
+      billable_seats: billable_seat_count,
+      feature_flags: CompanyFeatureFlag.for_company(self),
       dashboard_layout: dashboard_layout.presence || "top_nav",
       timezone: timezone,
       currency: currency,
