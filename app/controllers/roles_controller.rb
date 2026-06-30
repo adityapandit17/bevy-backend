@@ -3,19 +3,28 @@ class RolesController < ApplicationController
   # before_action :authorize_roles_access!
 
   def index
-    @roles = Role.includes(:permissions, :users)
+    company = current_company
+    @roles = Role.assignable_for(company).includes(:permissions)
+    role_ids = @roles.map(&:id)
+    user_counts = User.joins(:user_roles)
+                      .where(user_roles: { role_id: role_ids })
+                      .where(company_id: company.id)
+                      .group("user_roles.role_id")
+                      .count
 
     render json: {
-      roles: @roles.map { |role| format_role(role) },
+      roles: @roles.map { |role| format_role(role, user_count: user_counts[role.id] || 0) },
       total_count: @roles.size
     }
   end
 
   def show
+    company_users = @role.users_in_company(current_company)
+
     render json: {
-      role: format_role(@role),
+      role: format_role(@role, user_count: company_users.size),
       permissions: @role.permissions.map { |permission| format_permission(permission) },
-      users: @role.users.map { |user| format_user(user) }
+      users: company_users.map { |user| format_user(user) }
     }
   end
 
@@ -62,7 +71,7 @@ class RolesController < ApplicationController
 
   # DELETE /roles/:id
   def destroy
-    if @role.users.any?
+    if @role.users_in_company(current_company).any?
       render json: { error: "Cannot delete role with assigned users" }, status: :unprocessable_entity
       return
     end
@@ -226,12 +235,18 @@ class RolesController < ApplicationController
     authorize!("roles", "index")
   end
 
-  def format_role(role)
+  def current_company
+    ActsAsTenant.current_tenant || current_user&.company
+  end
+
+  def format_role(role, user_count: nil)
+    user_count ||= role.users_in_company(current_company).count
+
     {
       id: role.id,
       name: role.name,
       description: role.description,
-      user_count: role.users.size,
+      user_count: user_count,
       permission_count: role.permissions.size,
       created_at: role.created_at,
       updated_at: role.updated_at

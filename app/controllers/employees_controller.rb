@@ -61,12 +61,17 @@ class EmployeesController < ApplicationController
     total_pages = (total_count.to_f / per_page).ceil
 
     render json: {
-      data: @employees.as_json(
-        include: {
-          manager: { only: [ :id, :first_name, :last_name, :email, :designation ] },
-          department: { only: [ :id, :name ] }
-        }
-      ),
+      data: @employees.map { |e|
+        e.as_json(
+          include: {
+            manager: { only: [ :id, :first_name, :last_name, :email, :designation ] },
+            department: { only: [ :id, :name ] }
+          }
+        ).merge(
+          "display_id" => e.display_id,
+          "employee_number" => e.employee_number
+        )
+      },
       pagination: {
         current_page: page,
         per_page: per_page,

@@ -85,6 +85,12 @@ class Role < ApplicationRecord
     permissions.exists?(resource: resource, action: action)
   end
 
+  def users_in_company(company)
+    return users.none if company.blank?
+
+    users.where(company_id: company.id)
+  end
+
   private
 
   def company_presence_matches_role_type

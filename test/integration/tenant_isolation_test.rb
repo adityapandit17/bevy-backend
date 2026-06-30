@@ -115,6 +115,34 @@ class TenantIsolationTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  test "role user counts and assigned users are scoped to current company" do
+    role = Role.system_roles.find_by!(name: "Super Admin")
+
+    get "/roles", headers: @headers_a
+    assert_response :success
+    body_a = JSON.parse(response.body)
+    role_a = body_a.fetch("roles").find { |r| r["id"] == role.id }
+    assert_equal 1, role_a["user_count"]
+
+    get "/roles/#{role.id}", headers: @headers_a
+    assert_response :success
+    show_a = JSON.parse(response.body)
+    assert_equal 1, show_a.dig("role", "user_count")
+    assert_equal [ @user_a.id ], show_a.fetch("users").map { |u| u["id"] }
+
+    get "/roles", headers: @headers_b
+    assert_response :success
+    body_b = JSON.parse(response.body)
+    role_b = body_b.fetch("roles").find { |r| r["id"] == role.id }
+    assert_equal 1, role_b["user_count"]
+
+    get "/roles/#{role.id}", headers: @headers_b
+    assert_response :success
+    show_b = JSON.parse(response.body)
+    assert_equal 1, show_b.dig("role", "user_count")
+    assert_equal [ @user_b.id ], show_b.fetch("users").map { |u| u["id"] }
+  end
+
   test "trial signup creates isolated tenant data" do
     email = "new-tenant-#{SecureRandom.hex(4)}@example.com"
 

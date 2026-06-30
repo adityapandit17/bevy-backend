@@ -49,20 +49,51 @@ class AddMultiTenantCompanyId < ActiveRecord::Migration[8.1]
   private
 
   def ensure_default_company
-    company = execute("SELECT id FROM companies ORDER BY id ASC LIMIT 1").first
-    return Company.find(company["id"]) if company
+    row = execute("SELECT id FROM companies ORDER BY id ASC LIMIT 1").first
+    return company_handle(row["id"]) if row
 
-    Company.create!(
-      name: "BevyHR Demo",
-      code: "DEMO",
-      industry: "technology",
-      employee_count: "51-200",
-      timezone: "asia-kolkata",
-      currency: "inr",
-      country_code: "IN",
-      status: "active",
-      plan: "professional"
-    )
+    now = connection.quote(Time.current)
+    columns = %w[name code industry employee_count timezone currency created_at updated_at]
+    values = [
+      connection.quote("BevyHR Demo"),
+      connection.quote("DEMO"),
+      connection.quote("technology"),
+      connection.quote("51-200"),
+      connection.quote("asia-kolkata"),
+      connection.quote("inr"),
+      now,
+      now
+    ]
+
+    if column_exists?(:companies, :country_code)
+      columns << "country_code"
+      values << connection.quote("IN")
+    end
+
+    if column_exists?(:companies, :dashboard_layout)
+      columns << "dashboard_layout"
+      values << connection.quote("top_nav")
+    end
+
+    if column_exists?(:companies, :status)
+      columns << "status"
+      values << connection.quote("active")
+    end
+
+    if column_exists?(:companies, :plan)
+      columns << "plan"
+      values << connection.quote("professional")
+    end
+
+    inserted = execute(
+      "INSERT INTO companies (#{columns.join(', ')}) VALUES (#{values.join(', ')}) RETURNING id"
+    ).first
+
+    company_handle(inserted["id"])
+  end
+
+  def company_handle(id)
+    Struct.new(:id).new(id)
   end
 
   def backfill_company_ids(default_company)

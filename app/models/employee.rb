@@ -28,6 +28,7 @@ class Employee < ApplicationRecord
 
   # Validations
   before_validation :normalize_phone
+  before_validation :assign_employee_number, on: :create
 
   validates :first_name, presence: true
   validates :last_name, presence: true
@@ -39,6 +40,7 @@ class Employee < ApplicationRecord
   # validates :date_of_birth, presence: true
   validates :status, presence: true, inclusion: { in: %w[active inactive terminated probation onboarding] }
   validates :badge_level, inclusion: { in: %w[rockstar ninja champion expert pro rookie], allow_nil: true }
+  validates :employee_number, presence: true, uniqueness: { scope: :company_id }
 
   enum :status, {
     active: "active",
@@ -148,6 +150,15 @@ class Employee < ApplicationRecord
   def avatar_url
     # Placeholder for avatar functionality
     "https://ui-avatars.com/api/?name=#{URI.encode_www_form_component(name)}&background=random"
+  end
+
+  def display_id
+    code = company&.code.presence || "EMP"
+    "#{code}-#{employee_number.to_s.rjust(3, '0')}"
+  end
+
+  def manager_name
+    manager&.name
   end
 
   # Profile statistics
@@ -366,5 +377,14 @@ class Employee < ApplicationRecord
   rescue NameError
     # If phonelib isn't installed/loaded yet, fail safe with a minimal check
     errors.add(:phone, "must be a valid phone number")
+  end
+
+  def assign_employee_number
+    return if employee_number.present?
+    return if company_id.blank?
+
+    scope = self.class.unscoped.where(company_id: company_id)
+    scope = scope.where.not(id: id) if persisted?
+    self.employee_number = (scope.maximum(:employee_number) || 0) + 1
   end
 end

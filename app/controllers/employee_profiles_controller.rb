@@ -78,11 +78,14 @@ class EmployeeProfilesController < ApplicationController
   def format_employee_data
     {
       id: @employee.id,
+      employee_number: @employee.employee_number,
+      display_id: @employee.display_id,
       name: @employee.name,
       email: @employee.email,
       phone: @employee.phone,
       position: @employee.position,
       department: @employee.department_name,
+      manager: @employee.manager_name,
       hire_date: @employee.formatted_hire_date,
       tenure: @employee.tenure_summary,
       status: @employee.status,

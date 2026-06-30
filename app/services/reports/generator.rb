@@ -59,7 +59,8 @@ module Reports
     def report_employee_directory
       rows = active_employees.map do |e|
         {
-          employee_id: e.id,
+          employee_id: e.display_id,
+          employee_number: e.employee_number,
           name: e.name,
           email: e.email,
           department: e.department&.name,
@@ -77,6 +78,7 @@ module Reports
           { label: "Total employees", value: rows.size }
         ],
         columns: [
+          col("employee_id", "Employee ID"),
           col("name", "Name"),
           col("email", "Email"),
           col("department", "Department"),

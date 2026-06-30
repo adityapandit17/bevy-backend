@@ -5,8 +5,8 @@ class AddCompanyIdToUsers < ActiveRecord::Migration[8.1]
     add_reference :users, :company, foreign_key: true
 
     say_with_time "Backfilling users.company_id" do
-      default_company = Company.order(:id).first
-      User.where(company_id: nil).update_all(company_id: default_company.id) if default_company
+      default_company_id = execute("SELECT id FROM companies ORDER BY id ASC LIMIT 1").first&.fetch("id")
+      User.where(company_id: nil).update_all(company_id: default_company_id) if default_company_id
     end
   end
 
