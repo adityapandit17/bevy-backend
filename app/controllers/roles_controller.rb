@@ -1,4 +1,6 @@
 class RolesController < ApplicationController
+  before_action :authenticate_user!
+  before_action :require_company!
   before_action :set_role, only: [ :show, :update, :destroy ]
   # before_action :authorize_roles_access!
 
@@ -6,11 +8,15 @@ class RolesController < ApplicationController
     company = current_company
     @roles = Role.assignable_for(company).includes(:permissions)
     role_ids = @roles.map(&:id)
-    user_counts = User.joins(:user_roles)
-                      .where(user_roles: { role_id: role_ids })
-                      .where(company_id: company.id)
-                      .group("user_roles.role_id")
-                      .count
+    user_counts = if role_ids.empty?
+      {}
+    else
+      User.joins(:user_roles)
+          .where(user_roles: { role_id: role_ids })
+          .where(company_id: company.id)
+          .group("user_roles.role_id")
+          .count
+    end
 
     render json: {
       roles: @roles.map { |role| format_role(role, user_count: user_counts[role.id] || 0) },
@@ -237,6 +243,12 @@ class RolesController < ApplicationController
 
   def current_company
     ActsAsTenant.current_tenant || current_user&.company
+  end
+
+  def require_company!
+    return if current_company.present?
+
+    render json: { error: "User is not associated with a company" }, status: :forbidden
   end
 
   def format_role(role, user_count: nil)

@@ -22,6 +22,7 @@ class OffboardingEmployee < ApplicationRecord
   # Callbacks
   before_save :calculate_progress
   after_update :update_status_based_on_progress
+  after_update :deactivate_employee_on_completion, if: :just_completed?
 
   # Helper methods
   def active?
@@ -112,14 +113,26 @@ class OffboardingEmployee < ApplicationRecord
 
   def update_status_based_on_progress
     return if status == "cancelled"
+    return if completed?
 
     if progress == 100
-      update_column(:status, "completed") unless status == "completed"
+      unless completed?
+        update_column(:status, "completed")
+        employee.deactivate!
+      end
     elsif progress > 0
       update_column(:status, "in_progress") unless status == "in_progress"
     else
       update_column(:status, "pending") unless status == "pending"
     end
+  end
+
+  def just_completed?
+    saved_change_to_status? && completed?
+  end
+
+  def deactivate_employee_on_completion
+    employee.deactivate!
   end
 
   # Ensure an employee can have only one non-cancelled offboarding record at a time.

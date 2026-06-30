@@ -80,6 +80,15 @@ class Employee < ApplicationRecord
     status == "inactive"
   end
 
+  # Soft-deactivate the employee record and revoke linked portal access.
+  def deactivate!
+    transaction do
+      update!(status: "inactive") unless inactive?
+      user&.update!(status: "inactive") unless user.nil? || user.inactive?
+    end
+    self
+  end
+
   def terminated?
     status == "terminated"
   end

@@ -109,6 +109,25 @@ class Permission < ApplicationRecord
       { name: "settings.index", resource: "settings", action: "index", description: "View settings" },
       { name: "settings.update", resource: "settings", action: "update", description: "Update settings" },
 
+      # Communication & Engagement
+      { name: "channels.index", resource: "channels", action: "index", description: "Access chat and view channels" },
+      { name: "channels.show", resource: "channels", action: "show", description: "View channel details" },
+      { name: "channels.create", resource: "channels", action: "create", description: "Create channels and direct messages" },
+      { name: "channels.update", resource: "channels", action: "update", description: "Update channels and manage members" },
+      { name: "channels.destroy", resource: "channels", action: "destroy", description: "Delete channels" },
+      { name: "messages.create", resource: "messages", action: "create", description: "Send chat messages" },
+      { name: "messages.destroy", resource: "messages", action: "destroy", description: "Delete chat messages" },
+      { name: "events.index", resource: "events", action: "index", description: "View company events and calendar" },
+      { name: "events.show", resource: "events", action: "show", description: "View event details" },
+      { name: "events.create", resource: "events", action: "create", description: "Create company events" },
+      { name: "events.update", resource: "events", action: "update", description: "Update company events" },
+      { name: "events.destroy", resource: "events", action: "destroy", description: "Delete company events" },
+      { name: "recognitions.index", resource: "recognitions", action: "index", description: "View employee recognitions" },
+      { name: "recognitions.show", resource: "recognitions", action: "show", description: "View recognition details" },
+      { name: "recognitions.create", resource: "recognitions", action: "create", description: "Give employee recognitions" },
+      { name: "recognitions.update", resource: "recognitions", action: "update", description: "Update recognitions" },
+      { name: "recognitions.destroy", resource: "recognitions", action: "destroy", description: "Delete recognitions" },
+
       # Workspace Seating (UI access)
       { name: "workspace_seating.index", resource: "workspace_seating", action: "index", description: "View workspace seating map" }
     ]

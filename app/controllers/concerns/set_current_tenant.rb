@@ -10,12 +10,16 @@ module SetCurrentTenant
   private
 
   def should_set_tenant?
-    return false unless json_request?
+    return false unless json_request? || bearer_authenticated_request?
     return false if platform_api_path?
     return false if public_unauthenticated_path?
     return false unless @current_user.present?
 
     true
+  end
+
+  def bearer_authenticated_request?
+    JwtService.extract_token(request.headers["Authorization"]).present?
   end
 
   def platform_api_path?

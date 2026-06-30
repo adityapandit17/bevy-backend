@@ -103,11 +103,10 @@ class EmployeesController < ApplicationController
   end
 
   def destroy
-    if @employee.update(status: "inactive")
-      render json: @employee
-    else
-      render json: { errors: @employee.errors.full_messages }, status: :unprocessable_entity
-    end
+    @employee.deactivate!
+    render json: @employee
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
   end
 
   private

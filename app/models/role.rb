@@ -25,7 +25,13 @@ class Role < ApplicationRecord
   scope :by_name, ->(name) { where(name: name) }
   scope :system_roles, -> { where(company_id: nil) }
   scope :custom_roles, -> { where.not(company_id: nil) }
-  scope :for_company, ->(company) { where(company_id: [ nil, company.id ]) }
+  scope :for_company, ->(company) {
+    if company.blank?
+      system_roles
+    else
+      where(company_id: [ nil, company.id ])
+    end
+  }
   scope :assignable_for, ->(company) { for_company(company) }
 
   # Class methods

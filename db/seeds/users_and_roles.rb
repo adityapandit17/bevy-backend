@@ -25,7 +25,10 @@ if hr_manager
     'payrolls.index', 'payrolls.create',
     'leave_management.index',
     'attendance_records.index', 'attendance_records.approve',
-    'leave_requests.index', 'leave_requests.create', 'leave_requests.approve', 'leave_requests.reject'
+    'leave_requests.index', 'leave_requests.create', 'leave_requests.approve', 'leave_requests.reject',
+    'channels.index', 'channels.create', 'messages.create',
+    'events.index', 'events.create', 'events.update',
+    'recognitions.index', 'recognitions.create'
   ]
   hr_permissions = Permission.where(name: hr_permission_names)
   hr_manager.permission_ids = hr_permissions.pluck(:id)
@@ -53,7 +56,11 @@ if employee_role
     'attendance_records.index',
     'leave_requests.index',
     'leave_requests.create',
-    'leave_requests.cancel'
+    'leave_requests.cancel',
+    'channels.index',
+    'messages.create',
+    'events.index',
+    'recognitions.index'
   ]
   employee_permissions = Permission.where(name: employee_permission_names)
   employee_role.permission_ids = employee_permissions.pluck(:id)

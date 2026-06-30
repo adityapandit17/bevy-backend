@@ -19,9 +19,14 @@ module JwtAuthenticatable
     request.format.json? || request.headers["Accept"]&.include?("application/json")
   end
 
+  def bearer_authenticated_request?
+    JwtService.extract_token(request.headers["Authorization"]).present?
+  end
+
   def should_authenticate?
-    # Authenticate if it's a JSON request and not a public auth endpoint
-    json_request? && !public_auth_endpoint?
+    return false if public_auth_endpoint?
+
+    json_request? || bearer_authenticated_request?
   end
 
   # def should_authenticate_api_request?

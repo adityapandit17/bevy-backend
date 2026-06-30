@@ -130,6 +130,12 @@ class TenantIsolationTest < ActionDispatch::IntegrationTest
     assert_equal 1, show_a.dig("role", "user_count")
     assert_equal [ @user_a.id ], show_a.fetch("users").map { |u| u["id"] }
 
+    get "/roles/#{role.id}/permissions_matrix", headers: @headers_a
+    assert_response :success
+    matrix_a = JSON.parse(response.body)
+    assert matrix_a["permissions"].is_a?(Array)
+    assert matrix_a["permissions"].any?
+
     get "/roles", headers: @headers_b
     assert_response :success
     body_b = JSON.parse(response.body)

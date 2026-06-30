@@ -6,7 +6,7 @@ module TestHelpers
       first_name: "Test",
       last_name: "Employee",
       email: "test.employee@example.com",
-      phone: "1234567890",
+      phone: "+14155550100",
       department_id: departments(:one).id,
       designation: "Software Engineer",
       date_of_joining: Date.current,

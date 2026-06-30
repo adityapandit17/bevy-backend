@@ -344,6 +344,31 @@ class EmployeeTest < ActiveSupport::TestCase
     assert @employee.inactive?
   end
 
+  test "deactivate! sets employee and linked user to inactive" do
+    employee = create_test_employee(email: "deactivate.employee@example.com")
+    user = ActsAsTenant.with_tenant(companies(:one)) do
+      User.create!(
+        email: employee.email,
+        password: "Password123!",
+        first_name: employee.first_name,
+        last_name: employee.last_name,
+        status: "active",
+        employee: employee,
+        company: companies(:one)
+      )
+    end
+
+    ActsAsTenant.with_tenant(companies(:one)) do
+      employee.deactivate!
+    end
+
+    employee.reload
+    user.reload
+
+    assert_equal "inactive", employee.status
+    assert_equal "inactive", user.status
+  end
+
   test "terminated? should return true for terminated status" do
     @employee.status = "terminated"
     assert @employee.terminated?
