@@ -34,6 +34,21 @@ class EmployeeDocumentsController < ApplicationController
     render json: @employee_documents.map { |doc| format_employee_document(doc) }
   end
 
+  def by_employee
+    employee_id = params[:employee_id]
+    return render json: { error: "employee_id is required" }, status: :bad_request if employee_id.blank?
+
+    docs = EmployeeDocument.includes(:employee).where(employee_id: employee_id)
+    render json: docs.map { |doc| format_employee_document(doc) }
+  end
+
+  def expiring_soon
+    days = (params[:days] || 30).to_i
+    docs = EmployeeDocument.includes(:employee)
+                           .where("expiry_date BETWEEN ? AND ?", Date.current, Date.current + days.days)
+    render json: docs.map { |doc| format_employee_document(doc) }
+  end
+
   def show
     # Force authentication for JSON requests
     if json_request? && !login_endpoint?

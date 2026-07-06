@@ -1,6 +1,6 @@
 class PolicyDocumentsController < ApplicationController
   # JwtAuthenticatable concern handles authentication via should_authenticate? method
-  before_action :set_policy_document, only: [ :show, :update, :destroy, :download ]
+  before_action :set_policy_document, only: [ :show, :update, :destroy, :download, :request_signatures ]
 
   # GET /policy_documents
   # All authenticated users can view
@@ -117,6 +117,7 @@ class PolicyDocumentsController < ApplicationController
     @policy_document.downloads = 0
 
     if @policy_document.save
+      DigitalSignatureAssignmentService.assign_for_policy!(@policy_document) if @policy_document.requires_signature?
       render json: format_policy_document(@policy_document), status: :created
     else
       render json: { errors: @policy_document.errors.full_messages }, status: :unprocessable_entity
@@ -160,6 +161,9 @@ class PolicyDocumentsController < ApplicationController
     end
 
     if @policy_document.update(policy_document_params)
+      if @policy_document.requires_signature? && params.dig(:policy_document, :assign_signatures)
+        DigitalSignatureAssignmentService.assign_for_policy!(@policy_document)
+      end
       render json: format_policy_document(@policy_document)
     else
       render json: { errors: @policy_document.errors.full_messages }, status: :unprocessable_entity
@@ -206,6 +210,30 @@ class PolicyDocumentsController < ApplicationController
     head :no_content
   end
 
+  # POST /policy_documents/:id/request_signatures
+  def request_signatures
+    unless current_user
+      return render json: { error: "Authentication required" }, status: :unauthorized
+    end
+
+    unless can_edit_policy_documents?
+      return render json: { error: "Insufficient permissions" }, status: :forbidden
+    end
+
+    unless @policy_document.requires_signature?
+      return render json: { error: "This document does not require signatures" }, status: :unprocessable_entity
+    end
+
+    employee_ids = Array(params[:employee_ids]).presence
+    created = DigitalSignatureAssignmentService.assign_for_policy!(@policy_document, employee_ids: employee_ids)
+
+    render json: {
+      message: "Signature requests created for #{created.size} employee(s)",
+      created_count: created.size,
+      policy_document: format_policy_document(@policy_document.reload)
+    }
+  end
+
   private
 
   def set_policy_document
@@ -242,6 +270,7 @@ class PolicyDocumentsController < ApplicationController
   end
 
   def format_policy_document(doc)
+    signatures = doc.digital_signatures
     {
       id: doc.id,
       title: doc.title,
@@ -254,6 +283,9 @@ class PolicyDocumentsController < ApplicationController
       size: doc.file_size_formatted,
       type: File.extname(doc.file_path).downcase[1..-1] || "pdf",
       requiresSignature: doc.requires_signature,
+      signedBy: signatures.signed.count,
+      signaturesPending: signatures.pending.count,
+      signaturesTotal: signatures.count,
       filePath: doc.file_path,
       createdAt: doc.created_at,
       updatedAt: doc.updated_at

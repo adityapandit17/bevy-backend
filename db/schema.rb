@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_01_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_03_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -238,6 +238,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_120000) do
     t.bigint "employee_id", null: false
     t.string "ip_address"
     t.bigint "policy_document_id", null: false
+    t.text "signature_image"
     t.string "signature_type"
     t.date "signed_date"
     t.string "status", default: "pending"
@@ -347,6 +348,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_120000) do
     t.index ["organizer_id"], name: "index_events_on_organizer_id"
     t.index ["start_time"], name: "index_events_on_start_time"
     t.index ["status"], name: "index_events_on_status"
+  end
+
+  create_table "expenses", force: :cascade do |t|
+    t.decimal "amount", precision: 12, scale: 2, null: false
+    t.string "category", null: false
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.bigint "employee_id", null: false
+    t.date "expense_date", null: false
+    t.string "payment_method"
+    t.string "receipt_url"
+    t.string "status", default: "submitted", null: false
+    t.jsonb "tags", default: []
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "expense_date"], name: "index_expenses_on_company_id_and_expense_date"
+    t.index ["company_id"], name: "index_expenses_on_company_id"
+    t.index ["employee_id"], name: "index_expenses_on_employee_id"
   end
 
   create_table "helpdesk_tickets", force: :cascade do |t|
@@ -866,6 +886,43 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_120000) do
     t.index ["slug"], name: "index_pricing_plans_on_slug", unique: true
   end
 
+  create_table "project_tasks", force: :cascade do |t|
+    t.string "assignee_name"
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.date "due_date"
+    t.bigint "employee_id"
+    t.string "priority", default: "medium", null: false
+    t.bigint "project_id", null: false
+    t.string "sprint_name"
+    t.string "status", default: "backlog", null: false
+    t.integer "story_points"
+    t.jsonb "tags", default: []
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_project_tasks_on_company_id"
+    t.index ["employee_id"], name: "index_project_tasks_on_employee_id"
+    t.index ["project_id", "status"], name: "index_project_tasks_on_project_id_and_status"
+    t.index ["project_id"], name: "index_project_tasks_on_project_id"
+  end
+
+  create_table "projects", force: :cascade do |t|
+    t.decimal "budget", precision: 12, scale: 2
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.date "end_date"
+    t.string "name", null: false
+    t.string "priority", default: "medium", null: false
+    t.integer "progress", default: 0, null: false
+    t.decimal "spent", precision: 12, scale: 2, default: "0.0"
+    t.date "start_date"
+    t.string "status", default: "planning", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_projects_on_company_id"
+  end
+
   create_table "recognitions", force: :cascade do |t|
     t.string "category"
     t.bigint "company_id", null: false
@@ -1060,6 +1117,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_120000) do
     t.index ["status"], name: "index_users_on_status"
   end
 
+  create_table "workspace_seats", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "employee_id"
+    t.string "label", null: false
+    t.string "status", default: "vacant", null: false
+    t.datetime "updated_at", null: false
+    t.string "zone", default: "center", null: false
+    t.index ["company_id", "label"], name: "index_workspace_seats_on_company_id_and_label", unique: true
+    t.index ["company_id"], name: "index_workspace_seats_on_company_id"
+    t.index ["employee_id"], name: "index_workspace_seats_on_employee_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "asset_allocations", "assets"
@@ -1093,6 +1163,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_120000) do
   add_foreign_key "employees", "departments"
   add_foreign_key "employees", "employees", column: "manager_id"
   add_foreign_key "events", "companies"
+  add_foreign_key "expenses", "companies"
+  add_foreign_key "expenses", "employees"
   add_foreign_key "helpdesk_tickets", "companies"
   add_foreign_key "huddle_participants", "companies"
   add_foreign_key "huddle_participants", "huddles"
@@ -1140,6 +1212,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_120000) do
   add_foreign_key "platform_follow_ups", "platform_inquiries"
   add_foreign_key "platform_invoices", "companies"
   add_foreign_key "policy_documents", "companies"
+  add_foreign_key "project_tasks", "companies"
+  add_foreign_key "project_tasks", "employees"
+  add_foreign_key "project_tasks", "projects"
+  add_foreign_key "projects", "companies"
   add_foreign_key "recognitions", "companies"
   add_foreign_key "recognitions", "employees", column: "received_by_id"
   add_foreign_key "recognitions", "users", column: "given_by_id"
@@ -1160,4 +1236,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_01_120000) do
   add_foreign_key "user_roles", "users"
   add_foreign_key "users", "companies"
   add_foreign_key "users", "employees"
+  add_foreign_key "workspace_seats", "companies"
+  add_foreign_key "workspace_seats", "employees"
 end

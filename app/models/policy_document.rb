@@ -1,6 +1,7 @@
 class PolicyDocument < ApplicationRecord
   include TenantScoped
   belongs_to :uploader, class_name: "User", foreign_key: "uploaded_by", optional: true
+  has_many :digital_signatures, dependent: :destroy
 
   # Validations
   validates :title, presence: true

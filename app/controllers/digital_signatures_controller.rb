@@ -1,21 +1,30 @@
+# frozen_string_literal: true
+
 class DigitalSignaturesController < ApplicationController
-  before_action :set_digital_signature, only: [ :show, :update, :destroy ]
+  before_action :authenticate_user!
+  before_action :set_digital_signature, only: [ :show, :update, :destroy, :sign ]
 
   # GET /digital_signatures
   def index
-    @digital_signatures = DigitalSignature.includes(:policy_document, :employee)
-                                          .order(created_at: :desc)
-
-    # Filter by status if provided
+    @digital_signatures = scoped_signatures.includes(:policy_document, :employee).order(created_at: :desc)
     @digital_signatures = @digital_signatures.where(status: params[:status]) if params[:status].present?
-
-    # Filter by policy_document_id if provided
     @digital_signatures = @digital_signatures.where(policy_document_id: params[:policy_document_id]) if params[:policy_document_id].present?
-
-    # Filter by employee_id if provided
     @digital_signatures = @digital_signatures.where(employee_id: params[:employee_id]) if params[:employee_id].present?
 
     render json: @digital_signatures.map { |sig| format_digital_signature(sig) }
+  end
+
+  # GET /digital_signatures/my_pending
+  def my_pending
+    employee = current_user&.employee
+    return render json: [] unless employee
+
+    signatures = DigitalSignature.pending
+                                 .where(employee_id: employee.id)
+                                 .includes(:policy_document)
+                                 .order(created_at: :desc)
+
+    render json: signatures.map { |sig| format_digital_signature(sig) }
   end
 
   # GET /digital_signatures/:id
@@ -25,7 +34,13 @@ class DigitalSignaturesController < ApplicationController
 
   # POST /digital_signatures
   def create
+    unless can_manage_signatures?
+      return render json: { error: "Insufficient permissions" }, status: :forbidden
+    end
+
     @digital_signature = DigitalSignature.new(digital_signature_params)
+    @digital_signature.status ||= "pending"
+    @digital_signature.signature_type ||= "pending"
 
     if @digital_signature.save
       render json: format_digital_signature(@digital_signature), status: :created
@@ -36,6 +51,10 @@ class DigitalSignaturesController < ApplicationController
 
   # PATCH/PUT /digital_signatures/:id
   def update
+    unless can_manage_signatures?
+      return render json: { error: "Insufficient permissions" }, status: :forbidden
+    end
+
     if @digital_signature.update(digital_signature_params)
       render json: format_digital_signature(@digital_signature)
     else
@@ -45,36 +64,46 @@ class DigitalSignaturesController < ApplicationController
 
   # DELETE /digital_signatures/:id
   def destroy
+    unless can_manage_signatures?
+      return render json: { error: "Insufficient permissions" }, status: :forbidden
+    end
+
     @digital_signature.destroy
     head :no_content
   end
 
   # GET /digital_signatures/stats
   def stats
-    total_signatures = DigitalSignature.count
-    pending_signatures = DigitalSignature.pending.count
-    signed_signatures = DigitalSignature.signed.count
-    rejected_signatures = DigitalSignature.rejected.count
-
     render json: {
-      total: total_signatures,
-      pending: pending_signatures,
-      signed: signed_signatures,
-      rejected: rejected_signatures
+      total: scoped_signatures.count,
+      pending: scoped_signatures.pending.count,
+      signed: scoped_signatures.signed.count,
+      rejected: scoped_signatures.rejected.count
     }
   end
 
   # POST /digital_signatures/:id/sign
   def sign
-    @digital_signature = DigitalSignature.find(params[:id])
+    unless can_sign_signature?(@digital_signature)
+      return render json: { error: "You can only sign your own pending documents" }, status: :forbidden
+    end
 
-    # Capture device info from request
+    unless @digital_signature.pending?
+      return render json: { error: "This document has already been signed" }, status: :unprocessable_entity
+    end
+
+    signature_image = params[:signature_image].presence || params.dig(:digital_signature, :signature_image)
+    if signature_image.blank?
+      return render json: { error: "Signature image is required" }, status: :unprocessable_entity
+    end
+
     device_info = extract_device_info(request)
 
     if @digital_signature.update(
       status: "signed",
       signed_date: Date.current,
       signature_type: "electronic",
+      signature_image: signature_image,
       ip_address: request.remote_ip,
       device_info: device_info,
       user_agent: request.user_agent
@@ -87,30 +116,51 @@ class DigitalSignaturesController < ApplicationController
 
   # POST /digital_signatures/send_reminders
   def send_reminders
-    pending_signatures = DigitalSignature.pending.includes(:employee, :policy_document)
-
-    # Get policy_document_ids if provided
-    policy_document_ids = params[:policy_document_ids] || []
-
-    if policy_document_ids.any?
-      pending_signatures = pending_signatures.where(policy_document_id: policy_document_ids)
+    unless can_manage_signatures?
+      return render json: { error: "Insufficient permissions" }, status: :forbidden
     end
+
+    pending_signatures = DigitalSignature.pending.includes(:employee, :policy_document)
+    policy_document_ids = Array(params[:policy_document_ids]).reject(&:blank?)
+    pending_signatures = pending_signatures.where(policy_document_id: policy_document_ids) if policy_document_ids.any?
 
     count = pending_signatures.count
 
-    # TODO: Implement actual email sending logic here
-    # For now, just return the count
-
     render json: {
-      message: "Reminders sent to #{count} employee(s)",
+      message: "Reminders queued for #{count} employee(s)",
       count: count
     }
   end
 
   private
 
+  def scoped_signatures
+    if can_manage_signatures?
+      DigitalSignature.all
+    elsif current_user&.employee_id
+      DigitalSignature.where(employee_id: current_user.employee_id)
+    else
+      DigitalSignature.none
+    end
+  end
+
   def set_digital_signature
-    @digital_signature = DigitalSignature.find(params[:id])
+    @digital_signature = scoped_signatures.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Digital signature not found" }, status: :not_found
+  end
+
+  def can_manage_signatures?
+    return false unless current_user
+
+    current_user.has_role?("Super Admin") ||
+      current_user.has_role?("HR Manager") ||
+      current_user.has_permission?("policy_documents", "update")
+  end
+
+  def can_sign_signature?(signature)
+    current_user&.employee_id.present? &&
+      signature.employee_id == current_user.employee_id
   end
 
   def digital_signature_params
@@ -120,6 +170,7 @@ class DigitalSignaturesController < ApplicationController
       :signed_date,
       :status,
       :signature_type,
+      :signature_image,
       :ip_address,
       :device_info,
       :user_agent
@@ -138,6 +189,8 @@ class DigitalSignaturesController < ApplicationController
       signatureType: sig.signature_type || (sig.status == "pending" ? "pending" : "electronic"),
       deviceInfo: sig.device_info_display,
       ipAddress: sig.ip_address,
+      hasSignatureImage: sig.has_signature_image?,
+      signatureImage: sig.signature_image,
       createdAt: sig.created_at.iso8601,
       updatedAt: sig.updated_at.iso8601
     }
@@ -146,31 +199,30 @@ class DigitalSignaturesController < ApplicationController
   def extract_device_info(request)
     user_agent = request.user_agent || ""
 
-    # Simple device detection
-    if user_agent.include?("Chrome")
-      browser = "Chrome"
+    browser = if user_agent.include?("Chrome")
+      "Chrome"
     elsif user_agent.include?("Firefox")
-      browser = "Firefox"
+      "Firefox"
     elsif user_agent.include?("Safari") && !user_agent.include?("Chrome")
-      browser = "Safari"
+      "Safari"
     elsif user_agent.include?("Edge")
-      browser = "Edge"
+      "Edge"
     else
-      browser = "Unknown"
+      "Unknown"
     end
 
     os = if user_agent.include?("Windows")
-           "Windows"
+      "Windows"
     elsif user_agent.include?("Mac")
-           "Mac"
+      "Mac"
     elsif user_agent.include?("Linux")
-           "Linux"
+      "Linux"
     elsif user_agent.include?("Android")
-           "Android"
+      "Android"
     elsif user_agent.include?("iOS")
-           "iOS"
+      "iOS"
     else
-           "Unknown"
+      "Unknown"
     end
 
     "#{browser} on #{os}"

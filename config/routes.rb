@@ -236,6 +236,47 @@ Rails.application.routes.draw do
   resources :policy_documents do
     member do
       get :download
+      post :request_signatures
+    end
+  end
+
+  # Digital Signatures
+  resources :digital_signatures do
+    member do
+      post :sign
+    end
+    collection do
+      get :stats
+      get :my_pending
+      post :send_reminders
+    end
+  end
+
+  get "expiry_alerts", to: "expiry_alerts#index"
+
+  # Workspace Seating
+  resources :workspace_seats do
+    collection do
+      get :stats
+    end
+  end
+
+  # Project Management
+  resources :projects do
+    collection do
+      get :stats
+    end
+  end
+  resources :project_tasks do
+    collection do
+      get :sprints
+    end
+  end
+
+  # Expenses
+  resources :expenses do
+    collection do
+      get :stats
     end
   end
 

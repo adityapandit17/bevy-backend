@@ -7,6 +7,7 @@ class DigitalSignature < ApplicationRecord
   validates :status, presence: true, inclusion: { in: %w[signed pending rejected] }
   validates :signature_type, inclusion: { in: %w[electronic digital handwritten pending] }, allow_nil: true
   validates :signed_date, presence: true, if: -> { status == "signed" }
+  validates :employee_id, uniqueness: { scope: :policy_document_id, message: "already has a signature request for this document" }
 
   # Scopes
   scope :signed, -> { where(status: "signed") }
@@ -42,6 +43,10 @@ class DigitalSignature < ApplicationRecord
 
   def document_title
     policy_document.title
+  end
+
+  def has_signature_image?
+    signature_image.present?
   end
 
   def device_info_display

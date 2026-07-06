@@ -1620,6 +1620,262 @@ employee_trainings.each do |training_attrs|
   end
 end
 
+# Workspace seating, project management, expenses, and document signatures
+puts "Seeding workspace seating, projects, expenses, and policy signatures..."
+
+seat_assignments = {
+  "N-01" => Employee.find_by(email: "john.doe@company.com"),
+  "N-03" => Employee.find_by(email: "alice.johnson@company.com"),
+  "C-08" => Employee.find_by(email: "mike.johnson@company.com"),
+  "C-10" => Employee.find_by(email: "sarah.miller@company.com"),
+  "S-02" => Employee.find_by(email: "jane.smith@company.com"),
+  "S-06" => Employee.find_by(email: "david.lee@company.com")
+}
+blocked_seat_labels = %w[N-12 C-01 S-29]
+
+if WorkspaceSeat.none?
+  { "north" => "N", "center" => "C", "south" => "S" }.each do |zone, prefix|
+    30.times do |i|
+      label = "#{prefix}-#{format('%02d', i + 1)}"
+      employee = seat_assignments[label]
+      status = if blocked_seat_labels.include?(label)
+        "blocked"
+      elsif employee
+        "occupied"
+      else
+        "vacant"
+      end
+
+      WorkspaceSeat.find_or_create_by!(label: label) do |seat|
+        seat.zone = zone
+        seat.status = status
+        seat.employee = employee
+      end
+    end
+  end
+end
+
+john = Employee.find_by(email: "john.doe@company.com")
+alice = Employee.find_by(email: "alice.johnson@company.com")
+bob = Employee.find_by(email: "bob.wilson@company.com")
+jane = Employee.find_by(email: "jane.smith@company.com")
+david = Employee.find_by(email: "david.lee@company.com")
+sarah = Employee.find_by(email: "sarah.miller@company.com")
+
+project_seeds = [
+  {
+    name: "BevyHR Mobile App",
+    description: "Mobile application for employee self-service with attendance, leave, and payroll access",
+    status: "active",
+    progress: 75,
+    priority: "high",
+    start_date: Date.new(2024, 1, 15),
+    end_date: Date.new(2024, 3, 30),
+    budget: 50_000,
+    spent: 37_500,
+    tasks: [
+      { title: "Setup development environment", status: "completed", priority: "high", assignee_name: "John Doe", employee: john, due_date: Date.new(2024, 1, 18), story_points: 3, sprint_name: "Sprint 1 - Foundation" },
+      { title: "Design user interface mockups", status: "completed", priority: "high", assignee_name: "Jane Smith", employee: jane, due_date: Date.new(2024, 2, 10), story_points: 5, sprint_name: "Sprint 1 - Foundation" },
+      { title: "Implement authentication system", status: "in_progress", priority: "high", assignee_name: "Bob Wilson", employee: bob, due_date: Date.new(2024, 2, 28), story_points: 8, sprint_name: "Sprint 2 - Core Features" },
+      { title: "Create user dashboard", status: "in_progress", priority: "medium", assignee_name: "Alice Johnson", employee: alice, due_date: Date.new(2024, 3, 5), story_points: 5, sprint_name: "Sprint 2 - Core Features" },
+      { title: "Implement attendance tracking", status: "todo", priority: "medium", assignee_name: "Alice Johnson", employee: alice, due_date: Date.new(2024, 3, 10), story_points: 5, sprint_name: "Sprint 3 - HR Modules" },
+      { title: "Integrate payroll system", status: "backlog", priority: "high", assignee_name: "Bob Wilson", employee: bob, due_date: Date.new(2024, 3, 18), story_points: 8, sprint_name: "Sprint 3 - HR Modules" }
+    ]
+  },
+  {
+    name: "Payroll System Upgrade",
+    description: "Modernizing the existing payroll processing system",
+    status: "planning",
+    progress: 25,
+    priority: "medium",
+    start_date: Date.new(2024, 2, 1),
+    end_date: Date.new(2024, 5, 15),
+    budget: 75_000,
+    spent: 12_000,
+    tasks: [
+      { title: "Requirements gathering", status: "completed", priority: "high", assignee_name: "Sarah Miller", employee: sarah, due_date: Date.new(2024, 2, 15), story_points: 5, sprint_name: "Sprint 1 - Discovery" },
+      { title: "Payroll calculation engine refactor", status: "in_progress", priority: "high", assignee_name: "Mike Johnson", employee: Employee.find_by(email: "mike.johnson@company.com"), due_date: Date.new(2024, 4, 1), story_points: 13, sprint_name: "Sprint 2 - Engine" },
+      { title: "Payslip PDF generation", status: "backlog", priority: "medium", assignee_name: "John Doe", employee: john, due_date: Date.new(2024, 4, 20), story_points: 5, sprint_name: "Sprint 3 - Output" }
+    ]
+  },
+  {
+    name: "Performance Analytics Dashboard",
+    description: "Real-time analytics for employee performance tracking",
+    status: "completed",
+    progress: 100,
+    priority: "high",
+    start_date: Date.new(2023, 11, 1),
+    end_date: Date.new(2024, 1, 31),
+    budget: 30_000,
+    spent: 28_500,
+    tasks: [
+      { title: "Dashboard wireframes", status: "completed", priority: "medium", assignee_name: "Jane Smith", employee: jane, due_date: Date.new(2023, 11, 20), story_points: 3, sprint_name: "Sprint 1" },
+      { title: "Metrics API endpoints", status: "completed", priority: "high", assignee_name: "John Doe", employee: john, due_date: Date.new(2023, 12, 15), story_points: 8, sprint_name: "Sprint 2" },
+      { title: "Chart components", status: "completed", priority: "medium", assignee_name: "Alice Johnson", employee: alice, due_date: Date.new(2024, 1, 10), story_points: 5, sprint_name: "Sprint 3" }
+    ]
+  }
+]
+
+project_seeds.each do |project_attrs|
+  tasks = project_attrs.delete(:tasks)
+  project = Project.find_or_create_by!(name: project_attrs[:name]) do |p|
+    p.assign_attributes(project_attrs)
+  end
+
+  tasks.each do |task_attrs|
+    ProjectTask.find_or_create_by!(project: project, title: task_attrs[:title]) do |task|
+      task.assign_attributes(task_attrs)
+    end
+  end
+end
+
+expense_seeds = [
+  {
+    employee: john,
+    title: "Office Supplies",
+    amount: 125.50,
+    category: "Office",
+    expense_date: Date.current - 15.days,
+    description: "Pens, notebooks, and stationery",
+    payment_method: "Credit Card",
+    tags: %w[work supplies],
+    status: "approved"
+  },
+  {
+    employee: jane,
+    title: "Lunch Meeting",
+    amount: 45.00,
+    category: "Meals",
+    expense_date: Date.current - 14.days,
+    description: "Client lunch at restaurant",
+    payment_method: "Cash",
+    tags: %w[business client],
+    status: "submitted"
+  },
+  {
+    employee: alice,
+    title: "Uber Ride",
+    amount: 18.75,
+    category: "Transportation",
+    expense_date: Date.current - 13.days,
+    description: "Ride to client office",
+    payment_method: "Credit Card",
+    tags: %w[transport business],
+    status: "approved"
+  },
+  {
+    employee: bob,
+    title: "Software License",
+    amount: 299.00,
+    category: "Software",
+    expense_date: Date.current - 12.days,
+    description: "Annual subscription for design software",
+    payment_method: "Bank Transfer",
+    tags: %w[software subscription],
+    status: "reimbursed"
+  },
+  {
+    employee: david,
+    title: "Team Coffee",
+    amount: 24.50,
+    category: "Meals",
+    expense_date: Date.current - 11.days,
+    description: "Morning coffee for marketing standup",
+    payment_method: "Credit Card",
+    tags: %w[coffee team],
+    status: "submitted"
+  }
+]
+
+expense_seeds.each do |expense_attrs|
+  Expense.find_or_create_by!(
+    employee: expense_attrs[:employee],
+    title: expense_attrs[:title],
+    expense_date: expense_attrs[:expense_date]
+  ) do |expense|
+    expense.assign_attributes(expense_attrs)
+  end
+end
+
+admin_user = User.find_by(email: "admin@hrms.com")
+policy_seeds = [
+  {
+    title: "Employee Handbook 2024",
+    category: "HR Policies",
+    version: "v2.1",
+    file_path: "policy-documents/employee-handbook-2024.pdf",
+    file_size: 2_516_582,
+    last_updated: Date.current - 2.months,
+    expiry_date: Date.current + 10.months,
+    status: "active",
+    downloads: 156,
+    requires_signature: true,
+    uploaded_by: admin_user&.id
+  },
+  {
+    title: "Code of Conduct",
+    category: "Compliance",
+    version: "v1.5",
+    file_path: "policy-documents/code-of-conduct.pdf",
+    file_size: 1_887_436,
+    last_updated: Date.current - 3.months,
+    expiry_date: Date.current + 9.months,
+    status: "active",
+    downloads: 203,
+    requires_signature: true,
+    uploaded_by: admin_user&.id
+  },
+  {
+    title: "Leave Policy",
+    category: "HR Policies",
+    version: "v1.2",
+    file_path: "policy-documents/leave-policy.pdf",
+    file_size: 1_572_864,
+    last_updated: Date.current - 8.months,
+    expiry_date: Date.current + 20.days,
+    status: "expiring",
+    downloads: 134,
+    requires_signature: false,
+    uploaded_by: admin_user&.id
+  }
+]
+
+policy_seeds.each do |policy_attrs|
+  PolicyDocument.find_or_create_by!(title: policy_attrs[:title]) do |doc|
+    doc.assign_attributes(policy_attrs)
+  end
+end
+
+handbook = PolicyDocument.find_by(title: "Employee Handbook 2024")
+conduct = PolicyDocument.find_by(title: "Code of Conduct")
+
+if handbook && john
+  DigitalSignature.find_or_create_by!(policy_document: handbook, employee: john) do |sig|
+    sig.status = "signed"
+    sig.signed_date = Date.current - 1.month
+    sig.signature_type = "electronic"
+    sig.ip_address = "192.168.1.100"
+    sig.device_info = "Chrome on Mac"
+  end
+end
+
+if conduct && jane
+  DigitalSignature.find_or_create_by!(policy_document: conduct, employee: jane) do |sig|
+    sig.status = "pending"
+    sig.signature_type = "pending"
+  end
+end
+
+if conduct && alice
+  DigitalSignature.find_or_create_by!(policy_document: conduct, employee: alice) do |sig|
+    sig.status = "signed"
+    sig.signed_date = Date.current - 3.weeks
+    sig.signature_type = "electronic"
+    sig.ip_address = "192.168.1.105"
+    sig.device_info = "Safari on Mac"
+  end
+end
+
 # Create leave requests
 leave_requests = [
   {
@@ -1788,6 +2044,11 @@ puts "Created #{PerformanceGoal.count} performance goals"
 puts "Created #{Timesheet.count} timesheets"
 puts "Created #{EmployeeBenefit.count} employee benefits"
 puts "Created #{EmployeeTraining.count} employee trainings"
+puts "Created #{WorkspaceSeat.count} workspace seats"
+puts "Created #{Project.count} projects with #{ProjectTask.count} tasks"
+puts "Created #{Expense.count} expenses"
+puts "Created #{PolicyDocument.count} policy documents"
+puts "Created #{DigitalSignature.count} digital signatures"
 puts "Created #{LeaveRequest.count} leave requests"
 
 # Create Helpdesk Tickets
