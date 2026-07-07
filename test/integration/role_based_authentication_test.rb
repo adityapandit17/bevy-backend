@@ -163,11 +163,13 @@ class RoleBasedAuthenticationTest < ActionDispatch::IntegrationTest
   end
 
   test "user without token cannot access protected endpoints" do
-    get "/employees"
-    assert_response :unauthorized
+    without_authentication do
+      get "/employees"
+      assert_response :unauthorized
 
-    get "/employees/1"
-    assert_response :unauthorized
+      get "/employees/1"
+      assert_response :unauthorized
+    end
   end
 
   test "invalid token cannot access protected endpoints" do
@@ -231,41 +233,41 @@ class RoleBasedAuthenticationTest < ActionDispatch::IntegrationTest
   test "user can check their own permissions" do
     token = get_jwt_token(@super_admin)
 
-    get "/users/current", headers: { "Authorization" => "Bearer #{token}" }
+    get "/api/v1/auth/me", headers: { "Authorization" => "Bearer #{token}" }
     assert_response :success
 
     response_data = JSON.parse(response.body)
-    role_names = response_data["roles"].map { |r| r["name"] }
+    assert response_data["success"]
+    role_names = response_data.dig("data", "user", "roles") || []
     assert_includes role_names, "Super Admin"
-    assert response_data["permissions"].length > 0
+    assert (response_data.dig("data", "user", "permissions") || []).length > 0
   end
 
   test "user can login and get token with roles and permissions" do
-    post "/users/sign_in", params: {
-      user: {
-        email: @super_admin.email,
-        password: "password123"
-      }
-    }
+  without_authentication do
+    post "/api/v1/auth/login",
+         params: { email: @super_admin.email, password: "password123" }.to_json,
+         headers: { "Content-Type" => "application/json", "Accept" => "application/json" }
 
     assert_response :success
     response_data = JSON.parse(response.body)
 
-    assert response_data["token"].present?
-    assert response_data["user"].present?
-    assert response_data["roles"].present?
-    assert response_data["permissions"].present?
-    assert_includes response_data["roles"].map { |r| r["name"] }, "Super Admin"
+    assert response_data.dig("data", "token").present?
+    assert response_data.dig("data", "user").present?
+    assert response_data.dig("data", "user", "roles").present?
+    assert response_data.dig("data", "user", "permissions").present?
+    assert_includes response_data.dig("data", "user", "roles"), "Super Admin"
+  end
   end
 
   test "user can logout successfully" do
     token = get_jwt_token(@super_admin)
 
-    delete "/users/sign_out", headers: { "Authorization" => "Bearer #{token}" }
+    post "/api/v1/auth/logout", headers: { "Authorization" => "Bearer #{token}" }
     assert_response :success
 
     response_data = JSON.parse(response.body)
-    assert_equal "Logout successful", response_data["message"]
+    assert_equal "Logged out successfully", response_data.dig("data", "message")
   end
 
   test "user with multiple roles gets combined permissions" do
@@ -365,16 +367,6 @@ class RoleBasedAuthenticationTest < ActionDispatch::IntegrationTest
   private
 
   def get_jwt_token(user)
-    # Generate JWT token for testing
-    payload = {
-      user_id: user.id,
-      email: user.email,
-      roles: user.roles.pluck(:name),
-      permissions: user.permissions.pluck(:name),
-      status: user.status,
-      jti: SecureRandom.uuid,
-      exp: 24.hours.from_now.to_i
-    }
-    JWT.encode(payload, Rails.application.secret_key_base, "HS256")
+    JwtService.generate_token(user)
   end
 end

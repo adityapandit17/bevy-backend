@@ -40,23 +40,19 @@ class ApplicationController < ActionController::Base
   end
 
   def authenticate_user!
-    # For API/JSON requests, JWT authentication is handled by authenticate_user_from_token!
-    # So we just need to check if current_user is set
-    return if @current_user.present? && request.format.json?
+    return if @current_user.present?
 
-    unless current_user
-      # For JSON requests, always return JSON error
-      if json_request?
-        render json: { success: false, error: "Authentication required" }, status: :unauthorized
-      else
-        # Handle case where Devise routes might not be available
-        if respond_to?(:new_user_session_path)
-          redirect_to new_user_session_path
-        else
-          render json: { success: false, error: "Authentication required" }, status: :unauthorized
-        end
+    # Legacy session fallback (API-only app; JWT is primary)
+    if session[:user_id].present?
+      user = User.find_by(id: session[:user_id])
+      if user&.active?
+        @current_user = user
+        return
       end
+      session[:user_id] = nil
     end
+
+    render json: { success: false, error: "Authentication required" }, status: :unauthorized
   end
 
   def json_request?

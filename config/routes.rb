@@ -1,14 +1,7 @@
 Rails.application.routes.draw do
-  get "events/index"
-  get "events/show"
-  get "events/create"
-  get "events/update"
-  get "events/destroy"
-  get "ticket_comments/index"
-  get "ticket_comments/create"
-  get "ticket_comments/update"
-  get "ticket_comments/destroy"
-  devise_for :users
+  # API-only tenant app (Next.js frontend). Devise modules remain on User for password
+  # hashing and invitations; web sign-in routes are disabled.
+  # devise_for :users
 
   # API Routes
   namespace :api do
@@ -146,11 +139,6 @@ Rails.application.routes.draw do
   get "super_admin/security_settings"
   get "super_admin/system_configuration"
   get "super_admin/maintenance_mode"
-  # Custom session routes
-  post "/sessions", to: "sessions#create"
-  delete "/sessions", to: "sessions#destroy"
-  get "/sessions/current", to: "sessions#current"
-
   # Dashboard route
   get "/dashboard", to: "dashboard#index"
 

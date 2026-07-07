@@ -12,7 +12,7 @@ module SetCurrentTenant
   def should_set_tenant?
     return false unless json_request? || bearer_authenticated_request?
     return false if platform_api_path?
-    return false if public_unauthenticated_path?
+    return false if authentication_exempt?
     return false unless @current_user.present?
 
     true
@@ -24,15 +24,6 @@ module SetCurrentTenant
 
   def platform_api_path?
     request.path.start_with?("/api/v1/platform/")
-  end
-
-  def public_unauthenticated_path?
-    request.path == "/api/v1/auth/login" ||
-      request.path == "/api/v1/auth/accept_invitation" ||
-      request.path == "/api/v1/auth/forgot_password" ||
-      request.path == "/api/v1/auth/reset_password" ||
-      request.path == "/api/v1/public/signup" ||
-      request.path.start_with?("/api/v1/public/")
   end
 
   def with_tenant_from_user
