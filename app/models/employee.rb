@@ -157,8 +157,11 @@ class Employee < ApplicationRecord
   end
 
   def avatar_url
-    # Placeholder for avatar functionality
-    "https://ui-avatars.com/api/?name=#{URI.encode_www_form_component(name)}&background=random"
+    if user&.avatar&.attached?
+      user.avatar_url
+    else
+      "https://ui-avatars.com/api/?name=#{URI.encode_www_form_component(name)}&background=random"
+    end
   end
 
   def display_id

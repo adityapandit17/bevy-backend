@@ -30,9 +30,14 @@ class UploadsController < ApplicationController
       "application/pdf",
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-excel",
+      "text/plain",
+      "text/csv",
       "image/jpeg",
       "image/jpg",
       "image/png",
+      "image/webp",
       "image/heic",
       "image/heif"
     ]

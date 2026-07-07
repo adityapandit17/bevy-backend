@@ -1,4 +1,6 @@
 class UsersController < ApplicationController
+  include ActiveStorageUrlHelper
+
   before_action :authenticate_user!
   before_action :set_user, only: [ :show, :update, :destroy, :change_password, :update_profile, :preferences, :update_preferences ]
   before_action :authorize_users_access!, except: [ :change_password, :update_profile, :preferences, :update_preferences ]
@@ -205,8 +207,16 @@ class UsersController < ApplicationController
       return
     end
 
-    # Only allow updating name, not email
-    if @user.update(profile_params)
+    @user.assign_attributes(profile_params) if params[:user].present?
+
+    begin
+      handle_avatar_on_update
+    rescue ArgumentError => e
+      render json: { error: e.message }, status: :unprocessable_entity
+      return
+    end
+
+    if @user.save
       render json: {
         message: "Profile updated successfully",
         user: format_user(@user)
@@ -264,7 +274,17 @@ class UsersController < ApplicationController
   end
 
   def profile_params
+    return {} unless params[:user].present?
+
     params.require(:user).permit(:first_name, :last_name)
+  end
+
+  def handle_avatar_on_update
+    if ActiveModel::Type::Boolean.new.cast(params[:remove_avatar])
+      @user.remove_avatar!
+    elsif params[:avatar].present?
+      @user.attach_avatar!(params[:avatar])
+    end
   end
 
   def preference_params
@@ -304,6 +324,7 @@ class UsersController < ApplicationController
       first_name: user.first_name,
       last_name: user.last_name,
       name: user.name,
+      avatar_url: user.avatar_url,
       status: user.status,
       last_login_at: user.last_login_at,
       employee: user.employee ? {

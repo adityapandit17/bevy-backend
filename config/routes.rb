@@ -353,6 +353,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :holidays
+
   resources :leave_policies do
     collection do
       get :current

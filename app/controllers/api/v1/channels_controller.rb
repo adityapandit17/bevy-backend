@@ -63,7 +63,15 @@ class Api::V1::ChannelsController < ApplicationController
       return render json: { success: false, error: "Not a member of this channel" }, status: :forbidden
     end
 
-    if @channel.update(channel_params)
+    if channel_settings_change? && !can_manage_channel?
+      return render json: { success: false, error: "Not authorized to update this channel" }, status: :forbidden
+    end
+
+    if @channel.channel_type == "direct"
+      return render json: { success: false, error: "Direct messages cannot be updated" }, status: :unprocessable_entity
+    end
+
+    if @channel.update(channel_update_params)
       render json: {
         success: true,
         channel: format_channel(@channel)
@@ -209,6 +217,23 @@ class Api::V1::ChannelsController < ApplicationController
     params.require(:channel).permit(:name, :channel_type, :is_private, :description)
   end
 
+  def channel_update_params
+    permitted = [ :name, :description ]
+    permitted << :is_private if @channel.channel_type == "channel"
+    params.require(:channel).permit(*permitted)
+  end
+
+  def channel_settings_change?
+    channel_data = params[:channel]
+    return false unless channel_data.present?
+
+    channel_data.key?(:name) || channel_data.key?(:is_private) || channel_data.key?(:description)
+  end
+
+  def can_manage_channel?
+    @channel.created_by == current_user || current_user.super_admin?
+  end
+
   def format_channel(channel)
     {
       id: channel.id,
@@ -244,6 +269,9 @@ class Api::V1::ChannelsController < ApplicationController
       user_name: message.user.name,
       user_email: message.user.email,
       content: message.content,
+      attachment_path: message.attachment_path,
+      attachment_filename: message.attachment_filename,
+      attachment_content_type: message.attachment_content_type,
       edited_at: message.edited_at&.iso8601,
       created_at: message.created_at.iso8601,
       updated_at: message.updated_at.iso8601

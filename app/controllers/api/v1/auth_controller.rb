@@ -269,6 +269,7 @@ class Api::V1::AuthController < ApplicationController
       name: user.name,
       first_name: user.first_name,
       last_name: user.last_name,
+      avatar_url: user.avatar_url,
       status: user.status,
       company_id: user.company_id,
       roles: user.association(:roles).loaded? ? user.roles.map(&:name) : user.roles.pluck(:name),

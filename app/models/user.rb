@@ -1,6 +1,9 @@
 class User < ApplicationRecord
   include TenantScoped
 
+  AVATAR_CONTENT_TYPES = %w[image/png image/jpeg image/jpg image/webp].freeze
+  AVATAR_MAX_SIZE = 2.megabytes
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :invitable, :database_authenticatable, :registerable,
@@ -19,6 +22,7 @@ class User < ApplicationRecord
   has_many :started_huddles, class_name: "Huddle", foreign_key: "started_by_id", dependent: :destroy
   has_many :huddle_participants, dependent: :destroy
   has_many :huddles, through: :huddle_participants
+  has_one_attached :avatar
 
   # Validations
   validates :first_name, presence: true
@@ -155,7 +159,34 @@ class User < ApplicationRecord
     update_column(:updated_at, Time.current)
   end
 
+  def avatar_url
+    BlobUrl.for(avatar) || default_avatar_url
+  end
+
+  def attach_avatar!(file)
+    raise ArgumentError, "No avatar file provided" if file.blank?
+
+    content_type = file.respond_to?(:content_type) ? file.content_type : nil
+    if content_type.present? && AVATAR_CONTENT_TYPES.exclude?(content_type)
+      raise ArgumentError, "Invalid file type. Only PNG, JPG, or WEBP images are allowed."
+    end
+
+    file_size = file.respond_to?(:size) ? file.size : 0
+    raise ArgumentError, "File size too large. Maximum size is 2MB." if file_size > AVATAR_MAX_SIZE
+
+    avatar.purge if avatar.attached?
+    avatar.attach(file)
+  end
+
+  def remove_avatar!
+    avatar.purge if avatar.attached?
+  end
+
   private
+
+  def default_avatar_url
+    "https://ui-avatars.com/api/?name=#{URI.encode_www_form_component(name)}&background=random"
+  end
 
   def roles_with_permissions_loaded?
     association(:roles).loaded? && roles.all? { |role| role.association(:permissions).loaded? }

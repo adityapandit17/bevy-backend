@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_03_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_08_010000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -392,6 +392,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_03_140000) do
     t.index ["status"], name: "index_helpdesk_tickets_on_status"
   end
 
+  create_table "holidays", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.date "date", null: false
+    t.string "name", null: false
+    t.text "reason"
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "date"], name: "index_holidays_on_company_id_and_date", unique: true
+    t.index ["company_id"], name: "index_holidays_on_company_id"
+    t.index ["created_by_id"], name: "index_holidays_on_created_by_id"
+  end
+
   create_table "huddle_participants", force: :cascade do |t|
     t.bigint "company_id", null: false
     t.datetime "created_at", null: false
@@ -546,9 +559,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_03_140000) do
   end
 
   create_table "messages", force: :cascade do |t|
+    t.string "attachment_content_type"
+    t.string "attachment_filename"
+    t.string "attachment_path"
     t.bigint "channel_id", null: false
     t.bigint "company_id", null: false
-    t.text "content", null: false
+    t.text "content"
     t.datetime "created_at", null: false
     t.datetime "edited_at"
     t.datetime "updated_at", null: false
@@ -1166,6 +1182,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_03_140000) do
   add_foreign_key "expenses", "companies"
   add_foreign_key "expenses", "employees"
   add_foreign_key "helpdesk_tickets", "companies"
+  add_foreign_key "holidays", "companies"
+  add_foreign_key "holidays", "users", column: "created_by_id"
   add_foreign_key "huddle_participants", "companies"
   add_foreign_key "huddle_participants", "huddles"
   add_foreign_key "huddle_participants", "users"

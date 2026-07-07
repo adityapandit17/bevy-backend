@@ -106,7 +106,7 @@ class Api::V1::MessagesController < ApplicationController
   end
 
   def message_params
-    params.require(:message).permit(:content)
+    params.require(:message).permit(:content, :attachment_path, :attachment_filename, :attachment_content_type)
   end
 
   def format_message(message)
@@ -117,6 +117,9 @@ class Api::V1::MessagesController < ApplicationController
       user_name: message.user.name,
       user_email: message.user.email,
       content: message.content,
+      attachment_path: message.attachment_path,
+      attachment_filename: message.attachment_filename,
+      attachment_content_type: message.attachment_content_type,
       edited_at: message.edited_at&.iso8601,
       created_at: message.created_at.iso8601,
       updated_at: message.updated_at.iso8601

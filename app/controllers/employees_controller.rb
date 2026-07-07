@@ -11,7 +11,7 @@ class EmployeesController < ApplicationController
   before_action :authorize_destroy!, only: [ :destroy ]
 
   def index
-    @employees = Employee.includes(:manager, :department)
+    @employees = Employee.includes(:manager, :department, user: { avatar_attachment: :blob })
 
     # Apply search filter
     if params[:search].present?
@@ -69,7 +69,8 @@ class EmployeesController < ApplicationController
           }
         ).merge(
           "display_id" => e.display_id,
-          "employee_number" => e.employee_number
+          "employee_number" => e.employee_number,
+          "avatar_url" => e.avatar_url
         )
       },
       pagination: {
