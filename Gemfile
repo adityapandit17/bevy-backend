@@ -7,7 +7,7 @@ gem "propshaft"
 # Use postgresql as the database for Active Record
 gem "pg"
 # Use the Puma web server [https://github.com/puma/puma]
-gem "puma", "~> 7.2.1"
+gem "puma", "~> 8.0"
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
 gem "importmap-rails"
 # Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
@@ -94,11 +94,11 @@ gem "mission_control-jobs"
 # Phone number validation (country-aware)
 gem "phonelib"
 
-gem "google-apis-calendar_v3", "~> 0.53.0"
+gem "google-apis-calendar_v3", "~> 0.55.0"
 
 gem "rqrcode", "~> 3.2"
 gem "barby", "~> 0.7.0"
 gem "chunky_png", "~> 1.4"
 
 # SaaS billing (Stripe — swap gateway via PAYMENT_GATEWAY env)
-gem "stripe", "~> 13.0"
+gem "stripe", "~> 19.0"
