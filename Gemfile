@@ -94,7 +94,7 @@ gem "mission_control-jobs"
 # Phone number validation (country-aware)
 gem "phonelib"
 
-gem "google-apis-calendar_v3", "~> 0.55.0"
+gem "google-apis-calendar_v3", "~> 0.57.0"
 
 gem "rqrcode", "~> 3.2"
 gem "barby", "~> 0.7.0"
