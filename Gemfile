@@ -101,7 +101,7 @@ gem "barby", "~> 0.7.0"
 gem "chunky_png", "~> 1.4"
 
 # SaaS billing (Stripe — swap gateway via PAYMENT_GATEWAY env)
-gem "stripe", "~> 19.0"
+gem "stripe", "~> 19.4"
 
 # error tracking locally
 gem "error_track"
