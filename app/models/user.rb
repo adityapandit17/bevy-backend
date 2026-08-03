@@ -185,7 +185,7 @@ class User < ApplicationRecord
   private
 
   def default_avatar_url
-    "https://ui-avatars.com/api/?name=#{URI.encode_www_form_component(name)}&background=random"
+    LocalAvatar.url_for(name)
   end
 
   def roles_with_permissions_loaded?

@@ -16,6 +16,7 @@ class SalaryStructuresController < ApplicationController
 
   def create
     @salary_structure = SalaryStructure.new(salary_structure_params)
+    @salary_structure.created_by = current_user if respond_to?(:current_user) && current_user
     if @salary_structure.save
       render json: @salary_structure, status: :created
     else
@@ -93,7 +94,10 @@ class SalaryStructuresController < ApplicationController
       :annual_ctc,
       :monthly_ctc,
       :effective_from,
-      :effective_upto
+      :effective_upto,
+      :revision_type,
+      :notes,
+      :previous_annual_ctc
     )
   end
 end

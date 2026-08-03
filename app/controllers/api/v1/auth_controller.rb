@@ -1,7 +1,8 @@
 class Api::V1::AuthController < ApplicationController
   # Skip CSRF protection for API endpoints
   skip_before_action :verify_authenticity_token
-  before_action :authenticate_user!, only: [ :logout, :refresh, :me, :change_password ]
+  before_action :authenticate_user!, only: [ :logout, :refresh, :me, :change_password, :impersonate, :stop_impersonation ]
+  before_action :forbid_impersonation_mutations!, only: [ :change_password, :impersonate ]
 
   # POST /api/v1/auth/login
   def login
@@ -171,23 +172,21 @@ class Api::V1::AuthController < ApplicationController
 
   # POST /api/v1/auth/refresh
   def refresh
-    # Generate a new token for the current user
-    token = JwtService.generate_token(current_user)
+    token = if impersonating?
+      JwtService.generate_impersonation_token(
+        current_user,
+        impersonator_id: jwt_payload["impersonator_id"],
+        platform_admin_id: jwt_payload["platform_admin_id"],
+        expires_in: ImpersonationService::IMPERSONATION_EXPIRATION
+      )
+    else
+      JwtService.generate_token(current_user)
+    end
 
     render_success({
       token: token,
-      user: {
-        id: current_user.id,
-        email: current_user.email,
-        name: current_user.name,
-        first_name: current_user.first_name,
-        last_name: current_user.last_name,
-        status: current_user.status,
-        roles: current_user.roles.pluck(:name),
-        permissions: current_user.permissions.pluck(:resource, :action).map { |r, a| "#{r}:#{a}" },
-        last_login_at: current_user.last_login_at,
-        employee_id: current_user.employee_id
-      }
+      user: user_payload(current_user),
+      impersonation: ImpersonationService.meta_from_payload(jwt_payload)
     })
   end
 
@@ -195,8 +194,52 @@ class Api::V1::AuthController < ApplicationController
   def me
     render_success({
       user: user_payload(current_user),
-      company: company_settings_payload
+      company: company_settings_payload,
+      impersonation: ImpersonationService.meta_from_payload(jwt_payload)
     })
+  end
+
+  # POST /api/v1/auth/impersonate
+  def impersonate
+    target = User.find_by(id: params[:user_id])
+    result = ImpersonationService.start_tenant!(actor: current_user, target_user: target)
+
+    Rails.logger.info(
+      "[Impersonation] tenant start actor=#{current_user.id} target=#{result[:user].id} company=#{current_user.company_id}"
+    )
+
+    render_success({
+      token: result[:token],
+      user: user_payload(result[:user]),
+      company: company_payload(result[:company]),
+      impersonation: result[:impersonation]
+    })
+  rescue ImpersonationService::Error => e
+    status = e.message.include?("not enabled") || e.message.include?("Only company") ? :forbidden : :unprocessable_entity
+    render_error(e.message, status)
+  end
+
+  # POST /api/v1/auth/stop_impersonation
+  def stop_impersonation
+    result = ImpersonationService.stop!(payload: jwt_payload)
+
+    if result[:platform]
+      Rails.logger.info("[Impersonation] platform stop target=#{current_user.id}")
+      return render_success({ platform: true, message: result[:message] })
+    end
+
+    Rails.logger.info(
+      "[Impersonation] tenant stop restored=#{result[:user].id} was=#{current_user.id}"
+    )
+
+    render_success({
+      token: result[:token],
+      user: user_payload(result[:user]),
+      company: company_payload(result[:company]),
+      impersonation: { active: false }
+    })
+  rescue ImpersonationService::Error => e
+    render_error(e.message, :unprocessable_entity)
   end
 
   # POST /api/v1/auth/validate
@@ -261,6 +304,12 @@ class Api::V1::AuthController < ApplicationController
   end
 
   private
+
+  def forbid_impersonation_mutations!
+    return unless impersonating?
+
+    render_error("This action is not allowed while impersonating", :forbidden)
+  end
 
   def user_payload(user)
     {

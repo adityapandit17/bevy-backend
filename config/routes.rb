@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  mount ErrorTrack::Engine => "/errors"
   # API-only tenant app (Next.js frontend). Devise modules remain on User for password
   # hashing and invitations; web sign-in routes are disabled.
   # devise_for :users
@@ -16,6 +17,8 @@ Rails.application.routes.draw do
       post "auth/accept_invitation", to: "auth#accept_invitation"
       post "auth/forgot_password", to: "auth#forgot_password"
       post "auth/reset_password", to: "auth#reset_password"
+      post "auth/impersonate", to: "auth#impersonate"
+      post "auth/stop_impersonation", to: "auth#stop_impersonation"
 
       # Google Calendar (Settings → Integrations)
       get "google_calendar/status", to: "google_calendar#status"
@@ -58,6 +61,7 @@ Rails.application.routes.draw do
             get :feature_flags
             patch :feature_flags, action: :feature_flags
             get :audits
+            post :impersonate
           end
         end
 

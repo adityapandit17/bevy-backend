@@ -5,10 +5,13 @@ class JwtService
   # Token expiration time (24 hours)
   EXPIRATION_TIME = 24.hours
 
+  VerifiedToken = Struct.new(:user, :payload, keyword_init: true)
+
   class << self
     # Generate JWT token for a user
-    def encode(payload)
-      payload[:exp] = EXPIRATION_TIME.from_now.to_i
+    def encode(payload, expires_in: EXPIRATION_TIME)
+      payload = payload.dup
+      payload[:exp] = expires_in.from_now.to_i
       JWT.encode(payload, SECRET_KEY, "HS256")
     end
 
@@ -29,21 +32,27 @@ class JwtService
 
     # Generate token for user authentication
     def generate_token(user)
-      payload = {
-        aud: "tenant",
-        user_id: user.id,
-        company_id: user.company_id,
-        email: user.email,
-        name: user.name,
-        roles: user.roles.pluck(:name),
-        iat: Time.current.to_i,
-        jti: SecureRandom.uuid
-      }
-      encode(payload)
+      encode(base_payload(user))
+    end
+
+    # Impersonation token — shorter TTL, carries impersonation claims
+    def generate_impersonation_token(user, impersonator_id: nil, platform_admin_id: nil, expires_in: 2.hours)
+      payload = base_payload(user).merge(imp: true)
+      payload[:impersonator_id] = impersonator_id if impersonator_id.present?
+      payload[:platform_admin_id] = platform_admin_id if platform_admin_id.present?
+      encode(payload, expires_in: expires_in)
+    end
+
+    def impersonating?(payload)
+      payload.present? && ActiveModel::Type::Boolean.new.cast(payload["imp"] || payload[:imp])
     end
 
     # Verify token and return user
     def verify_token(token)
+      verify_token_details(token)&.user
+    end
+
+    def verify_token_details(token)
       return nil unless token.present?
 
       payload = decode(token)
@@ -61,12 +70,14 @@ class JwtService
       token_company_id = payload["company_id"]
       return nil if token_company_id.present? && token_company_id.to_i != user.company_id
 
-      # Throttle last-login writes — avoids 2 UPDATEs on every authenticated request
-      if user.last_login_at.nil? || user.last_login_at < 15.minutes.ago
-        user.update_last_login!
+      # Throttle last-login writes — skip during impersonation so we don't pollute target's last_login
+      unless impersonating?(payload)
+        if user.last_login_at.nil? || user.last_login_at < 15.minutes.ago
+          user.update_last_login!
+        end
       end
 
-      user
+      VerifiedToken.new(user: user, payload: payload)
     end
 
     # Extract token from Authorization header
@@ -94,6 +105,21 @@ class JwtService
       return nil if payload["exp"] && Time.current.to_i > payload["exp"]
 
       User.find_by(id: payload["user_id"])
+    end
+
+    private
+
+    def base_payload(user)
+      {
+        aud: "tenant",
+        user_id: user.id,
+        company_id: user.company_id,
+        email: user.email,
+        name: user.name,
+        roles: user.roles.pluck(:name),
+        iat: Time.current.to_i,
+        jti: SecureRandom.uuid
+      }
     end
   end
 end

@@ -160,7 +160,7 @@ class Employee < ApplicationRecord
     if user&.avatar&.attached?
       user.avatar_url
     else
-      "https://ui-avatars.com/api/?name=#{URI.encode_www_form_component(name)}&background=random"
+      LocalAvatar.url_for(name)
     end
   end
 
@@ -245,9 +245,12 @@ class Employee < ApplicationRecord
     date_of_joining
   end
 
+  def current_salary_structure
+    SalaryStructure.current_for(self)
+  end
+
   def salary
-    # This would need to be implemented based on salary structure
-    salary_structures.first&.basic || 0
+    current_salary_structure&.basic || 0
   end
 
   # Birthday methods

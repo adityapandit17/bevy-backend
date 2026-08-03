@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class CompanyFeatureFlag < ApplicationRecord
-  DEFAULT_FLAGS = %w[chat mobile_app ai_assistant].freeze
+  DEFAULT_FLAGS = %w[chat mobile_app ai_assistant impersonation].freeze
 
   belongs_to :company
 
@@ -20,5 +20,8 @@ class CompanyFeatureFlag < ApplicationRecord
       record.enabled = ActiveModel::Type::Boolean.new.cast(enabled)
       record.save!
     end
+
+    # Bust /auth/me company_settings cache (keyed on company.updated_at)
+    company.touch
   end
 end

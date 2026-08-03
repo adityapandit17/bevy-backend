@@ -446,10 +446,9 @@ class EmployeeTest < ActiveSupport::TestCase
     assert_equal "TE", @employee.initials
   end
 
-  test "avatar_url should return formatted URL" do
-    # Adjusting test to match actual URL encoding behavior
-    expected_url = "https://ui-avatars.com/api/?name=#{URI.encode_www_form_component(@employee.name)}&background=random"
-    assert_equal expected_url, @employee.avatar_url
+  test "avatar_url should return local data URI placeholder" do
+    url = @employee.avatar_url
+    assert url.start_with?("data:image/svg+xml;base64,"), "expected local SVG data URI, got #{url}"
   end
 
   test "profile_completion_percentage should calculate completion" do

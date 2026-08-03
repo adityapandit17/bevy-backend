@@ -5,7 +5,8 @@ module Api
     module Platform
       class CompaniesController < BaseController
         before_action :require_billing_or_super!, only: [ :create, :update, :end_trial, :extend_trial, :restart_trial, :activate ]
-        before_action :set_company, only: [ :show, :update, :end_trial, :extend_trial, :restart_trial, :activate, :feature_flags, :audits ]
+        before_action :require_super_admin!, only: [ :impersonate ]
+        before_action :set_company, only: [ :show, :update, :end_trial, :extend_trial, :restart_trial, :activate, :feature_flags, :audits, :impersonate ]
 
         def index
           companies = Company.order(created_at: :desc)
@@ -96,6 +97,51 @@ module Api
           })
         end
 
+        # POST /api/v1/platform/companies/:id/impersonate
+        # Issues a tenant JWT for the company's Super Admin (or optional user_id).
+        def impersonate
+          target = params[:user_id].present? ? @company.users.find_by(id: params[:user_id]) : nil
+          if params[:user_id].present? && target.nil?
+            return render_error("User not found in this company", :not_found)
+          end
+
+          result = ImpersonationService.start_platform!(
+            platform_admin: current_platform_admin,
+            company: @company,
+            target_user: target
+          )
+
+          audit_action!(
+            action: "company.impersonate",
+            company: @company,
+            resource: result[:user],
+            metadata: {
+              target_user_id: result[:user].id,
+              target_email: result[:user].email,
+              target_name: result[:user].name
+            }
+          )
+
+          render_success({
+            token: result[:token],
+            redirect_url: result[:redirect_url],
+            user: {
+              id: result[:user].id,
+              email: result[:user].email,
+              name: result[:user].name,
+              roles: result[:user].roles.pluck(:name)
+            },
+            company: {
+              id: @company.id,
+              name: @company.name,
+              code: @company.code
+            },
+            impersonation: result[:impersonation]
+          })
+        rescue ImpersonationService::Error => e
+          render_error(e.message)
+        end
+
         def stats
           overdue_follow_ups = PlatformFollowUp.overdue.count
           open_inquiries = PlatformInquiry.open.count
@@ -140,7 +186,7 @@ module Api
         end
 
         def feature_flag_params
-          params.require(:feature_flags).permit(:chat, :mobile_app, :ai_assistant)
+          params.require(:feature_flags).permit(:chat, :mobile_app, :ai_assistant, :impersonation)
         end
 
         def revenue_chart_data

@@ -35,6 +35,11 @@ module SetCurrentTenant
     end
 
     unless company.accessible?
+      if platform_impersonating?
+        ActsAsTenant.with_tenant(company) { yield }
+        return
+      end
+
       if subscription_exempt_path?
         yield
         return
@@ -54,6 +59,11 @@ module SetCurrentTenant
   def subscription_exempt_path?
     request.path == "/api/v1/auth/me" ||
       request.path == "/api/v1/auth/logout" ||
+      request.path == "/api/v1/auth/stop_impersonation" ||
       request.path.start_with?("/api/v1/billing/")
+  end
+
+  def platform_impersonating?
+    JwtService.impersonating?(@jwt_payload) && @jwt_payload&.dig("platform_admin_id").present?
   end
 end

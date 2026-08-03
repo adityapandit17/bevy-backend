@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_08_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_03_090119) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -328,6 +328,33 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_08_010000) do
     t.index ["company_id"], name: "index_employees_on_company_id"
     t.index ["department_id"], name: "index_employees_on_department_id"
     t.index ["manager_id"], name: "index_employees_on_manager_id"
+  end
+
+  create_table "error_track_error_events", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "fingerprint", null: false
+    t.datetime "first_seen_at"
+    t.string "klass", null: false
+    t.datetime "last_seen_at"
+    t.text "message"
+    t.integer "occurrences_count", default: 0, null: false
+    t.boolean "resolved", default: false, null: false
+    t.datetime "updated_at", null: false
+    t.index ["fingerprint"], name: "index_error_track_error_events_on_fingerprint", unique: true
+    t.index ["last_seen_at"], name: "index_error_track_error_events_on_last_seen_at"
+    t.index ["resolved"], name: "index_error_track_error_events_on_resolved"
+  end
+
+  create_table "error_track_occurrences", force: :cascade do |t|
+    t.text "backtrace"
+    t.json "context"
+    t.datetime "created_at", null: false
+    t.string "environment"
+    t.bigint "error_event_id", null: false
+    t.datetime "occurred_at"
+    t.datetime "updated_at", null: false
+    t.index ["error_event_id"], name: "index_error_track_occurrences_on_error_event_id"
+    t.index ["occurred_at"], name: "index_error_track_occurrences_on_occurred_at"
   end
 
   create_table "events", force: :cascade do |t|
@@ -985,6 +1012,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_08_010000) do
     t.decimal "bonus", precision: 10, scale: 2, default: "0.0"
     t.bigint "company_id", null: false
     t.datetime "created_at", null: false
+    t.bigint "created_by_id"
     t.decimal "deductions"
     t.bigint "department_id"
     t.date "effective_from"
@@ -995,12 +1023,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_08_010000) do
     t.decimal "income_tax", precision: 10, scale: 2, default: "0.0"
     t.string "level"
     t.decimal "monthly_ctc", precision: 10, scale: 2, default: "0.0"
+    t.text "notes"
     t.decimal "pf", precision: 10, scale: 2, default: "0.0"
+    t.decimal "previous_annual_ctc", precision: 12, scale: 2
     t.decimal "professional_tax", precision: 10, scale: 2, default: "0.0"
+    t.string "revision_type", default: "appraisal", null: false
     t.datetime "updated_at", null: false
     t.index ["company_id"], name: "index_salary_structures_on_company_id"
+    t.index ["created_by_id"], name: "index_salary_structures_on_created_by_id"
     t.index ["department_id"], name: "index_salary_structures_on_department_id"
+    t.index ["employee_id", "effective_from"], name: "index_salary_structures_on_employee_and_effective_from"
     t.index ["employee_id"], name: "index_salary_structures_on_employee_id"
+    t.index ["revision_type"], name: "index_salary_structures_on_revision_type"
   end
 
   create_table "sla_workflows", force: :cascade do |t|
@@ -1178,6 +1212,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_08_010000) do
   add_foreign_key "employees", "companies"
   add_foreign_key "employees", "departments"
   add_foreign_key "employees", "employees", column: "manager_id"
+  add_foreign_key "error_track_occurrences", "error_track_error_events", column: "error_event_id"
   add_foreign_key "events", "companies"
   add_foreign_key "expenses", "companies"
   add_foreign_key "expenses", "employees"

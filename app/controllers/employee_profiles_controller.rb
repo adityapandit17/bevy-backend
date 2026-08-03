@@ -157,10 +157,21 @@ class EmployeeProfilesController < ApplicationController
   end
 
   def get_pay_info_data
+    current = @employee.current_salary_structure
+
     {
-      current_salary: @employee.salary,
-      salary_structure: @employee.salary_structures.first&.as_json(include: :employee),
-      payroll_history: @employee.payrolls.limit(12).map do |payroll|
+      current_salary: current&.basic.to_f,
+      annual_ctc: current&.annual_ctc.to_f,
+      monthly_ctc: current&.monthly_ctc.to_f,
+      salary_structure: current&.as_json(
+        only: %i[
+          id employee_id department_id level basic hra allowances bonus deductions
+          pf esi professional_tax income_tax annual_ctc monthly_ctc
+          effective_from effective_upto revision_type notes previous_annual_ctc
+        ]
+      ),
+      salary_history: SalaryStructure.appraisal_history_for(@employee),
+      payroll_history: @employee.payrolls.order(processed_at: :desc, created_at: :desc).limit(12).map do |payroll|
         {
           id: payroll.id,
           month: payroll.month,

@@ -29,6 +29,7 @@ class PayrollBreakdown
       cutoff = PayrollMonth.parse(month).end_of_month
       structure = employee.salary_structures
                            .where("effective_from IS NULL OR effective_from <= ?", cutoff)
+                           .where("effective_upto IS NULL OR effective_upto >= ?", cutoff.beginning_of_month)
                            .order(effective_from: :desc, created_at: :desc)
                            .first
 

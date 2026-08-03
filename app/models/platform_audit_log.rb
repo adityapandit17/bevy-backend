@@ -9,6 +9,7 @@ class PlatformAuditLog < ApplicationRecord
     "company.restart_trial" => "Trial restarted",
     "company.activate" => "Subscription activated",
     "company.feature_flags.update" => "Feature flags updated",
+    "company.impersonate" => "Impersonated company admin",
     "admin.create" => "Platform admin created",
     "admin.update" => "Platform admin updated",
     "admin.deactivate" => "Platform admin deactivated",

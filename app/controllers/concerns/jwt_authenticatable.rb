@@ -81,11 +81,12 @@ module JwtAuthenticatable
       return
     end
 
-    user = JwtService.verify_token(token)
+    verified = JwtService.verify_token_details(token)
 
-    if user
-      @current_user = user
-      Rails.logger.debug { "JWT auth OK user=#{user.id}" } if Rails.env.development?
+    if verified
+      @current_user = verified.user
+      @jwt_payload = verified.payload
+      Rails.logger.debug { "JWT auth OK user=#{verified.user.id}" } if Rails.env.development?
     else
       Rails.logger.error "JWT Authentication failed: Invalid or expired token"
       render_unauthorized("Invalid or expired token")
@@ -100,6 +101,18 @@ module JwtAuthenticatable
     unless user_signed_in?
       render_unauthorized("Authentication required")
     end
+  end
+
+  def jwt_payload
+    @jwt_payload || {}
+  end
+
+  def impersonating?
+    JwtService.impersonating?(jwt_payload)
+  end
+
+  def platform_impersonating?
+    impersonating? && jwt_payload["platform_admin_id"].present?
   end
 
   def render_unauthorized(message = "Unauthorized")
