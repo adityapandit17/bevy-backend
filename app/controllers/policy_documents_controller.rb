@@ -46,11 +46,17 @@ class PolicyDocumentsController < ApplicationController
 
     @policy_document.increment_downloads!
 
-    file_path = Rails.root.join("storage", "uploads", @policy_document.file_path)
+    uploads_root = Rails.root.join("storage", "uploads").expand_path
+    safe_name = File.basename(@policy_document.file_path.to_s)
+    file_path = uploads_root.join(safe_name).expand_path
+
+    unless file_path.to_s.start_with?("#{uploads_root}/") || file_path == uploads_root
+      return render json: { error: "Invalid file path" }, status: :bad_request
+    end
 
     if File.exist?(file_path)
       # Set proper MIME type based on file extension
-      mime_type = case File.extname(@policy_document.file_path).downcase
+      mime_type = case File.extname(safe_name).downcase
       when ".pdf"
         "application/pdf"
       when ".doc"

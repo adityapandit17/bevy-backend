@@ -13,7 +13,16 @@ module Api
         end
 
         def create
-          admin = PlatformAdminUser.new(admin_params)
+          role = sanitize_admin_role(params.dig(:admin, :role))
+          return render_error("Invalid or missing admin role", :bad_request) if role.blank?
+
+          status = sanitize_admin_status(params.dig(:admin, :status)) || "active"
+          return render_error("Invalid admin status", :bad_request) if params.dig(:admin, :status).present? && status.blank?
+
+          admin = PlatformAdminUser.new(admin_profile_params)
+          admin.email = params.require(:admin)[:email]
+          admin.role = role
+          admin.status = status
           admin.password = params[:password]
           admin.password_confirmation = params[:password_confirmation] || params[:password]
 
@@ -26,7 +35,23 @@ module Api
         end
 
         def update
-          if @admin.update(admin_update_params)
+          attrs = admin_profile_params.to_h
+
+          if params.dig(:admin, :role).present?
+            role = sanitize_admin_role(params.dig(:admin, :role))
+            return render_error("Invalid admin role", :bad_request) if role.blank?
+
+            attrs[:role] = role
+          end
+
+          if params.dig(:admin, :status).present?
+            status = sanitize_admin_status(params.dig(:admin, :status))
+            return render_error("Invalid admin status", :bad_request) if status.blank?
+
+            attrs[:status] = status
+          end
+
+          if @admin.update(attrs)
             audit_record_update!(action: "admin.update", record: @admin)
             render_success(admin_payload(@admin))
           else
@@ -76,12 +101,18 @@ module Api
           render_error("Platform admin not found", :not_found)
         end
 
-        def admin_params
-          params.require(:admin).permit(:email, :first_name, :last_name, :role, :status)
+        def admin_profile_params
+          params.require(:admin).permit(:first_name, :last_name)
         end
 
-        def admin_update_params
-          params.require(:admin).permit(:first_name, :last_name, :role, :status)
+        def sanitize_admin_role(value)
+          role = value.to_s
+          PlatformAdminUser::ROLES.include?(role) ? role : nil
+        end
+
+        def sanitize_admin_status(value)
+          status = value.to_s
+          PlatformAdminUser::STATUSES.include?(status) ? status : nil
         end
 
         def admin_payload(admin)
